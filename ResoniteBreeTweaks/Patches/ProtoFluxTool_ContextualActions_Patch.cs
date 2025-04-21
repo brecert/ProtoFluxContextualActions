@@ -312,6 +312,7 @@ internal static class ProtoFluxTool_ContextualActions_Patch
     internal static IEnumerable<MenuItem> InputMenuItems(ProtoFluxInputProxy inputProxy)
     {
         var inputType = inputProxy.InputType.Value;
+        var nodeType = inputProxy.Node.Target.NodeType;
 
         if (TryGetPackNode(inputType, out var packNodeTypes))
         {
@@ -356,9 +357,25 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             yield return new MenuItem(typeof(LocalUserSlot));
         }
 
-        else if (inputProxy.Node.Target.NodeType == typeof(ValueMul<floatQ>))
+        else if (nodeType == typeof(ValueMul<floatQ>) && inputProxy.ElementName == "B")
         {
             yield return new MenuItem(typeof(GetForward), overload: true);
+            // yield return new MenuItem(
+            //     name: "ValueInput<float>",
+            //     node: typeof(ExternalValueInput<FrooxEngineContext, float3>),
+            //     binding: typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ValueInput<float3>),
+            //     overload: true
+            // );
+        }
+
+        else if (nodeType == typeof(Mul_FloatQ_Float3) && inputProxy.ElementName == "B")
+        {
+            yield return new MenuItem(typeof(GetForward));
+            yield return new MenuItem(typeof(GetBackward));
+            yield return new MenuItem(typeof(GetUp));
+            yield return new MenuItem(typeof(GetDown));
+            yield return new MenuItem(typeof(GetLeft));
+            yield return new MenuItem(typeof(GetRight));
         }
     }
 
