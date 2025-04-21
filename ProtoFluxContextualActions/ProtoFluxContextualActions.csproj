@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<RootNamespace>ProtoFluxContextualActions</RootNamespace>
 		<AssemblyName>ProtoFluxContextualActions</AssemblyName>
-		<AssemblyTitle>Bree's Tweaks</AssemblyTitle>
+		<AssemblyTitle>ProtoFlux Contextual Actions</AssemblyTitle>
 		<Description>Adds additional contextual actions for protoflux.</Description>
 		<Authors>bree</Authors>
 		<RepositoryUrl>https://github.com/brecert/ProtoFluxContextualActions</RepositoryUrl>
