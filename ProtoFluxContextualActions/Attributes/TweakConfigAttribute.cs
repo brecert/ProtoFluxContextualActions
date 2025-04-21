@@ -1,6 +1,6 @@
 using System;
 
-namespace BreeTweaks.Attributes;
+namespace ProtoFluxContextualActions.Attributes;
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
 internal sealed class TweakOptionAttribute(string name, string description) : Attribute

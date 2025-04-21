@@ -4,21 +4,19 @@ using ResoniteModLoader;
 using System;
 using System.Linq;
 using System.Reflection;
-using BreeTweaks.Attributes;
+using ProtoFluxContextualActions.Attributes;
 
-namespace BreeTweaks;
+namespace ProtoFluxContextualActions;
 
 using System.Collections.Generic;
-using System.ComponentModel;
-
 
 #if DEBUG
 using ResoniteHotReloadLib;
 #endif
 
-public class ResoniteBreeTweaksMod : ResoniteMod
+public class ProtoFluxContextualActions : ResoniteMod
 {
-  private static Assembly ModAssembly => typeof(ResoniteBreeTweaksMod).Assembly;
+  private static Assembly ModAssembly => typeof(ProtoFluxContextualActions).Assembly;
 
   public override string Name => ModAssembly.GetCustomAttribute<AssemblyTitleAttribute>().Title;
   public override string Author => ModAssembly.GetCustomAttribute<AssemblyCompanyAttribute>().Company;
@@ -34,9 +32,9 @@ public class ResoniteBreeTweaksMod : ResoniteMod
   private static readonly Dictionary<string, ModConfigurationKey<bool>> patchCategoryKeys = [];
   // private static readonly Dictionary<ModConfigurationKey, FieldInfo> patchOptionKeys = [];
 
-  static ResoniteBreeTweaksMod()
+  static ProtoFluxContextualActions()
   {
-    DebugFunc(() => $"Static Initializing {nameof(ResoniteBreeTweaksMod)}...");
+    DebugFunc(() => $"Static Initializing {nameof(ProtoFluxContextualActions)}...");
 
     var types = AccessTools.GetTypesFromAssembly(ModAssembly);
 

@@ -1,14 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<RootNamespace>BreeTweaks</RootNamespace>
-		<AssemblyName>BreeTweaks</AssemblyName>
+		<RootNamespace>ProtoFluxContextualActions</RootNamespace>
+		<AssemblyName>ProtoFluxContextualActions</AssemblyName>
 		<AssemblyTitle>Bree's Tweaks</AssemblyTitle>
-		<Description>This mod provides various miscellanious tweaks.</Description>
+		<Description>Adds additional contextual actions for protoflux.</Description>
 		<Authors>bree</Authors>
-		<RepositoryUrl>https://github.com/brecert/ResoniteBreeTweaks</RepositoryUrl>
+		<RepositoryUrl>https://github.com/brecert/ProtoFluxContextualActions</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<PackageTags>Resonite,Mod,ResoniteModLoader,Tweaks</PackageTags>
+		<PackageTags>Resonite,Mod,ResoniteModLoader,Tweaks,ProtoFlux</PackageTags>
 		<Version>0.0.2.0</Version>
 		<PackageReadmeFile>../README.md</PackageReadmeFile>
 	</PropertyGroup>
@@ -20,7 +20,7 @@
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<GenerateDocumentationFile>False</GenerateDocumentationFile>
 		<DelaySign>False</DelaySign>
-		<Title>Bree's Tweaks</Title>
+		<Title>ProtoFlux Contextual Actions</Title>
 	</PropertyGroup>
 
     <PropertyGroup>

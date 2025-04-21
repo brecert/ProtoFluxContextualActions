@@ -2,14 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using BreeTweaks.Attributes;
+using ProtoFluxContextualActions.Attributes;
 using Elements.Core;
 using FrooxEngine;
 using FrooxEngine.ProtoFlux;
 using FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Variables;
 using HarmonyLib;
 
-namespace BreeTweaks.Patches;
+namespace ProtoFluxContextualActions.Patches;
 
 [HarmonyPatchCategory("ProtoFluxTool DynamicVariableInput Creation"), TweakCategory("Adds a context menu item to create DynamicVariableInputs when holding a dynamic variable component with the ProtoFlux tool.")]
 [HarmonyPatch(typeof(ProtoFluxTool), nameof(ProtoFluxTool.GenerateMenuItems))]

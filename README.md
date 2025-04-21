@@ -1,7 +1,7 @@
-# Bree's Tweaks
+# ProtoFlux Contextual Actions
 
-This is a Resonite mod that tweaks various things either for myself, for others, or for fun.
+ProtoFlux Contextual Actions is a mod that add additional context menu actions for different contexts.
 
 ## Acknowledgements
 
-The project structure and idea is based on https://github.com/esnya/ResoniteEsnyaTweaks.
+The project structure is based on https://github.com/esnya/ResoniteEsnyaTweaks.

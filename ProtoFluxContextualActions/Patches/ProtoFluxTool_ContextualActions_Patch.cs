@@ -3,7 +3,7 @@ using Elements.Core;
 using FrooxEngine;
 using FrooxEngine.ProtoFlux;
 
-using BreeTweaks.Attributes;
+using ProtoFluxContextualActions.Attributes;
 using HarmonyLib;
 using System.Runtime.CompilerServices;
 using System.Collections.Generic;
@@ -23,7 +23,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.Math;
 using ProtoFlux.Runtimes.Execution.Nodes.Strings.Characters;
 using ProtoFlux.Runtimes.Execution.Nodes.Strings;
 
-namespace BreeTweaks.Patches;
+namespace ProtoFluxContextualActions.Patches;
 
 [HarmonyPatchCategory("ProtoFluxTool Contextual Actions"), TweakCategory("Adds 'Contextual Actions' to the ProtoFlux Tool. The secondary press while holding a protoflux tool will be open a context menu of quick actions based on what wire you're dragging instead of always spawning an input node. Pressing secondary again will spawn out an input node like normal.")]
 [HarmonyPatch(typeof(ProtoFluxTool), nameof(ProtoFluxTool.OnSecondaryPress))]

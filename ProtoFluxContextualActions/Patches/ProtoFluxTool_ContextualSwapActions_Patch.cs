@@ -3,7 +3,7 @@ using Elements.Core;
 using FrooxEngine;
 using FrooxEngine.ProtoFlux;
 
-using BreeTweaks.Attributes;
+using ProtoFluxContextualActions.Attributes;
 using HarmonyLib;
 using System.Runtime.CompilerServices;
 using System.Collections.Generic;
@@ -16,8 +16,8 @@ using ProtoFlux.Runtimes.Execution.Nodes.Math.Easing;
 using ProtoFlux.Runtimes.Execution.Nodes.Operators;
 using System.Runtime.InteropServices;
 using ProtoFlux.Runtimes.Execution.Nodes.Math;
-using System;
 
+namespace ProtoFluxContextualActions.Patches;
 
 [HarmonyPatchCategory("ProtoFluxTool Contextual Swap Actions"), TweakCategory("Adds 'Contextual Swapping Actions' to the ProtoFlux Tool. Double pressing secondary pointing at a node with protoflux tool will be open a context menu of actions to swap the node for another node.")]
 [HarmonyPatch(typeof(ProtoFluxTool), nameof(ProtoFluxTool.OnSecondaryPress))]
