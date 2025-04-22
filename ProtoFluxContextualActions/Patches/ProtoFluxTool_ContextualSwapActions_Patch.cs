@@ -241,118 +241,117 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
         {
           AddMenuItem(__instance, menu, colorX.White, menuItem, () =>
           {
-            var undoBatch = __instance.World.BeginUndoBatch($"Swap {hitNode.Name} to {menuItem.DisplayName}");
-
-            var runtime = hitNode.NodeInstance.Runtime;
-            var oldNode = hitNode.NodeInstance;
-            var binding = ProtoFluxHelper.GetBindingForNode(menuItem.node);
-            var overload = new NodeOverloadContext(oldNode.Runtime.Group, oldNode.Runtime);
-            // overload.TrySwap(oldNode, menuItem.node);
-            // overload.SwapNodes();
-
-            void SwapNodes()
+            try
             {
-              var swappedNodes = new Dictionary<INode, INode>();
-              var query = new NodeQueryAcceleration(oldNode.Runtime.Group);
-              var newNode = runtime.AddNode(menuItem.node);
-              swappedNodes.Add(oldNode, newNode);
-
-              // our own swapping behaviors
-              {
-                // ensure input list
-                if (newNode.DynamicInputCount > 0 && newNode.ArgumentCount < oldNode.ArgumentCount)
-                {
-                  var list = newNode.GetInputList(0);
-                  while (newNode.ArgumentCount < oldNode.ArgumentCount) list.AddInput(null);
-                }
-
-                // ensure output list
-                if (newNode.DynamicOutputCount > 0 && newNode.OutputCount < oldNode.OutputCount)
-                {
-                  var list = newNode.GetOutputList(0);
-                  while (newNode.OutputCount < oldNode.OutputCount) list.AddOutput();
-                }
-                // todo: Impulses, Operations, References, Globals
-
-                // while SwapNodes should handle things for us, it does not handle everything so we use our own as well;
-                TransferInputs(oldNode, newNode, tryByIndex: menuItem.connectionTransferType == ConnectionTransferType.ByIndexLossy);
-                // by now oldNode has lost the group while newNode has inherited it
-                TransferOutputs(oldNode, newNode, newNode.Runtime.Group, tryByIndex: menuItem.connectionTransferType == ConnectionTransferType.ByIndexLossy);
-              }
-
-              newNode.CopyDynamicOutputLayout(oldNode);
-              newNode.CopyDynamicOperationLayout(oldNode);
-              runtime.TranslateInputs(newNode, oldNode, swappedNodes, []);
-              runtime.TranslateImpulses(newNode, oldNode, swappedNodes);
-              runtime.TranslateReferences(newNode, oldNode, swappedNodes);
-
-              var evaluatingNodes = query.GetEvaluatingNodes(oldNode).Where(n => n != oldNode);
-              // foreach (var evaluatingNode in evaluatingNodes)
-              // {
-              //   for (int i = 0; i < evaluatingNode.InputCount; i++)
-              //   {
-              //     IOutput inputSource = evaluatingNode.GetInputSource(i);
-              //     IOutput output = inputSource.RemapOutput(swappedNodes);
-              //     if (output != inputSource)
-              //     {
-              //       evaluatingNode.SetInputSource(i, output);
-              //     }
-              //   }
-              // }
-
-              var impulsingNodes = query.GetImpulsingNodes(oldNode).Where(n => n != oldNode);
-              foreach (var impulsingNode in impulsingNodes)
-              {
-                for (int i = 0; i < impulsingNode.ImpulseCount; i++)
-                {
-                  var impulseTarget = impulsingNode.GetImpulseTarget(i);
-                  if (impulseTarget != null)
-                  {
-                    var operation = impulseTarget.RemapTarget(swappedNodes);
-                    if (operation != impulseTarget)
-                    {
-                      impulsingNode.SetImpulseTarget(i, operation);
-                    }
-                  }
-                }
-              }
-
-              runtime.RemapImportsAndExports(swappedNodes);
-
-              var t = Traverse.Create(overload);
-              t.Field<Dictionary<INode, INode>>("swappedNodes").Value = swappedNodes;
-              t.Field<HashSet<INode>>("affectedEvaluatingNodes").Value = [.. evaluatingNodes];
-              t.Field<HashSet<INode>>("affectedImpulsingNodes").Value = [.. impulsingNodes];
+              SwapHitForNode(__instance, hitNode, menuItem);
             }
-
-            SwapNodes();
-
-            var result = ConnectionResult.Overload(overload);
-
-            // addtional setup
-            // {
-            //   // ensure input list
-            //   if (newNode.DynamicInputCount > 0 && newNode.ArgumentCount < oldNode.ArgumentCount)
-            //   {
-            //     var list = newNode.GetInputList(0);
-            //     while (newNode.ArgumentCount < oldNode.ArgumentCount) list.AddInput(null);
-            //   }
-            //   // ensure output list
-            //   if (newNode.DynamicOutputCount > 0 && newNode.OutputCount < oldNode.OutputCount)
-            //   {
-            //     var list = newNode.GetOutputList(0);
-            //     while (newNode.OutputCount < oldNode.OutputCount) list.AddOutput();
-            //   }
-            //   // todo: Impulses, Operations, References, Globals
-            // }
-
-            MapCastsAndOverloads(hitNode.Group, hitNode, hitNode, result, undoable: true);
-
-            __instance.World.EndUndoBatch();
+            finally
+            {
+              // if there's somehow an error I do not want evil dangling references that world crash silently.
+              if (hitNode != null && !hitNode.IsRemoved)
+              {
+                hitNode.UndoableDestroy();
+              }
+            }
           });
         }
       }
     });
+  }
+
+  private static void SwapHitForNode(ProtoFluxTool __instance, ProtoFluxNode hitNode, MenuItem menuItem)
+  {
+    var undoBatch = __instance.World.BeginUndoBatch($"Swap {hitNode.Name} to {menuItem.DisplayName}");
+
+    var runtime = hitNode.NodeInstance.Runtime;
+    var oldNode = hitNode.NodeInstance;
+    var binding = ProtoFluxHelper.GetBindingForNode(menuItem.node);
+    var overload = new NodeOverloadContext(oldNode.Runtime.Group, oldNode.Runtime);
+    // overload.TrySwap(oldNode, menuItem.node);
+    // overload.SwapNodes();
+
+    void SwapNodes()
+    {
+      var swappedNodes = new Dictionary<INode, INode>();
+      var query = new NodeQueryAcceleration(oldNode.Runtime.Group);
+      var newNode = runtime.AddNode(menuItem.node);
+      swappedNodes.Add(oldNode, newNode);
+
+      // our own swapping behaviors
+      {
+        // ensure input list
+        if (newNode.DynamicInputCount > 0 && newNode.ArgumentCount < oldNode.ArgumentCount)
+        {
+          var list = newNode.GetInputList(0);
+          while (newNode.ArgumentCount < oldNode.ArgumentCount) list.AddInput(null);
+        }
+
+        // ensure output list
+        if (newNode.DynamicOutputCount > 0 && newNode.OutputCount < oldNode.OutputCount)
+        {
+          var list = newNode.GetOutputList(0);
+          while (newNode.OutputCount < oldNode.OutputCount) list.AddOutput();
+        }
+        // todo: Impulses, Operations, References, Globals
+
+        // while SwapNodes should handle things for us, it does not handle everything so we use our own as well;
+        TransferInputs(oldNode, newNode, tryByIndex: menuItem.connectionTransferType == ConnectionTransferType.ByIndexLossy);
+        // by now oldNode has lost the group while newNode has inherited it
+        TransferOutputs(oldNode, newNode, newNode.Runtime.Group, tryByIndex: menuItem.connectionTransferType == ConnectionTransferType.ByIndexLossy);
+      }
+
+      newNode.CopyDynamicOutputLayout(oldNode);
+      newNode.CopyDynamicOperationLayout(oldNode);
+      runtime.TranslateInputs(newNode, oldNode, swappedNodes, []);
+      runtime.TranslateImpulses(newNode, oldNode, swappedNodes);
+      runtime.TranslateReferences(newNode, oldNode, swappedNodes);
+
+      var evaluatingNodes = query.GetEvaluatingNodes(oldNode).Where(n => n != oldNode);
+      // foreach (var evaluatingNode in evaluatingNodes)
+      // {
+      //   for (int i = 0; i < evaluatingNode.InputCount; i++)
+      //   {
+      //     IOutput inputSource = evaluatingNode.GetInputSource(i);
+      //     IOutput output = inputSource.RemapOutput(swappedNodes);
+      //     if (output != inputSource)
+      //     {
+      //       evaluatingNode.SetInputSource(i, output);
+      //     }
+      //   }
+      // }
+
+      var impulsingNodes = query.GetImpulsingNodes(oldNode).Where(n => n != oldNode);
+      foreach (var impulsingNode in impulsingNodes)
+      {
+        for (int i = 0; i < impulsingNode.ImpulseCount; i++)
+        {
+          var impulseTarget = impulsingNode.GetImpulseTarget(i);
+          if (impulseTarget != null)
+          {
+            var operation = impulseTarget.RemapTarget(swappedNodes);
+            if (operation != impulseTarget)
+            {
+              impulsingNode.SetImpulseTarget(i, operation);
+            }
+          }
+        }
+      }
+
+      runtime.RemapImportsAndExports(swappedNodes);
+
+      var t = Traverse.Create(overload);
+      t.Field<Dictionary<INode, INode>>("swappedNodes").Value = swappedNodes;
+      t.Field<HashSet<INode>>("affectedEvaluatingNodes").Value = [.. evaluatingNodes];
+      t.Field<HashSet<INode>>("affectedImpulsingNodes").Value = [.. impulsingNodes];
+    }
+
+    SwapNodes();
+
+    var result = ConnectionResult.Overload(overload);
+
+    MapCastsAndOverloads(hitNode.Group, hitNode, hitNode, result, undoable: true);
+
+    __instance.World.EndUndoBatch();
   }
 
   private static void AddMenuItem(ProtoFluxTool __instance, ContextMenu menu, colorX color, MenuItem item, Action setup)
