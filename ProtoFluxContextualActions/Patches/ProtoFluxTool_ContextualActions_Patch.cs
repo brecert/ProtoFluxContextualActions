@@ -22,6 +22,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.TimeAndDate;
 using ProtoFlux.Runtimes.Execution.Nodes.Math;
 using ProtoFlux.Runtimes.Execution.Nodes.Strings.Characters;
 using ProtoFlux.Runtimes.Execution.Nodes.Strings;
+using ProtoFlux.Runtimes.Execution.Nodes.ParsingFormatting;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -70,7 +71,8 @@ internal static class ProtoFluxTool_ContextualActions_Patch
                                         __instance.StartTask(async () =>
                                         {
                                             // this is dumb
-                                            await new Updates(0);
+                                            // TODO: investigate why it's needed to avoid the one or two update disconnect issue
+                                            await new Updates(1);
                                             var output = n.GetOutput(0); // TODO: specify
                                             elementProxy.Node.Target.TryConnectInput(inputProxy.NodeInput.Target, output, allowExplicitCast: false, undoable: true);
                                         });
@@ -274,8 +276,9 @@ internal static class ProtoFluxTool_ContextualActions_Patch
                 yield return new MenuItem(nodeType);
             }
         }
+        var outputType = outputProxy.OutputType.Value;
 
-        if (outputProxy.OutputType.Value == typeof(Slot))
+        if (outputType == typeof(Slot))
         {
             yield return new MenuItem(typeof(GlobalTransform));
             yield return new MenuItem(typeof(GetForward));
@@ -283,7 +286,7 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             yield return new MenuItem(typeof(ChildrenCount));
         }
 
-        else if (outputProxy.OutputType.Value == typeof(bool))
+        else if (outputType == typeof(bool))
         {
             yield return new MenuItem(typeof(If));
             yield return new MenuItem(typeof(ValueConditional<int>)); // dummy type when // todo: convert to multi?
@@ -292,7 +295,7 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             yield return new MenuItem(typeof(NOT_Bool));
         }
 
-        else if (outputProxy.OutputType.Value == typeof(string))
+        else if (outputType == typeof(string))
         {
             yield return new MenuItem(typeof(GetCharacter));
             yield return new MenuItem(typeof(StringLength));
@@ -302,6 +305,13 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             yield return new MenuItem(typeof(Substring));
             yield return new MenuItem(typeof(FormatString));
         }
+
+        else if (outputType == typeof(DateTime))
+        {
+            yield return new MenuItem(typeof(Sub_DateTime));
+            yield return new MenuItem(typeof(Add_DateTime_TimeSpan));
+        }
+
     }
 
     /// <summary>
@@ -327,6 +337,8 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             yield return new MenuItem(typeof(LocalUser));
             yield return new MenuItem(typeof(HostUser));
             yield return new MenuItem(typeof(UserFromUsername));
+            yield return new MenuItem(typeof(GetActiveUser));
+            yield return new MenuItem(typeof(GetActiveUserSelf));
         }
 
         else if (inputType == typeof(UserRoot))
@@ -349,6 +361,17 @@ internal static class ProtoFluxTool_ContextualActions_Patch
         {
             yield return new MenuItem(typeof(UtcNow));
             yield return new MenuItem(typeof(FromUnixMilliseconds));
+        }
+
+        else if (inputType == typeof(TimeSpan))
+        {
+            yield return new MenuItem(typeof(Parse_TimeSpan));
+            yield return new MenuItem(typeof(TimeSpanFromTicks));
+            yield return new MenuItem(typeof(TimeSpanFromMilliseconds));
+            yield return new MenuItem(typeof(TimeSpanFromSeconds));
+            yield return new MenuItem(typeof(TimeSpanFromMinutes));
+            yield return new MenuItem(typeof(TimeSpanFromHours));
+            yield return new MenuItem(typeof(TimeSpanFromDays));
         }
 
         else if (inputType == typeof(Slot))

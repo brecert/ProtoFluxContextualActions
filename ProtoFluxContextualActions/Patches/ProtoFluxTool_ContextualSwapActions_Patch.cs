@@ -16,6 +16,10 @@ using ProtoFlux.Runtimes.Execution.Nodes.Math.Easing;
 using ProtoFlux.Runtimes.Execution.Nodes.Operators;
 using System.Runtime.InteropServices;
 using ProtoFlux.Runtimes.Execution.Nodes.Math;
+using System.Text.RegularExpressions;
+using System.ComponentModel;
+using ProtoFluxContextualActions.Extensions;
+using ProtoFlux.Runtimes.Execution.Nodes.TimeAndDate;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -23,6 +27,7 @@ namespace ProtoFluxContextualActions.Patches;
 [HarmonyPatch(typeof(ProtoFluxTool), nameof(ProtoFluxTool.OnSecondaryPress))]
 internal static class ProtoFluxTool_ContextualSwapActions_Patch
 {
+  // TODO: This can be replaced in the future with flags or a combination of the three automatically.
   internal enum ConnectionTransferType
   {
     /// <summary>
@@ -41,17 +46,15 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     ByIndexLossy
   }
 
-  internal readonly struct MenuItem(Type node, Type? binding = null, string? name = null, ConnectionTransferType? connectionTransferType = ConnectionTransferType.ByNameLossy, Action<ProtoFluxNode>? onInit = null)
+  internal readonly struct MenuItem(Type node, string? name = null, ConnectionTransferType? connectionTransferType = ConnectionTransferType.ByNameLossy)
   {
     internal readonly Type node = node;
-    internal readonly Type? binding = binding;
+
     internal readonly string? name = name;
 
     internal readonly ConnectionTransferType? connectionTransferType = connectionTransferType;
 
     internal readonly string DisplayName => name ?? NodeMetadataHelper.GetMetadata(node).Name ?? node.GetNiceTypeName();
-
-    internal readonly Action<ProtoFluxNode>? onInit = onInit;
   }
 
   internal class ProtoFluxNodeData
@@ -62,7 +65,8 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     internal double SecondsSinceLastSecondaryPress() => (DateTime.Now - lastSecondaryPress.GetValueOrDefault()).TotalSeconds;
   }
 
-  const double DoublePressTime = 1;
+  // TODO: configurable
+  const double DoublePressTime = 0.45;
 
   private static readonly ConditionalWeakTable<ProtoFluxTool, ProtoFluxNodeData> additionalData = new();
 
@@ -104,207 +108,244 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     return true;
   }
 
-  // internal static readonly HashSet<Type>[] SelectionGroups = [
-  //   [typeof(GetForward), typeof(GetBackward), typeof(GetUp), typeof(GetDown), typeof(GetLeft), typeof(GetRight)],
-  //   [typeof(ValueAdd<>), typeof(ValueSub<>), typeof(ValueMul<>), typeof(ValueDiv<>)],
-  //   [typeof(For), typeof(AsyncFor)],
-  //   [typeof(ValueInc<>), typeof(ValueDec<>)],
-  // ];
+  private static void TransferOutputs(INode from, INode to, NodeGroup group, bool tryByIndex = false)
+  {
+    var query = new NodeQueryAcceleration(group);
 
-  // TODO: find alternative to this, even generating it at runtime will feel bad.
-  //       alternatives include manual conversions, 
-  internal static readonly Dictionary<(Type, Type), Dictionary<string, string>> CompiledInputMappings = new() {
-    {(typeof(For), typeof(RangeLoopInt)), new () {
-      {"Count", "End"}
-    }},
-    {(typeof(RangeLoopInt), typeof(For)), new () {
-      {"End", "Count"}
-    }},
-  };
+    // resize dynamic inputs to fit before transferring the outputs
+    foreach (var fromOutputListMeta in from.Metadata.DynamicOutputs)
+    {
+      if (to.Metadata.GetOutputListByName(fromOutputListMeta.Name) is OutputListMetadata toOutputListMeta && fromOutputListMeta.TypeConstraint == toOutputListMeta.TypeConstraint)
+      {
+        var toOutputList = to.GetOutputList(toOutputListMeta.Index);
+        var fromOutputList = from.GetOutputList(fromOutputListMeta.Index);
 
-  internal static readonly Dictionary<(Type, Type), Dictionary<string, string>> CompiledOutputMappings = new() {
-    {(typeof(For), typeof(RangeLoopInt)), new () {
-      {"Iteration", "Current"}
-    }},
-    {(typeof(RangeLoopInt), typeof(For)), new () {
-      {"Current", "Iteration"}
-    }},
-  };
+        if (toOutputList.Count < fromOutputList.Count)
+        {
+          for (int i = 0; i < fromOutputList.Count - toOutputList.Count; i++)
+          {
+            toOutputList.AddOutput();
+          }
+        }
+      }
+    }
 
-  // todo: pages
+    if (tryByIndex || true)
+    {
+      foreach (var node in query.GetEvaluatingNodes(from))
+      {
+        for (int i = 0; i < node.InputCount; i++)
+        {
+          var fromSource = node.GetInputSource(i);
+          if (fromSource?.OwnerNode == from)
+          {
+            var toSourceIndex = fromSource.FindLinearOutputIndex();
+            node.SetInputSource(i, to.GetOutput(toSourceIndex));
+          }
+        }
+      }
+    }
+  }
+
+
+  private static void TransferInputs(INode from, INode to, bool tryByIndex = false)
+  {
+    // resize dynamic inputs to fit before transferring the inputs
+    foreach (var fromInputListMeta in from.Metadata.DynamicInputs)
+    {
+      if (to.Metadata.GetInputListByName(fromInputListMeta.Name) is InputListMetadata toInputListMeta && fromInputListMeta.TypeConstraint == toInputListMeta.TypeConstraint)
+      {
+        var toInputList = to.GetInputList(toInputListMeta.Index);
+        var fromInputList = from.GetInputList(fromInputListMeta.Index);
+
+        if (toInputList.Count < fromInputList.Count)
+        {
+          for (int i = 0; i < fromInputList.Count - toInputList.Count; i++)
+          {
+            toInputList.AddInput(null);
+          }
+        }
+      }
+    }
+
+    if (tryByIndex)
+    {
+      for (int i = 0; i < MathX.Min(from.InputCount, to.InputCount); i++)
+      {
+        if (from.GetInputType(i) == to.GetInputType(i))
+        {
+          to.SetInputSource(i, from.GetInputSource(i));
+        }
+      }
+    }
+
+    foreach (var fromInputMeta in from.Metadata.FixedInputs)
+    {
+      if (to.Metadata.GetInputByName(fromInputMeta.Name) is InputMetadata toInputMeta)
+      {
+        if (fromInputMeta.InputType != toInputMeta.InputType) continue;
+
+        to.SetInputSource(new ElementRef(toInputMeta.Index), from.GetInputSource(fromInputMeta.Index));
+      }
+    }
+
+    foreach (var fromInputListMeta in from.Metadata.DynamicInputs)
+    {
+      if (to.Metadata.GetInputListByName(fromInputListMeta.Name) is InputListMetadata toInputListMeta)
+      {
+        if (fromInputListMeta.TypeConstraint != toInputListMeta.TypeConstraint) continue;
+
+        var toInputList = to.GetInputList(toInputListMeta.Index);
+        var fromInputList = from.GetInputList(fromInputListMeta.Index);
+        for (int i = 0; i < fromInputList.Count; i++)
+        {
+          toInputList.SetInputSource(i, fromInputList.GetInputSource(i));
+        }
+      }
+    }
+
+
+    // This can be made into a lookup or something nicer later if it comes up again, this is fine for now.
+    var typeTuple = (from.GetType(), to.GetType());
+    if (typeTuple == (typeof(For), typeof(RangeLoopInt)))
+    {
+      var countIndex = from.Metadata.GetInputByName("Count").Index;
+      var endIndex = to.Metadata.GetInputByName("End").Index;
+      to.SetInputSource(endIndex, from.GetInputSource(countIndex));
+    }
+    if (typeTuple == (typeof(RangeLoopInt), typeof(For)))
+    {
+      var endIndex = from.Metadata.GetInputByName("End").Index;
+      var countIndex = to.Metadata.GetInputByName("Count").Index;
+      to.SetInputSource(countIndex, from.GetInputSource(endIndex));
+    }
+
+  }
+
   private static void CreateMenu(ProtoFluxTool __instance, ProtoFluxNode hitNode)
   {
     __instance.StartTask(async () =>
     {
-      var menu = await __instance.LocalUser.OpenContextMenu(__instance, __instance.Slot);
-      var items = GetMenuItems(__instance, hitNode).Take(10);
-      // TODO: pages / menus
+      var items = GetMenuItems(__instance, hitNode).Take(10).ToArray();
 
-      foreach (var menuItem in items)
+      if (items.Length > 0)
       {
-        AddMenuItem(__instance, menu, colorX.White, menuItem, () =>
+        var menu = await __instance.LocalUser.OpenContextMenu(__instance, __instance.Slot);
+        // TODO: pages / custom menus
+
+        foreach (var menuItem in items)
         {
-          var runtime = hitNode.NodeInstance.Runtime;
-          var oldNode = hitNode.NodeInstance;
-          var binding = ProtoFluxHelper.GetBindingForNode(menuItem.node);
-
-          var undoBatch = __instance.World.BeginUndoBatch($"Swap {hitNode.Name} to {menuItem.DisplayName}");
-
-          var newNode = __instance.SpawnNode(binding, n =>
+          AddMenuItem(__instance, menu, colorX.White, menuItem, () =>
           {
-            // this will be so buggy, I need to make my own protoflux helper library so I'm not constantly fighting all of the edge cases of protoflux
-            var sharedInputListsByOrder = hitNode.NodeInputLists.Zip(n.NodeInputLists, (a, b) => (a, b)).Where((z) => z.b.GetType().IsAssignableFrom(z.a.GetType()));
-            var elementsEnsured = false;
-            foreach (var (oldList, newList) in sharedInputListsByOrder)
+            var undoBatch = __instance.World.BeginUndoBatch($"Swap {hitNode.Name} to {menuItem.DisplayName}");
+
+            var runtime = hitNode.NodeInstance.Runtime;
+            var oldNode = hitNode.NodeInstance;
+            var binding = ProtoFluxHelper.GetBindingForNode(menuItem.node);
+            var overload = new NodeOverloadContext(oldNode.Runtime.Group, oldNode.Runtime);
+            // overload.TrySwap(oldNode, menuItem.node);
+            // overload.SwapNodes();
+
+            void SwapNodes()
             {
-              if (oldList.Count > newList.Count)
+              var swappedNodes = new Dictionary<INode, INode>();
+              var query = new NodeQueryAcceleration(oldNode.Runtime.Group);
+              var newNode = runtime.AddNode(menuItem.node);
+              swappedNodes.Add(oldNode, newNode);
+
               {
-                elementsEnsured = true;
-                var missingElements = oldList.Count - newList.Count;
-                for (int i = 0; i < missingElements; i++)
+                // ensure input list
+                if (newNode.DynamicInputCount > 0 && newNode.ArgumentCount < oldNode.ArgumentCount)
                 {
-                  newList.AddElement();
+                  var list = newNode.GetInputList(0);
+                  while (newNode.ArgumentCount < oldNode.ArgumentCount) list.AddInput(null);
                 }
-              }
-            }
-            if (!elementsEnsured)
-            {
-              n.EnsureElementsInDynamicLists();
-            }
-          });
-          newNode.Slot.TRS = hitNode.Slot.TRS;
-          menuItem.onInit?.Invoke(newNode);
 
-          var query = new NodeQueryAcceleration(runtime.Group);
-          var evaluatingNodes = query.GetEvaluatingNodes(oldNode);
-          var impulsingNodes = query.GetImpulsingNodes(oldNode);
-          var nodeReferences = hitNode.Group.Nodes.ToDictionary(n => n.NodeInstance);
-          var remappedNodes = new Dictionary<INode, INode>() {
-            {oldNode, newNode.NodeInstance}
-          };
-          var oldMeta = NodeMetadataHelper.GetMetadata(oldNode.GetType());
-          var newMeta = NodeMetadataHelper.GetMetadata(newNode.NodeType);
-
-          // outputs
-          switch (menuItem.connectionTransferType)
-          {
-            case ConnectionTransferType.ByIndexLossy:
-              goto case ConnectionTransferType.ByNameLossy;
-            case ConnectionTransferType.ByMappingsLossy:
-              {
-                var nodeOutputMappings = CompiledOutputMappings.GetValueSafe((oldNode.GetType(), menuItem.node));
-
-                var evaluatingInputs = evaluatingNodes.SelectMany(n => nodeReferences[n].AllInputs)
-                  .Where(i => ((INodeOutput)i.Target)?.MappedOutput?.OwnerNode == oldNode);
-
-                foreach (var input in evaluatingInputs)
+                // ensure output list
+                if (newNode.DynamicOutputCount > 0 && newNode.OutputCount < oldNode.OutputCount)
                 {
-                  var oldName = oldNode.GetOutputName(((INodeOutput)input.Target).MappedOutput.FindLinearOutputIndex());
-                  if (nodeOutputMappings.TryGetValue(oldName, out var newName))
+                  var list = newNode.GetOutputList(0);
+                  while (newNode.OutputCount < oldNode.OutputCount) list.AddOutput();
+                }
+                // todo: Impulses, Operations, References, Globals
+
+                // while SwapNodes should handle things for us, it does not handle everything so we use our own as well;
+                TransferInputs(oldNode, newNode, tryByIndex: menuItem.connectionTransferType == ConnectionTransferType.ByIndexLossy);
+                // by now oldNode has lost the group while newNode has inherited it
+                TransferOutputs(oldNode, newNode, newNode.Runtime.Group, tryByIndex: menuItem.connectionTransferType == ConnectionTransferType.ByIndexLossy);
+              }
+
+              newNode.CopyDynamicOutputLayout(oldNode);
+              newNode.CopyDynamicOperationLayout(oldNode);
+              runtime.TranslateInputs(newNode, oldNode, swappedNodes, []);
+              runtime.TranslateImpulses(newNode, oldNode, swappedNodes);
+              runtime.TranslateReferences(newNode, oldNode, swappedNodes);
+
+              var evaluatingNodes = query.GetEvaluatingNodes(oldNode).Where(n => n != oldNode);
+              // foreach (var evaluatingNode in evaluatingNodes)
+              // {
+              //   for (int i = 0; i < evaluatingNode.InputCount; i++)
+              //   {
+              //     IOutput inputSource = evaluatingNode.GetInputSource(i);
+              //     IOutput output = inputSource.RemapOutput(swappedNodes);
+              //     if (output != inputSource)
+              //     {
+              //       evaluatingNode.SetInputSource(i, output);
+              //     }
+              //   }
+              // }
+
+              var impulsingNodes = query.GetImpulsingNodes(oldNode).Where(n => n != oldNode);
+              foreach (var impulsingNode in impulsingNodes)
+              {
+                for (int i = 0; i < impulsingNode.ImpulseCount; i++)
+                {
+                  var impulseTarget = impulsingNode.GetImpulseTarget(i);
+                  if (impulseTarget != null)
                   {
-                    var newOutputIndex = newMeta.GetOutputByName(newName).Index;
-                    input.TrySet(newNode.GetOutput(newOutputIndex));
-                  }
-                }
-
-                goto case ConnectionTransferType.ByNameLossy;
-              }
-            case ConnectionTransferType.ByNameLossy:
-              {
-                var evaluatingInputs = evaluatingNodes.SelectMany(n => nodeReferences[n].AllInputs)
-                  .Where(i => ((INodeOutput)i.Target)?.MappedOutput?.OwnerNode == oldNode);
-
-                foreach (var input in evaluatingInputs)
-                {
-                  var oldName = oldNode.GetOutputName(((INodeOutput)input.Target).MappedOutput.FindLinearOutputIndex());
-                  var newOutputIndex = newMeta.GetOutputByName(oldName).Index;
-                  input.TrySet(newNode.GetOutput(newOutputIndex));
-                }
-
-                break;
-              }
-          }
-
-          // inputs
-          switch (menuItem.connectionTransferType)
-          {
-            case ConnectionTransferType.ByIndexLossy:
-              var validInputs = hitNode.AllInputs.Zip(newNode.AllInputs, (a, b) => (a, b)).Where(z => z.a.TargetType == z.b.TargetType);
-              foreach (var (oldInput, newInput) in validInputs)
-              {
-                newInput.TrySet(oldInput.Target);
-              }
-              goto case ConnectionTransferType.ByNameLossy;
-            case ConnectionTransferType.ByMappingsLossy:
-              {
-                var nodeInputMappings = CompiledInputMappings.GetValueSafe((oldNode.GetType(), menuItem.node));
-
-                foreach (var oldInput in hitNode.AllInputs)
-                {
-                  if (nodeInputMappings?.TryGetValue(oldInput.Name, out var mappedName) ?? false)
-                  {
-                    var input = newNode.AllInputs.FirstOrDefault(i => i.Name == mappedName);
-                    input.TrySet(oldInput.Target);
-                  }
-                }
-                goto case ConnectionTransferType.ByNameLossy;
-              }
-            case ConnectionTransferType.ByNameLossy:
-              {
-                foreach (var newInput in newNode.AllInputs)
-                {
-                  foreach (var oldInput in hitNode.AllInputs)
-                  {
-                    if (newInput.Name == oldInput.Name)
+                    var operation = impulseTarget.RemapTarget(swappedNodes);
+                    if (operation != impulseTarget)
                     {
-                      newInput.TrySet(oldInput.Target);
+                      impulsingNode.SetImpulseTarget(i, operation);
                     }
                   }
                 }
-                break;
               }
-          }
 
+              runtime.RemapImportsAndExports(swappedNodes);
 
-          // output impulses
-          foreach (var oldImpulse in hitNode.AllImpulses)
-          {
-            foreach (var newImpulse in newNode.AllImpulses)
-            {
-              if (oldImpulse.Name == newImpulse.Name)
-              {
-                newNode.TryConnectImpulse(newImpulse, (INodeOperation)oldImpulse.Target, undoable: true);
-              }
+              var t = Traverse.Create(overload);
+              t.Field<Dictionary<INode, INode>>("swappedNodes").Value = swappedNodes;
+              t.Field<HashSet<INode>>("affectedEvaluatingNodes").Value = [.. evaluatingNodes];
+              t.Field<HashSet<INode>>("affectedImpulsingNodes").Value = [.. impulsingNodes];
             }
-          }
 
-          // input impulses
-          foreach (var impulsingNode in impulsingNodes)
-          {
-            foreach (var impulseRef in nodeReferences[impulsingNode].AllImpulses)
-            {
-              foreach (var operation in hitNode.NodeOperations)
-              {
-                if (impulseRef.Target == operation)
-                {
-                  var index = operation.MappedOperation.FindLinearOperationIndex();
-                  nodeReferences[impulsingNode].TryConnectImpulse(impulseRef, newNode.GetOperation(index), undoable: true);
-                }
-              }
-            }
-          }
+            SwapNodes();
 
-          // delay for "seamless" transition
-          // without this there will be an update where there are no nodes connectedm
-          // that is unacceptable as it would cause unintented behavior with protoflux that can lead to destructive actions
-          __instance.StartTask(async () =>
-          {
-            await new Updates(1);
-            hitNode.Slot.Destroy();
+            var result = ConnectionResult.Overload(overload);
+
+            // addtional setup
+            // {
+            //   // ensure input list
+            //   if (newNode.DynamicInputCount > 0 && newNode.ArgumentCount < oldNode.ArgumentCount)
+            //   {
+            //     var list = newNode.GetInputList(0);
+            //     while (newNode.ArgumentCount < oldNode.ArgumentCount) list.AddInput(null);
+            //   }
+            //   // ensure output list
+            //   if (newNode.DynamicOutputCount > 0 && newNode.OutputCount < oldNode.OutputCount)
+            //   {
+            //     var list = newNode.GetOutputList(0);
+            //     while (newNode.OutputCount < oldNode.OutputCount) list.AddOutput();
+            //   }
+            //   // todo: Impulses, Operations, References, Globals
+            // }
+
+            MapCastsAndOverloads(hitNode.Group, hitNode, hitNode, result, undoable: true);
+
+            __instance.World.EndUndoBatch();
           });
-
-          __instance.World.EndUndoBatch();
-        });
+        }
       }
     });
   }
@@ -425,6 +466,17 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     {typeof(ValueMax<>), typeof(ValueMaxMulti<>)},
   };
 
+
+  static readonly HashSet<Type> TimespanInstanceGroup = [
+    typeof(TimeSpanFromDays),
+    typeof(TimeSpanFromHours),
+    typeof(TimeSpanFromMilliseconds),
+    typeof(TimeSpanFromMinutes),
+    typeof(TimeSpanFromSeconds),
+    typeof(TimeSpanFromTicks),
+  ];
+
+
   internal static IEnumerable<MenuItem> GetMenuItems(ProtoFluxTool __instance, ProtoFluxNode nodeComponent)
   {
     var node = nodeComponent.NodeInstance;
@@ -460,6 +512,15 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     if (EasingGroupDouble.Contains(nodeType))
     {
       foreach (var match in EasingGroupDouble)
+      {
+        if (match == nodeType) continue;
+        yield return new MenuItem(match);
+      }
+    }
+
+    if (TimespanInstanceGroup.Contains(nodeType))
+    {
+      foreach (var match in TimespanInstanceGroup)
       {
         if (match == nodeType) continue;
         yield return new MenuItem(match);

@@ -64,5 +64,4 @@ internal static class ProtoFluxTool_GenerateMenuItems_Patch
   [HarmonyPatch(typeof(ProtoFluxHelper), "GetNodeForType")]
   [MethodImpl(MethodImplOptions.NoInlining)]
   internal static Type GetNodeForType(Type type, List<NodeTypeRecord> list) => throw new NotImplementedException();
-
 }
