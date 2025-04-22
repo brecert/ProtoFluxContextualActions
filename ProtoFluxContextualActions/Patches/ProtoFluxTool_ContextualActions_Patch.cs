@@ -33,17 +33,21 @@ internal static class ProtoFluxTool_ContextualActions_Patch
     internal readonly struct MenuItem(Type node, Type? binding = null, string? name = null, bool overload = false)
     {
         internal readonly Type node = node;
+
         internal readonly Type? binding = binding;
+
         internal readonly string? name = name;
 
         internal readonly bool overload = overload;
+
+        internal readonly string DisplayName => name ?? NodeMetadataHelper.GetMetadata(node).Name ?? node.GetNiceTypeName();
     }
 
     internal static bool Prefix(ProtoFluxTool __instance, SyncRef<ProtoFluxElementProxy> ____currentProxy)
     {
         var elementProxy = ____currentProxy.Target;
         var items = MenuItems(__instance).Take(10).ToArray();
-
+        // todo: pages / menu
 
         if (items.Length != 0)
         {
@@ -138,7 +142,7 @@ internal static class ProtoFluxTool_ContextualActions_Patch
     private static void AddMenuItem(ProtoFluxTool __instance, ContextMenu menu, colorX color, MenuItem item, Action<ProtoFluxNode> setup)
     {
         var nodeMetadata = NodeMetadataHelper.GetMetadata(item.node);
-        var label = (LocaleString)(item.name ?? nodeMetadata.Name ?? item.node.GetNiceTypeName());
+        var label = (LocaleString)item.DisplayName;
         var menuItem = menu.AddItem(in label, (Uri?)null, color);
         menuItem.Button.LocalPressed += (button, data) =>
         {
@@ -466,6 +470,7 @@ internal static class ProtoFluxTool_ContextualActions_Patch
         return UnpackNodeMapping.TryGetValue(nodeType, out value);
     }
 
+    // TODO: make a faux "generic" type getter for things like Unpack_Float3, Or_Multi_Bool2, or Mul_FloatQ_Float3 that interacts in a generic way to avoid this in the future
     internal static readonly Dictionary<Type, Type[]> PackNodeMapping = new() {
         {typeof(bool2), [typeof(Pack_Bool2)]},
         {typeof(bool3), [typeof(Pack_Bool3)]},

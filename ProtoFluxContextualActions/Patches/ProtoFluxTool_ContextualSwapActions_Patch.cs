@@ -14,11 +14,7 @@ using FrooxEngine.Undo;
 using ProtoFlux.Runtimes.Execution.Nodes;
 using ProtoFlux.Runtimes.Execution.Nodes.Math.Easing;
 using ProtoFlux.Runtimes.Execution.Nodes.Operators;
-using System.Runtime.InteropServices;
 using ProtoFlux.Runtimes.Execution.Nodes.Math;
-using System.Text.RegularExpressions;
-using System.ComponentModel;
-using ProtoFluxContextualActions.Extensions;
 using ProtoFlux.Runtimes.Execution.Nodes.TimeAndDate;
 
 namespace ProtoFluxContextualActions.Patches;
@@ -57,7 +53,8 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     internal readonly string DisplayName => name ?? NodeMetadataHelper.GetMetadata(node).Name ?? node.GetNiceTypeName();
   }
 
-  internal class ProtoFluxNodeData
+  // additional data we store for the protoflux tool
+  internal class ProtoFluxToolData
   {
     internal DateTime? lastSecondaryPress;
     internal ProtoFluxNode? lastSecondaryPressNode;
@@ -68,7 +65,7 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
   // TODO: configurable
   const double DoublePressTime = 0.45;
 
-  private static readonly ConditionalWeakTable<ProtoFluxTool, ProtoFluxNodeData> additionalData = new();
+  private static readonly ConditionalWeakTable<ProtoFluxTool, ProtoFluxToolData> additionalData = new();
 
   internal static bool Prefix(ProtoFluxTool __instance, SyncRef<ProtoFluxElementProxy> ____currentProxy)
   {
@@ -204,7 +201,6 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
       }
     }
 
-
     // This can be made into a lookup or something nicer later if it comes up again, this is fine for now.
     var typeTuple = (from.GetType(), to.GetType());
     if (typeTuple == (typeof(For), typeof(RangeLoopInt)))
@@ -253,6 +249,7 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
               var newNode = runtime.AddNode(menuItem.node);
               swappedNodes.Add(oldNode, newNode);
 
+              // our own swapping behaviors
               {
                 // ensure input list
                 if (newNode.DynamicInputCount > 0 && newNode.ArgumentCount < oldNode.ArgumentCount)
@@ -376,6 +373,7 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     typeof(RangeLoopInt),
   ];
 
+  // todo: currently there's too many, page support or custom uix menus are needed
   static readonly HashSet<Type> EasingGroupFloat = [
     typeof(EaseInBounceFloat),
     typeof(EaseInCircularFloat),
@@ -475,7 +473,6 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     typeof(TimeSpanFromSeconds),
     typeof(TimeSpanFromTicks),
   ];
-
 
   internal static IEnumerable<MenuItem> GetMenuItems(ProtoFluxTool __instance, ProtoFluxNode nodeComponent)
   {
