@@ -222,7 +222,7 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
   {
     __instance.StartTask(async () =>
     {
-      var items = GetMenuItems(__instance, hitNode).Take(10).ToArray();
+      var items = GetMenuItems(__instance, hitNode).Where(m => m.node != hitNode.NodeType).Take(10).ToArray();
 
       if (items.Length > 0)
       {
@@ -368,6 +368,7 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     typeof(GetRight)
   ];
 
+  // todo: async
   static readonly HashSet<Type> ForLoopGroup = [
     typeof(For),
     typeof(RangeLoopInt),
@@ -440,21 +441,6 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     typeof(EaseOutSineDouble),
   ];
 
-  static readonly HashSet<Type> BinaryOperationGroup = [
-    typeof(ValueAdd<>),
-    typeof(ValueSub<>),
-    typeof(ValueMul<>),
-    typeof(ValueDiv<>),
-    typeof(ValueMod<>),
-  ];
-
-  static readonly HashSet<Type> BinaryOperationGroupMulti = [
-    typeof(ValueAddMulti<>),
-    typeof(ValueSubMulti<>),
-    typeof(ValueMulMulti<>),
-    typeof(ValueDivMulti<>),
-  ];
-
   static readonly BiDictionary<Type, Type> MultiInputMappingGroup = new() {
     {typeof(ValueAdd<>), typeof(ValueAddMulti<>)},
     {typeof(ValueSub<>), typeof(ValueSubMulti<>)},
@@ -474,6 +460,32 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     typeof(TimeSpanFromTicks),
   ];
 
+  static readonly HashSet<Type> ArithmeticBinaryOperatorGroup = [
+    typeof(ValueAdd<>),
+    typeof(ValueSub<>),
+    typeof(ValueMul<>),
+    typeof(ValueDiv<>),
+    typeof(ValueMod<>),
+  ];
+
+  static readonly HashSet<Type> ArithmeticMultiOperatorGroup = [
+    typeof(ValueAddMulti<>),
+    typeof(ValueSubMulti<>),
+    typeof(ValueMulMulti<>),
+    typeof(ValueDivMulti<>),
+  ];
+
+
+  static readonly HashSet<Type> ComparisonBinaryOperatorGroup = [
+    typeof(ValueLessThan<>),
+    typeof(ValueLessOrEqual<>),
+    typeof(ValueGreaterThan<>),
+    typeof(ValueGreaterOrEqual<>),
+    typeof(ValueEquals<>),
+    typeof(ValueNotEquals<>),
+  ];
+
+
   internal static IEnumerable<MenuItem> GetMenuItems(ProtoFluxTool __instance, ProtoFluxNode nodeComponent)
   {
     var node = nodeComponent.NodeInstance;
@@ -483,7 +495,6 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     {
       foreach (var match in GetDirectionGroup)
       {
-        if (match == nodeType) continue;
         yield return new MenuItem(match);
       }
     }
@@ -492,7 +503,6 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     {
       foreach (var match in ForLoopGroup)
       {
-        if (match == nodeType) continue;
         yield return new MenuItem(match, connectionTransferType: ConnectionTransferType.ByMappingsLossy);
       }
     }
@@ -501,7 +511,6 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     {
       foreach (var match in EasingGroupFloat)
       {
-        if (match == nodeType) continue;
         yield return new MenuItem(match);
       }
     }
@@ -510,7 +519,6 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     {
       foreach (var match in EasingGroupDouble)
       {
-        if (match == nodeType) continue;
         yield return new MenuItem(match);
       }
     }
@@ -519,58 +527,91 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     {
       foreach (var match in TimespanInstanceGroup)
       {
-        if (match == nodeType) continue;
         yield return new MenuItem(match);
       }
     }
 
     if (nodeType.TryGetGenericTypeDefinition(out var genericType))
     {
-      if (BinaryOperationGroup.Contains(genericType))
+
+      if (ArithmeticBinaryOperatorGroup.Contains(genericType))
       {
-        var binopType = nodeType.GenericTypeArguments[0];
-        foreach (var match in BinaryOperationGroup)
+        var opType = nodeType.GenericTypeArguments[0];
+        var coder = Traverse.Create(typeof(Coder<>).MakeGenericType(opType));
+
+        if (coder.Property<bool>("SupportsAddSub").Value)
         {
-          var matchedNodeType = match.MakeGenericType(binopType);
-          if (matchedNodeType == nodeType) continue;
-          yield return new MenuItem(matchedNodeType);
+          yield return new MenuItem(typeof(ValueAdd<>).MakeGenericType(opType));
+          yield return new MenuItem(typeof(ValueSub<>).MakeGenericType(opType));
+        }
+
+        if (coder.Property<bool>("SupportsMul").Value)
+        {
+          yield return new MenuItem(typeof(ValueMul<>).MakeGenericType(opType));
+        }
+
+        if (coder.Property<bool>("SupportsDiv").Value)
+        {
+          yield return new MenuItem(typeof(ValueDiv<>).MakeGenericType(opType));
+        }
+
+        if (coder.Property<bool>("SupportsMod").Value)
+        {
+          yield return new MenuItem(typeof(ValueMod<>).MakeGenericType(opType));
         }
       }
 
-      if (BinaryOperationGroupMulti.Contains(genericType))
+      if (ArithmeticMultiOperatorGroup.Contains(genericType))
       {
-        var binopType = nodeType.GenericTypeArguments[0];
-        foreach (var match in BinaryOperationGroupMulti)
+        var opType = nodeType.GenericTypeArguments[0];
+        var coder = Traverse.Create(typeof(Coder<>).MakeGenericType(opType));
+
+        static MenuItem MultiMenuItem(Type nodeType) => new(
+          node: nodeType,
+          name: nodeType.GetNiceTypeName(),
+          connectionTransferType: ConnectionTransferType.ByIndexLossy
+        );
+
+        if (coder.Property<bool>("SupportsAddSub").Value)
         {
-          var matchedNodeType = match.MakeGenericType(binopType);
-          if (matchedNodeType == nodeType) continue;
-          yield return new MenuItem(
-            node: matchedNodeType,
-            name: matchedNodeType.GetNiceTypeName(),
-            connectionTransferType: ConnectionTransferType.ByIndexLossy
-          );
+          yield return MultiMenuItem(typeof(ValueAddMulti<>).MakeGenericType(opType));
+          yield return MultiMenuItem(typeof(ValueSubMulti<>).MakeGenericType(opType));
+        }
+
+        if (coder.Property<bool>("SupportsMul").Value)
+        {
+          yield return MultiMenuItem(typeof(ValueMulMulti<>).MakeGenericType(opType));
+        }
+
+        if (coder.Property<bool>("SupportsDiv").Value)
+        {
+          yield return MultiMenuItem(typeof(ValueDivMulti<>).MakeGenericType(opType));
         }
       }
 
-      // MultiInputMappingGroup
+      if (ComparisonBinaryOperatorGroup.Contains(genericType))
       {
-        if (MultiInputMappingGroup.TryGetSecond(genericType, out var mapped))
+        foreach (var match in ComparisonBinaryOperatorGroup)
         {
-          var binopType = nodeType.GenericTypeArguments[0];
-          yield return new MenuItem(
-            node: mapped.MakeGenericType(binopType),
-            name: mapped.GetNiceTypeName(),
-            connectionTransferType: ConnectionTransferType.ByIndexLossy
-          );
+          yield return new MenuItem(match);
         }
-        else if (MultiInputMappingGroup.TryGetFirst(genericType, out mapped))
-        {
-          var binopType = nodeType.GenericTypeArguments[0];
-          yield return new MenuItem(mapped.MakeGenericType(binopType), connectionTransferType: ConnectionTransferType.ByIndexLossy);
-        }
+      }
+
+      if (MultiInputMappingGroup.TryGetSecond(genericType, out var mapped))
+      {
+        var binopType = nodeType.GenericTypeArguments[0];
+        yield return new MenuItem(
+          node: mapped.MakeGenericType(binopType),
+          name: mapped.GetNiceTypeName(),
+          connectionTransferType: ConnectionTransferType.ByIndexLossy
+        );
+      }
+      else if (MultiInputMappingGroup.TryGetFirst(genericType, out mapped))
+      {
+        var binopType = nodeType.GenericTypeArguments[0];
+        yield return new MenuItem(mapped.MakeGenericType(binopType), connectionTransferType: ConnectionTransferType.ByIndexLossy);
       }
     }
-
   }
 
   // Utils

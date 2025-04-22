@@ -149,6 +149,7 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             var nodeBinding = item.binding ?? ProtoFluxHelper.GetBindingForNode(item.node);
             __instance.SpawnNode(nodeBinding, n =>
             {
+                n.EnsureElementsInDynamicLists();
                 setup(n);
                 __instance.LocalUser.CloseContextMenu(__instance);
                 CleanupDraggedWire(__instance);
@@ -207,6 +208,9 @@ internal static class ProtoFluxTool_ContextualActions_Patch
     internal static IEnumerable<MenuItem> GeneralNumericOperationMenuItems(ProtoFluxElementProxy? target)
     {
         {
+            // TODO: It's nice to have these work with any node, I think their precedence should be lower than manually specified ones and potentially hidden by default for many types that support but do not need, esp. comparison.
+            //       When I'm more sure that Swapping won't world crash I think I can limit comparison to a single node and then swap to the right one as a sort of submenu?
+            //       Feels a little weird though, ux is difficult. A custom uix menu could help.
             if (target is ProtoFluxOutputProxy { OutputType.Value: var outputType } && (outputType.IsUnmanaged() || typeof(ISphericalHarmonics).IsAssignableFrom(outputType)))
             {
                 var coder = Traverse.Create(typeof(Coder<>).MakeGenericType(outputType));
@@ -251,6 +255,7 @@ internal static class ProtoFluxTool_ContextualActions_Patch
                     yield return new MenuItem(typeof(ValueGreaterThan<>).MakeGenericType(outputType));
                     yield return new MenuItem(typeof(ValueGreaterOrEqual<>).MakeGenericType(outputType));
                     yield return new MenuItem(typeof(ValueEquals<>).MakeGenericType(outputType));
+                    yield return new MenuItem(typeof(ValueNotEquals<>).MakeGenericType(outputType));
                 }
 
                 if (TryGetInverseNode(outputType, out var inverseNodeType))
@@ -354,6 +359,7 @@ internal static class ProtoFluxTool_ContextualActions_Patch
 
         else if (inputType == typeof(bool))
         {
+            // I want to use dummy's here but it's not safe to do so.
             yield return new MenuItem(typeof(ValueLessThan<int>));
             yield return new MenuItem(typeof(ValueLessOrEqual<int>));
             yield return new MenuItem(typeof(ValueGreaterThan<int>));
@@ -450,6 +456,8 @@ internal static class ProtoFluxTool_ContextualActions_Patch
         {typeof(double2x2),  [typeof(UnpackRows_Double2x2), typeof(UnpackColumns_Double2x2)]},
         {typeof(double3x3),  [typeof(UnpackRows_Double3x3), typeof(UnpackColumns_Double3x3)]},
         {typeof(double4x4),  [typeof(UnpackRows_Double4x4), typeof(UnpackColumns_Double4x4)]},
+        
+        // TODO: SH1<T>, SH2<T>, SH3<T>, SH4<T>
     };
 
     internal static bool TryGetUnpackNode(Type nodeType, out Type[]? value)
