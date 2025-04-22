@@ -24,6 +24,7 @@ namespace ProtoFluxContextualActions.Patches;
 internal static class ProtoFluxTool_ContextualSwapActions_Patch
 {
   // TODO: This can be replaced in the future with flags or a combination of the three automatically.
+  //       progress has already been made.
   internal enum ConnectionTransferType
   {
     /// <summary>
@@ -58,6 +59,7 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
   {
     internal DateTime? lastSecondaryPress;
     internal ProtoFluxNode? lastSecondaryPressNode;
+    internal Type? lastSpawnNodeType;
 
     internal double SecondsSinceLastSecondaryPress() => (DateTime.Now - lastSecondaryPress.GetValueOrDefault()).TotalSeconds;
   }
@@ -85,11 +87,13 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
             CreateMenu(__instance, hitNode);
             data.lastSecondaryPressNode = null;
             data.lastSecondaryPressNode = null;
+            data.lastSpawnNodeType = null;
             // skip rest
             return false;
           }
           else
           {
+            data.lastSpawnNodeType = __instance.SpawnNodeType;
             data.lastSecondaryPressNode = hitNode;
             data.lastSecondaryPress = DateTime.Now;
             // skip null
@@ -100,6 +104,7 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
 
       data.lastSecondaryPressNode = null;
       data.lastSecondaryPress = null;
+      data.lastSpawnNodeType = null;
     }
 
     return true;
@@ -226,6 +231,9 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
 
       if (items.Length > 0)
       {
+        // restore previous spawn node
+        __instance.SpawnNodeType.Value = additionalData.GetOrCreateValue(__instance).lastSpawnNodeType;
+
         var menu = await __instance.LocalUser.OpenContextMenu(__instance, __instance.Slot);
         // TODO: pages / custom menus
 
