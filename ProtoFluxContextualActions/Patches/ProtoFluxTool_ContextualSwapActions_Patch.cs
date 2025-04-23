@@ -16,6 +16,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.Math.Easing;
 using ProtoFlux.Runtimes.Execution.Nodes.Operators;
 using ProtoFlux.Runtimes.Execution.Nodes.Math;
 using ProtoFlux.Runtimes.Execution.Nodes.TimeAndDate;
+using ProtoFlux.Runtimes.Execution;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -174,9 +175,9 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     {
       for (int i = 0; i < MathX.Min(from.InputCount, to.InputCount); i++)
       {
-        if (from.GetInputType(i) == to.GetInputType(i))
+        if (from.GetInputType(i) == to.GetInputType(i) && from.GetInputSource(i) is IOutput output)
         {
-          to.SetInputSource(i, from.GetInputSource(i));
+          to.SetInputSource(i, output);
         }
       }
     }
@@ -186,8 +187,10 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
       if (to.Metadata.GetInputByName(fromInputMeta.Name) is InputMetadata toInputMeta)
       {
         if (fromInputMeta.InputType != toInputMeta.InputType) continue;
-
-        to.SetInputSource(new ElementRef(toInputMeta.Index), from.GetInputSource(fromInputMeta.Index));
+        if (from.GetInputSource(fromInputMeta.Index) is IOutput output)
+        {
+          to.SetInputSource(new ElementRef(toInputMeta.Index), output);
+        }
       }
     }
 
@@ -201,8 +204,12 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
         var fromInputList = from.GetInputList(fromInputListMeta.Index);
         for (int i = 0; i < fromInputList.Count; i++)
         {
-          toInputList.SetInputSource(i, fromInputList.GetInputSource(i));
+          if (fromInputList.GetInputSource(i) is IOutput output)
+          {
+            toInputList.SetInputSource(i, output);
+          }
         }
+        fromInputList.Clear();
       }
     }
 
@@ -212,15 +219,20 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     {
       var countIndex = from.Metadata.GetInputByName("Count").Index;
       var endIndex = to.Metadata.GetInputByName("End").Index;
-      to.SetInputSource(endIndex, from.GetInputSource(countIndex));
+      if (from.GetInputSource(countIndex) is IOutput output)
+      {
+        to.SetInputSource(endIndex, output);
+      }
     }
     if (typeTuple == (typeof(RangeLoopInt), typeof(For)))
     {
       var endIndex = from.Metadata.GetInputByName("End").Index;
       var countIndex = to.Metadata.GetInputByName("Count").Index;
-      to.SetInputSource(countIndex, from.GetInputSource(endIndex));
+      if (from.GetInputSource(endIndex) is IOutput output)
+      {
+        to.SetInputSource(countIndex, output);
+      }
     }
-
   }
 
   private static void CreateMenu(ProtoFluxTool __instance, ProtoFluxNode hitNode)
@@ -295,14 +307,15 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
         // todo: Impulses, Operations, References, Globals
 
         // while SwapNodes should handle things for us, it does not handle everything so we use our own as well;
+        runtime.TranslateInputs(newNode, oldNode, swappedNodes, []);
         TransferInputs(oldNode, newNode, tryByIndex: menuItem.connectionTransferType == ConnectionTransferType.ByIndexLossy);
         // by now oldNode has lost the group while newNode has inherited it
         TransferOutputs(oldNode, newNode, newNode.Runtime.Group, tryByIndex: menuItem.connectionTransferType == ConnectionTransferType.ByIndexLossy);
       }
 
-      newNode.CopyDynamicOutputLayout(oldNode);
+      // newNode.CopyDynamicOutputLayout(oldNode);
       newNode.CopyDynamicOperationLayout(oldNode);
-      runtime.TranslateInputs(newNode, oldNode, swappedNodes, []);
+      // runtime.TranslateInputs(newNode, oldNode, swappedNodes, []);
       runtime.TranslateImpulses(newNode, oldNode, swappedNodes);
       runtime.TranslateReferences(newNode, oldNode, swappedNodes);
 
@@ -665,8 +678,8 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
   [MethodImpl(MethodImplOptions.NoInlining)]
   internal static void AssociateInstance(ProtoFluxNode instance, ProtoFluxNodeGroup group, INode node) => throw new NotImplementedException();
 
-  [HarmonyReversePatch]
-  [HarmonyPatch(typeof(ProtoFluxNode), "ReverseMapElements")]
-  [MethodImpl(MethodImplOptions.NoInlining)]
-  internal static void ReverseMapElements(ProtoFluxNode instance, Dictionary<INode, ProtoFluxNode> nodeMapping, bool undoable) => throw new NotImplementedException();
+  // [HarmonyReversePatch]
+  // [HarmonyPatch(typeof(ProtoFluxNode), "ReverseMapElements")]
+  // [MethodImpl(MethodImplOptions.NoInlining)]
+  // internal static void ReverseMapElements(ProtoFluxNode instance, Dictionary<INode, ProtoFluxNode> nodeMapping, bool undoable) => throw new NotImplementedException();
 }
