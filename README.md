@@ -2,6 +2,8 @@
 
 ProtoFlux Contextual Actions is a mod that add additional context menu actions for different contexts that revolve around protoflux.
 
+Bug report welcome, and feel free to create an issue for any actions that you want added.
+
 ## Patches
 There are currently three patches.
 
