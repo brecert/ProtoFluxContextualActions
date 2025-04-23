@@ -100,7 +100,15 @@ public class ProtoFluxContextualActions : ResoniteMod
   {
     foreach (var category in patchCategoryKeys.Keys)
     {
-      UpdatePatch(category, true);
+      // // unstable, disable by default
+      if (category == "ProtoFluxTool Contextual Swap Actions")
+      {
+        UpdatePatch(category, false);
+      }
+      else
+      {
+        UpdatePatch(category, true);
+      }
     }
   }
 
@@ -131,12 +139,12 @@ public class ProtoFluxContextualActions : ResoniteMod
       if (enabled)
       {
         DebugFunc(() => $"Patching {category}...");
-        harmony.PatchCategory(category.ToString());
+        harmony.PatchCategory(category);
       }
       else
       {
         DebugFunc(() => $"Unpatching {category}...");
-        harmony.UnpatchAll(HarmonyId);
+        harmony.UnpatchCategory(category);
       }
     }
     catch (Exception e)
