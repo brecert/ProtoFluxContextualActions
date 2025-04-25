@@ -16,12 +16,11 @@ using ProtoFlux.Runtimes.Execution.Nodes.Math.Easing;
 using ProtoFlux.Runtimes.Execution.Nodes.Operators;
 using ProtoFlux.Runtimes.Execution.Nodes.Math;
 using ProtoFlux.Runtimes.Execution.Nodes.TimeAndDate;
-using ProtoFlux.Runtimes.Execution;
 
 namespace ProtoFluxContextualActions.Patches;
 
-[HarmonyPatchCategory("ProtoFluxTool Contextual Swap Actions"), TweakCategory("Adds 'Contextual Swapping Actions' to the ProtoFlux Tool. Double pressing secondary pointing at a node with protoflux tool will be open a context menu of actions to swap the node for another node.")]
-[HarmonyPatch(typeof(ProtoFluxTool), nameof(ProtoFluxTool.OnSecondaryPress))]
+[HarmonyPatch]
+[HarmonyPatchCategory("ProtoFluxTool Contextual Swap Actions"), TweakCategory("Adds 'Contextual Swapping Actions' to the ProtoFlux Tool. Double pressing secondary pointing at a node with protoflux tool will be open a context menu of actions to swap the node for another node.", defaultValue: false)] // unstable, disable by default
 internal static class ProtoFluxTool_ContextualSwapActions_Patch
 {
   // TODO: This can be replaced in the future with flags or a combination of the three automatically.
@@ -70,7 +69,9 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
 
   private static readonly ConditionalWeakTable<ProtoFluxTool, ProtoFluxToolData> additionalData = new();
 
-  internal static bool Prefix(ProtoFluxTool __instance, SyncRef<ProtoFluxElementProxy> ____currentProxy)
+  [HarmonyPrefix]
+  [HarmonyPatch(typeof(ProtoFluxTool), nameof(ProtoFluxTool.OnSecondaryPress))]
+  internal static bool OnSecondaryPress_Prefix(ProtoFluxTool __instance, SyncRef<ProtoFluxElementProxy> ____currentProxy)
   {
     var data = additionalData.GetOrCreateValue(__instance);
     var elementProxy = ____currentProxy.Target;
@@ -111,7 +112,7 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     return true;
   }
 
-  private static void TransferOutputs(INode from, INode to, NodeGroup group, bool tryByIndex = false)
+  internal static void TransferOutputs(INode from, INode to, NodeGroup group, bool tryByIndex = false)
   {
     var query = new NodeQueryAcceleration(group);
 
@@ -151,7 +152,7 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
   }
 
 
-  private static void TransferInputs(INode from, INode to, bool tryByIndex = false)
+  internal static void TransferInputs(INode from, INode to, bool tryByIndex = false)
   {
     // resize dynamic inputs to fit before transferring the inputs
     foreach (var fromInputListMeta in from.Metadata.DynamicInputs)
@@ -351,6 +352,7 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
       }
 
       runtime.RemapImportsAndExports(swappedNodes);
+      runtime.RemoveNode(oldNode);
 
       var t = Traverse.Create(overload);
       t.Field<Dictionary<INode, INode>>("swappedNodes").Value = swappedNodes;
@@ -505,6 +507,15 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     typeof(ValueNotEquals<>),
   ];
 
+  static readonly HashSet<Type> ValueRelayGroup = [
+    typeof(ValueRelay<>),
+    typeof(ContinuouslyChangingValueRelay<>)
+  ];
+
+  static readonly HashSet<Type> ObjectRelayGroup = [
+    typeof(ObjectRelay<>),
+    typeof(ContinuouslyChangingObjectRelay<>)
+  ];
 
   internal static IEnumerable<MenuItem> GetMenuItems(ProtoFluxTool __instance, ProtoFluxNode nodeComponent)
   {
@@ -553,6 +564,21 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
 
     if (nodeType.TryGetGenericTypeDefinition(out var genericType))
     {
+      if (ValueRelayGroup.Contains(genericType))
+      {
+        foreach (var match in ValueRelayGroup)
+        {
+          yield return new MenuItem(match.MakeGenericType(nodeType.GenericTypeArguments[0]));
+        }
+      }
+
+      if (ObjectRelayGroup.Contains(genericType))
+      {
+        foreach (var match in ObjectRelayGroup)
+        {
+          yield return new MenuItem(match.MakeGenericType(nodeType.GenericTypeArguments[0]));
+        }
+      }
 
       if (ArithmeticBinaryOperatorGroup.Contains(genericType))
       {
@@ -613,7 +639,7 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
       {
         foreach (var match in ComparisonBinaryOperatorGroup)
         {
-          yield return new MenuItem(match);
+          yield return new MenuItem(match.MakeGenericType(nodeType.GenericTypeArguments[0]));
         }
       }
 
