@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using ProtoFluxContextualActions.Attributes;
+using ProtoFluxContextualActions.Extensions;
 
 namespace ProtoFluxContextualActions;
 
@@ -30,7 +31,6 @@ public class ProtoFluxContextualActions : ResoniteMod
   private static ModConfiguration? config;
 
   private static readonly Dictionary<string, ModConfigurationKey<bool>> patchCategoryKeys = [];
-  // private static readonly Dictionary<ModConfigurationKey, FieldInfo> patchOptionKeys = [];
 
   static ProtoFluxContextualActions()
   {
@@ -38,35 +38,16 @@ public class ProtoFluxContextualActions : ResoniteMod
 
     var types = AccessTools.GetTypesFromAssembly(ModAssembly);
 
-    var categoryKeys = from t in types
-                       select (t.GetCustomAttribute<HarmonyPatchCategory>(), t.GetCustomAttribute<TweakCategoryAttribute>()) into t
-                       where t.Item1 is not null && t.Item2 is not null
-                       select new ModConfigurationKey<bool>(t.Item1.info.category, t.Item2.Description, computeDefault: () => t.Item2.DefaultValue);
+    var categoryKeys = types
+      .Select(t => (patchCategory: t.GetCustomAttribute<HarmonyPatchCategory>(), tweakCategory: t.GetCustomAttribute<TweakCategoryAttribute>()))
+      .Where(t => t.patchCategory != null && t.tweakCategory != null)
+      .Select(t => new ModConfigurationKey<bool>(t.patchCategory.info.category, t.tweakCategory.Description, computeDefault: () => t.tweakCategory.DefaultValue));
 
     foreach (var key in categoryKeys)
     {
       DebugFunc(() => $"Registering patch category {key.Name}...");
       patchCategoryKeys[key.Name] = key;
     }
-
-    // var configFields = types
-    //   .Where(t => t.IsDefined(typeof(HarmonyPatchCategory)))
-    //   .SelectMany(AccessTools.GetDeclaredFields)
-    //   .Where(f => f.IsDefined(typeof(TweakOptionAttribute)));
-
-    // foreach (var field in configFields)
-    // {
-    //   DebugFunc(() => $"Registering patch config value {field.Name}...");
-    //   var configValue = field.GetCustomAttribute<TweakOptionAttribute>();
-    //   var defaultValue = field.GetCustomAttribute<DefaultValueAttribute>();
-
-    //   var key = typeof(ModConfigurationKey<>)
-    //     .MakeGenericType(field.FieldType)
-    //     .GetConstructor([typeof(string), typeof(string), typeof(Func<>).MakeGenericType(field.FieldType)])
-    //     .Invoke([configValue.Name, configValue.Description, defaultValue is not null ? () => defaultValue.Value : null]) as ModConfigurationKey;
-
-    //   patchOptionKeys[key] = field;
-    // }
   }
 
   public override void DefineConfiguration(ModConfigurationDefinitionBuilder builder)
@@ -98,17 +79,9 @@ public class ProtoFluxContextualActions : ResoniteMod
 
   public void InitCategories()
   {
-    foreach (var category in patchCategoryKeys.Keys)
+    foreach (var (category, key) in patchCategoryKeys)
     {
-      // // unstable, disable by default
-      if (category == "ProtoFluxTool Contextual Swap Actions")
-      {
-        UpdatePatch(category, false);
-      }
-      else
-      {
-        UpdatePatch(category, true);
-      }
+      UpdatePatch(category, config.GetValue(key));
     }
   }
 
@@ -124,9 +97,9 @@ public class ProtoFluxContextualActions : ResoniteMod
 
   static void OnHotReload(ResoniteMod modInstance)
   {
-    foreach (var category in patchCategoryKeys.Keys)
+    foreach (var (category, key) in patchCategoryKeys)
     {
-      UpdatePatch(category, true);
+      UpdatePatch(category, config.GetValue(key));
     }
   }
 #endif
@@ -145,6 +118,7 @@ public class ProtoFluxContextualActions : ResoniteMod
       {
         DebugFunc(() => $"Unpatching {category}...");
         harmony.UnpatchCategory(category);
+        // harmony.UnpatchAll(harmony.Id);
       }
     }
     catch (Exception e)
@@ -160,5 +134,4 @@ public class ProtoFluxContextualActions : ResoniteMod
       UpdatePatch(key.Name, change.Config.GetValue(key));
     }
   }
-
 }
