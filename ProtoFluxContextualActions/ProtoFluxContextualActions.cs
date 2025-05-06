@@ -99,7 +99,7 @@ public class ProtoFluxContextualActions : ResoniteMod
   {
     foreach (var (category, key) in patchCategoryKeys)
     {
-      UpdatePatch(category, config.GetValue(key));
+      UpdatePatch(category, true);
     }
   }
 #endif
@@ -117,8 +117,8 @@ public class ProtoFluxContextualActions : ResoniteMod
       else
       {
         DebugFunc(() => $"Unpatching {category}...");
-        harmony.UnpatchCategory(category);
-        // harmony.UnpatchAll(harmony.Id);
+        // harmony.UnpatchCategory(category);
+        harmony.UnpatchAll(harmony.Id);
       }
     }
     catch (Exception e)

@@ -4,6 +4,7 @@ using FrooxEngine;
 using FrooxEngine.ProtoFlux;
 
 using ProtoFluxContextualActions.Attributes;
+using ProtoFluxContextualActions.Extensions;
 using HarmonyLib;
 using System.Runtime.CompilerServices;
 using System.Collections.Generic;
@@ -16,11 +17,14 @@ using ProtoFlux.Runtimes.Execution.Nodes.Math.Easing;
 using ProtoFlux.Runtimes.Execution.Nodes.Operators;
 using ProtoFlux.Runtimes.Execution.Nodes.Math;
 using ProtoFlux.Runtimes.Execution.Nodes.TimeAndDate;
+using System.Runtime.InteropServices;
+using static ProtoFluxContextualActions.Extensions.DictionaryExtensions;
+using System.Collections;
 
 namespace ProtoFluxContextualActions.Patches;
 
-[HarmonyPatch]
-[HarmonyPatchCategory("ProtoFluxTool Contextual Swap Actions"), TweakCategory("Adds 'Contextual Swapping Actions' to the ProtoFlux Tool. Double pressing secondary pointing at a node with protoflux tool will be open a context menu of actions to swap the node for another node.", defaultValue: false)] // unstable, disable by default
+[HarmonyPatch(typeof(ProtoFluxTool), nameof(ProtoFluxTool.OnSecondaryPress))]
+[HarmonyPatchCategory("ProtoFluxTool Contextual Swap Actions"), TweakCategory("Adds 'Contextual Swapping Actions' to the ProtoFlux Tool. Double pressing secondary pointing at a node with protoflux tool will be open a context menu of actions to swap the node for another node.", defaultValue: true)] // unstable, disable by default
 internal static class ProtoFluxTool_ContextualSwapActions_Patch
 {
   // TODO: This can be replaced in the future with flags or a combination of the three automatically.
@@ -69,9 +73,7 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
 
   private static readonly ConditionalWeakTable<ProtoFluxTool, ProtoFluxToolData> additionalData = new();
 
-  [HarmonyPrefix]
-  [HarmonyPatch(typeof(ProtoFluxTool), nameof(ProtoFluxTool.OnSecondaryPress))]
-  internal static bool OnSecondaryPress_Prefix(ProtoFluxTool __instance, SyncRef<ProtoFluxElementProxy> ____currentProxy)
+  internal static bool Prefix(ProtoFluxTool __instance, SyncRef<ProtoFluxElementProxy> ____currentProxy)
   {
     var data = additionalData.GetOrCreateValue(__instance);
     var elementProxy = ____currentProxy.Target;
@@ -507,6 +509,15 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     typeof(ValueNotEquals<>),
   ];
 
+  // static readonly HashSet<Type> BooleanOperatorsGroup = [
+  //   typeof(AND_Bool),
+  //   typeof(NAND_Bool),
+  //   typeof(NOR_Bool),
+  //   typeof(OR_Bool),
+  //   typeof(XNOR_Bool),
+  //   typeof(XOR_Bool),
+  // ];
+
   static readonly HashSet<Type> ValueRelayGroup = [
     typeof(ValueRelay<>),
     typeof(ContinuouslyChangingValueRelay<>)
@@ -517,10 +528,14 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     typeof(ContinuouslyChangingObjectRelay<>)
   ];
 
+  static readonly Dictionary<Type, Type> protoFluxBindingMapping =
+    Traverse.Create(typeof(ProtoFluxHelper)).Field<Dictionary<Type, Type>>("protoFluxToBindingMapping").Value.ToDictionary(a => a.Value, a => a.Key);
+
   internal static IEnumerable<MenuItem> GetMenuItems(ProtoFluxTool __instance, ProtoFluxNode nodeComponent)
   {
     var node = nodeComponent.NodeInstance;
     var nodeType = node.GetType();
+    var componentType = nodeComponent.GetType();
 
     if (GetDirectionGroup.Contains(nodeType))
     {
@@ -559,6 +574,28 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
       foreach (var match in TimespanInstanceGroup)
       {
         yield return new MenuItem(match);
+      }
+    }
+
+    {
+      // todo: cache per-world?
+      // realistically with current resonite it doesn't matter and only needs to be done once.
+      var binaryOperations =
+        MapPsuedoGenericsToGenericTypes(__instance.World, "AND_")
+        .Concat(MapPsuedoGenericsToGenericTypes(__instance.World, "OR_"))
+        .Concat(MapPsuedoGenericsToGenericTypes(__instance.World, "NAND_"))
+        .Concat(MapPsuedoGenericsToGenericTypes(__instance.World, "NOR_"))
+        .Concat(MapPsuedoGenericsToGenericTypes(__instance.World, "XNOR_"))
+        .Concat(MapPsuedoGenericsToGenericTypes(__instance.World, "XOR_"))
+        .ToDictionary((a) => protoFluxBindingMapping[a.Node], (a) => a.Types);
+
+      if (binaryOperations.TryGetValue(nodeType, out var genericTypes))
+      {
+        var matchingNodes = binaryOperations.Where(a => genericTypes.SequenceEqual(a.Value)).Select(a => a.Key);
+        foreach (var match in matchingNodes)
+        {
+          yield return new MenuItem(match);
+        }
       }
     }
 
@@ -672,6 +709,29 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     return false;
   }
 
+  public static IEnumerable<(Type Node, IEnumerable<Type> Types)> MapPsuedoGenericsToGenericTypes(World world, string startingWith)
+  {
+    var protoFluxNodes = Traverse.Create(typeof(ProtoFluxHelper)).Field<Dictionary<string, Type>>("protoFluxNodes").Value;
+    return protoFluxNodes.Values
+      .Select(t => (name: t.GetNiceTypeName(), type: t))
+      .Where(a => a.name.StartsWith(startingWith) && !a.type.IsGenericType)
+      .Select(a => (a.type, ParseUnderscoreGenerics(world, a.name.Substring(startingWith.Length))))
+      // skip non matching
+      .Where(a => a.Item2.All(t => t != null));
+  }
+
+  class ArrayComparer<T> : EqualityComparer<T[]>
+  {
+    public override bool Equals(T[] x, T[] y) =>
+      StructuralComparisons.StructuralEqualityComparer.Equals(x, y);
+
+    public override int GetHashCode(T[] obj) =>
+      StructuralComparisons.StructuralEqualityComparer.GetHashCode(obj);
+  }
+
+  static IEnumerable<Type> ParseUnderscoreGenerics(World world, string generics) =>
+    generics.Split('_').Select(name => world.Types.DecodeType(name.ToLower()) ?? world.Types.DecodeType(name));
+
 
   [HarmonyReversePatch]
   [HarmonyPatch(typeof(ProtoFluxTool), "CleanupDraggedWire")]
@@ -709,3 +769,15 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
   // [MethodImpl(MethodImplOptions.NoInlining)]
   // internal static void ReverseMapElements(ProtoFluxNode instance, Dictionary<INode, ProtoFluxNode> nodeMapping, bool undoable) => throw new NotImplementedException();
 }
+
+// todo: optimization pass with static dictionary
+// var nodesWithGenericArguments = new Dictionary<Type[], List<Type>>(binaryOperations.Count, new ArrayComparer<Type>());
+// foreach (var (psuedoGenericNode, types) in binaryOperations) nodesWithGenericArguments.Add(types, psuedoGenericNode);
+
+// if (nodesWithGenericArguments.TryGetValue(genericTypes, out var matchingNodes))
+// {
+//   foreach (var match in matchingNodes)
+//   {
+//     yield return new MenuItem(match);
+//   }
+// }
