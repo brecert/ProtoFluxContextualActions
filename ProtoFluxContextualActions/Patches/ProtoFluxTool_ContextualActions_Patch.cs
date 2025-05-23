@@ -206,6 +206,12 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             yield return new MenuItem(typeof(ValueDecrement<int>)); // dec can be swapped to?
         }
 
+        else if (nodeType == typeof(DuplicateSlot))
+        {
+            yield return new MenuItem(typeof(SetGlobalTransform));
+            yield return new MenuItem(typeof(SetLocalTransform));
+        }
+
         switch (impulseProxy.ImpulseType.Value)
         {
             case ImpulseType.AsyncCall:

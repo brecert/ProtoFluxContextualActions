@@ -509,15 +509,6 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     typeof(ValueNotEquals<>),
   ];
 
-  // static readonly HashSet<Type> BooleanOperatorsGroup = [
-  //   typeof(AND_Bool),
-  //   typeof(NAND_Bool),
-  //   typeof(NOR_Bool),
-  //   typeof(OR_Bool),
-  //   typeof(XNOR_Bool),
-  //   typeof(XOR_Bool),
-  // ];
-
   static readonly HashSet<Type> ValueRelayGroup = [
     typeof(ValueRelay<>),
     typeof(ContinuouslyChangingValueRelay<>)
@@ -527,6 +518,31 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     typeof(ObjectRelay<>),
     typeof(ContinuouslyChangingObjectRelay<>)
   ];
+
+  static readonly HashSet<Type> SlotTranformGlobalOperationGroup = [
+    typeof(SetGlobalPosition),
+    typeof(SetGlobalPositionRotation),
+    typeof(SetGlobalRotation),
+    typeof(SetGlobalScale),
+    typeof(SetGlobalTransform),
+  ];
+
+  static readonly HashSet<Type> SlotTranformLocalOperationGroup = [
+    typeof(SetLocalPosition),
+    typeof(SetLocalPositionRotation),
+    typeof(SetLocalRotation),
+    typeof(SetLocalScale),
+    typeof(SetLocalTransform),
+  ];
+
+  static readonly BiDictionary<Type, Type> GlobalLocalEquivilents = new()
+  {
+    {typeof(SetGlobalPosition), typeof(SetLocalPosition)},
+    {typeof(SetGlobalPositionRotation), typeof(SetLocalPositionRotation)},
+    {typeof(SetGlobalRotation), typeof(SetLocalRotation)},
+    {typeof(SetGlobalScale), typeof(SetLocalScale)},
+    {typeof(SetGlobalTransform), typeof(SetLocalTransform)},
+  };
 
   static readonly Dictionary<Type, Type> protoFluxBindingMapping =
     Traverse.Create(typeof(ProtoFluxHelper)).Field<Dictionary<Type, Type>>("protoFluxToBindingMapping").Value.ToDictionary(a => a.Value, a => a.Key);
@@ -575,6 +591,31 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
       {
         yield return new MenuItem(match);
       }
+    }
+
+    if (SlotTranformGlobalOperationGroup.Contains(nodeType))
+    {
+      foreach (var match in SlotTranformGlobalOperationGroup)
+      {
+        yield return new MenuItem(match);
+      }
+    }
+
+    if (SlotTranformLocalOperationGroup.Contains(nodeType))
+    {
+      foreach (var match in SlotTranformLocalOperationGroup)
+      {
+        yield return new MenuItem(match);
+      }
+    }
+
+    if (GlobalLocalEquivilents.TryGetSecond(nodeType, out var second))
+    {
+      yield return new MenuItem(second);
+    }
+    else if (GlobalLocalEquivilents.TryGetFirst(nodeType, out var first))
+    {
+      yield return new MenuItem(first);
     }
 
     {
