@@ -181,12 +181,12 @@ internal static class ProtoFluxTool_ContextualActions_Patch
 
         else if (target is ProtoFluxImpulseProxy impulseProxy)
         {
-            ImpulseMenuItems(impulseProxy);
+            foreach (var item in ImpulseMenuItems(impulseProxy)) yield return item;
         }
 
         else if (target is ProtoFluxOperationProxy operationProxy)
         {
-            OperationMenuItems(operationProxy);
+            foreach (var item in OperationMenuItems(operationProxy)) yield return item;
         }
     }
 
@@ -359,6 +359,11 @@ internal static class ProtoFluxTool_ContextualActions_Patch
         var inputType = inputProxy.InputType.Value;
         var nodeType = inputProxy.Node.Target.NodeType;
 
+        // one level deep check
+        var nodeInstance = inputProxy.Node.Target.NodeInstance;
+        var query = new NodeQueryAcceleration(nodeInstance.Runtime.Group);
+        var indirectlyConnectsToIterationNode = query.GetEvaluatingNodes(nodeInstance).Any(n => IsIterationNode(n.GetType()));
+
         if (TryGetPackNode(inputType, out var packNodeTypes))
         {
             foreach (var packNodeType in packNodeTypes)
@@ -435,6 +440,14 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             yield return new MenuItem(typeof(GetDown));
             yield return new MenuItem(typeof(GetLeft));
             yield return new MenuItem(typeof(GetRight));
+        }
+
+        else if (inputType == typeof(int) && (IsIterationNode(nodeType) || indirectlyConnectsToIterationNode))
+        {
+            yield return new MenuItem(typeof(ValueInc<int>));
+            yield return new MenuItem(typeof(ValueDec<int>));
+            yield return new MenuItem(typeof(ChildrenCount));
+            yield return new MenuItem(typeof(CountOccurrences));
         }
     }
 
