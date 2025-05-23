@@ -23,6 +23,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.Math;
 using ProtoFlux.Runtimes.Execution.Nodes.Strings.Characters;
 using ProtoFlux.Runtimes.Execution.Nodes.Strings;
 using ProtoFlux.Runtimes.Execution.Nodes.ParsingFormatting;
+using ProtoFlux.Runtimes.Execution.Nodes.Actions;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -180,28 +181,46 @@ internal static class ProtoFluxTool_ContextualActions_Patch
 
         else if (target is ProtoFluxImpulseProxy impulseProxy)
         {
-            // TODO: convert to while?
-            yield return new MenuItem(typeof(For));
-            yield return new MenuItem(typeof(If));
-            yield return new MenuItem(typeof(ValueWrite<dummy>));
-            yield return new MenuItem(typeof(Sequence));
-
-            switch (impulseProxy.ImpulseType.Value)
-            {
-                case ImpulseType.AsyncCall:
-                case ImpulseType.AsyncResumption:
-                    yield return new MenuItem(typeof(AsyncFor));
-                    yield return new MenuItem(typeof(AsyncSequence));
-                    break;
-            }
+            ImpulseMenuItems(impulseProxy);
         }
 
         else if (target is ProtoFluxOperationProxy operationProxy)
         {
-            if (operationProxy.IsAsync)
-            {
-                yield return new MenuItem(typeof(StartAsyncTask));
-            }
+            OperationMenuItems(operationProxy);
+        }
+    }
+
+    private static IEnumerable<MenuItem> ImpulseMenuItems(ProtoFluxImpulseProxy impulseProxy)
+    {
+        var nodeType = impulseProxy.Node.Target.NodeType;
+
+        // TODO: convert to while?
+        yield return new MenuItem(typeof(For));
+        yield return new MenuItem(typeof(If));
+        yield return new MenuItem(typeof(ValueWrite<dummy>));
+        yield return new MenuItem(typeof(Sequence));
+
+        if (IsIterationNode(nodeType))
+        {
+            yield return new MenuItem(typeof(ValueIncrement<int>)); // dec can be swapped to?
+            yield return new MenuItem(typeof(ValueDecrement<int>)); // dec can be swapped to?
+        }
+
+        switch (impulseProxy.ImpulseType.Value)
+        {
+            case ImpulseType.AsyncCall:
+            case ImpulseType.AsyncResumption:
+                yield return new MenuItem(typeof(AsyncFor));
+                yield return new MenuItem(typeof(AsyncSequence));
+                break;
+        }
+    }
+
+    private static IEnumerable<MenuItem> OperationMenuItems(ProtoFluxOperationProxy operationProxy)
+    {
+        if (operationProxy.IsAsync)
+        {
+            yield return new MenuItem(typeof(StartAsyncTask));
         }
     }
 
@@ -278,11 +297,13 @@ internal static class ProtoFluxTool_ContextualActions_Patch
     /// <returns></returns>
     internal static IEnumerable<MenuItem> OutputMenuItems(ProtoFluxOutputProxy outputProxy)
     {
+        var nodeType = outputProxy.Node.Target.NodeType;
+
         if (TryGetUnpackNode(outputProxy.OutputType, out var unpackNodeTypes))
         {
-            foreach (var nodeType in unpackNodeTypes)
+            foreach (var unpackNodeType in unpackNodeTypes)
             {
-                yield return new MenuItem(nodeType);
+                yield return new MenuItem(unpackNodeType);
             }
         }
         var outputType = outputProxy.OutputType.Value;
@@ -321,6 +342,11 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             yield return new MenuItem(typeof(Add_DateTime_TimeSpan));
         }
 
+        else if (outputType == typeof(int) && (IsIterationNode(nodeType) || nodeType == typeof(IndexOfString)))
+        {
+            yield return new MenuItem(typeof(ValueInc<int>));
+            yield return new MenuItem(typeof(ValueDec<int>));
+        }
     }
 
     /// <summary>
@@ -570,6 +596,12 @@ internal static class ProtoFluxTool_ContextualActions_Patch
     };
 
     internal static bool TryGetTransposeNode(Type valueType, out Type value) => TransposeNodeMapping.TryGetValue(valueType, out value);
+
+    private static bool IsIterationNode(Type nodeType) =>
+        nodeType == typeof(For)
+        || nodeType == typeof(AsyncFor)
+        || nodeType == typeof(While)
+        || nodeType == typeof(AsyncWhile);
 
 
     [HarmonyReversePatch]
