@@ -101,8 +101,14 @@ internal static class ProtoFluxTool_ContextualActions_Patch
                                 AddMenuItem(__instance, menu, outputProxy.OutputType.Value.GetTypeColor(), item, n =>
                                 {
                                     if (item.overload) throw new Exception("Overloading with ProtoFluxOutputProxy is not supported");
-                                    var input = n.NodeInputs.First(i => typeof(INodeOutput<>).MakeGenericType(outputProxy.OutputType).IsAssignableFrom(i.TargetType));
-                                    n.TryConnectInput(input, outputProxy.NodeOutput.Target, allowExplicitCast: false, undoable: true);
+                                    var input = n.NodeInputs.First(i => i.TargetType.IsGenericType && (outputProxy.OutputType.Value.IsAssignableFrom(i.TargetType.GenericTypeArguments[0]) || ProtoFlux.Core.TypeHelper.CanImplicitlyConvertTo(outputProxy.OutputType, i.TargetType.GenericTypeArguments[0])));
+                                    __instance.StartTask(async () =>
+                                    {
+                                        // this is dumb
+                                        // TODO: investigate why it's needed for casting to work
+                                        await new Updates();
+                                        n.TryConnectInput(input, outputProxy.NodeOutput.Target, allowExplicitCast: false, undoable: true);
+                                    });
                                 });
                             }
                             break;
@@ -379,6 +385,11 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             var typeArg = outputType!.GenericTypeArguments[0];
             yield return new MenuItem(typeof(ReferenceAsVariable<>).MakeGenericType(typeArg));
             yield return new MenuItem(typeof(ReferenceTarget<>).MakeGenericType(typeArg));
+        }
+
+        if (typeof(IComponent).IsAssignableFrom(outputType))
+        {
+            yield return new MenuItem(typeof(GetSlot));
         }
     }
 

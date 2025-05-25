@@ -25,7 +25,7 @@ static class TypeUtils
       return true;
     }
 
-    if (interfaceType.IsGenericTypeDefinition)
+    if (interfaceType.IsGenericTypeDefinition && type.IsGenericType)
     {
       if (interfaceType == type.GetGenericTypeDefinition())
       {
