@@ -27,6 +27,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.Actions;
 using ProtoFluxContextualActions.Utils;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.References;
 using FrooxEngine.ProtoFlux.CoreNodes;
+using ProtoFlux.Runtimes.Execution.Nodes.Math.Bounds;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -357,6 +358,14 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             yield return new MenuItem(typeof(Add_DateTime_TimeSpan));
         }
 
+        else if (outputType == typeof(BoundingBox))
+        {
+            yield return new MenuItem(typeof(EncapsulateBounds));
+            yield return new MenuItem(typeof(EncapsulatePoint));
+            yield return new MenuItem(typeof(TransformBounds));
+            yield return new MenuItem(typeof(BoundingBoxProperties));
+        }
+
         else if (outputType == typeof(int) && (IsIterationNode(nodeType) || nodeType == typeof(IndexOfString)))
         {
             yield return new MenuItem(typeof(ValueInc<int>));
@@ -463,6 +472,16 @@ internal static class ProtoFluxTool_ContextualActions_Patch
         {
             yield return new MenuItem(typeof(RootSlot));
             yield return new MenuItem(typeof(LocalUserSlot));
+        }
+
+        else if (inputType == typeof(BoundingBox))
+        {
+            yield return new MenuItem(typeof(ComputeBoundingBox));
+            yield return new MenuItem(typeof(FromCenterSize));
+            yield return new MenuItem(typeof(Empty));
+            yield return new MenuItem(typeof(EncapsulateBounds));
+            yield return new MenuItem(typeof(EncapsulatePoint));
+            yield return new MenuItem(typeof(TransformBounds));
         }
 
         else if (nodeType == typeof(ValueMul<floatQ>) && inputProxy.ElementName == "B")
