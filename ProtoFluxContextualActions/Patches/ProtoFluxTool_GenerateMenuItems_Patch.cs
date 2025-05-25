@@ -8,6 +8,7 @@ using FrooxEngine;
 using FrooxEngine.ProtoFlux;
 using FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Variables;
 using HarmonyLib;
+using ProtoFluxContextualActions.Utils;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -17,25 +18,11 @@ internal static class ProtoFluxTool_GenerateMenuItems_Patch
 {
   static readonly Uri Icon_Color_Output = new("resdb:///e0a4e5f5dd6c0fc7e2b089b873455f908a8ede7de4fd37a3430ef71917a543ec.png");
 
-  internal static bool MatchInterface(Type interfaceType, object value, /* [NotNullWhen(true)] */ out Type? matchedType)
-  {
-    if (interfaceType.IsGenericTypeDefinition)
-    {
-      matchedType = value?.GetType().FindInterfaces((t, _) => t.IsGenericType && interfaceType == t.GetGenericTypeDefinition(), null).FirstOrDefault();
-    }
-    else
-    {
-      matchedType = value?.GetType().FindInterfaces((t, _) => interfaceType == t, null).FirstOrDefault();
-    }
-
-    return matchedType != null;
-  }
-
   internal static void Postfix(ProtoFluxTool __instance, InteractionHandler tool, ContextMenu menu)
   {
     var grabbedReference = __instance.GetGrabbedReference();
 
-    if (MatchInterface(typeof(IDynamicVariable<>), grabbedReference, out var matchedType))
+    if (TypeUtils.MatchInterface(typeof(IDynamicVariable<>), grabbedReference.GetType(), out var matchedType))
     {
       var variableName = ((IDynamicVariable)grabbedReference!).VariableName;
       var variableType = matchedType!.GenericTypeArguments[0];

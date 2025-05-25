@@ -24,6 +24,9 @@ using ProtoFlux.Runtimes.Execution.Nodes.Strings.Characters;
 using ProtoFlux.Runtimes.Execution.Nodes.Strings;
 using ProtoFlux.Runtimes.Execution.Nodes.ParsingFormatting;
 using ProtoFlux.Runtimes.Execution.Nodes.Actions;
+using ProtoFluxContextualActions.Utils;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.References;
+using FrooxEngine.ProtoFlux.CoreNodes;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -352,6 +355,30 @@ internal static class ProtoFluxTool_ContextualActions_Patch
         {
             yield return new MenuItem(typeof(ValueInc<int>));
             yield return new MenuItem(typeof(ValueDec<int>));
+        }
+
+        if (outputType == typeof(UserRef))
+        {
+            yield return new MenuItem(typeof(UserRefAsVariable));
+        }
+
+        if (TypeUtils.MatchesType(typeof(IValue<>), outputType))
+        {
+            var typeArg = outputType!.GenericTypeArguments[0];
+            yield return new MenuItem(typeof(FieldAsVariable<>).MakeGenericType(typeArg));
+        }
+
+        if (TypeUtils.MatchesType(typeof(ISyncRef<>), outputType))
+        {
+            var typeArg = outputType!.GenericTypeArguments[0];
+            yield return new MenuItem(typeof(ReferenceInterfaceAsVariable<>).MakeGenericType(typeArg));
+        }
+
+        if (TypeUtils.MatchesType(typeof(SyncRef<>), outputType))
+        {
+            var typeArg = outputType!.GenericTypeArguments[0];
+            yield return new MenuItem(typeof(ReferenceAsVariable<>).MakeGenericType(typeArg));
+            yield return new MenuItem(typeof(ReferenceTarget<>).MakeGenericType(typeArg));
         }
     }
 
