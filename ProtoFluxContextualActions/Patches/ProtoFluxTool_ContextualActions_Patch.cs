@@ -238,6 +238,13 @@ internal static class ProtoFluxTool_ContextualActions_Patch
         {
             yield return new MenuItem(typeof(StartAsyncTask));
         }
+
+        if (operationProxy.Node.Target.NodeName.Contains("Debug"))
+        {
+            yield return new MenuItem(typeof(Update));
+            yield return new MenuItem(typeof(LocalUpdate));
+            yield return new MenuItem(typeof(SecondsTimer));
+        }
     }
 
     internal static IEnumerable<MenuItem> GeneralNumericOperationMenuItems(ProtoFluxElementProxy? target)
