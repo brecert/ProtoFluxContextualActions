@@ -4,7 +4,6 @@ using FrooxEngine;
 using FrooxEngine.ProtoFlux;
 
 using ProtoFluxContextualActions.Attributes;
-using ProtoFluxContextualActions.Extensions;
 using HarmonyLib;
 using System.Runtime.CompilerServices;
 using System.Collections.Generic;
@@ -17,8 +16,6 @@ using ProtoFlux.Runtimes.Execution.Nodes.Math.Easing;
 using ProtoFlux.Runtimes.Execution.Nodes.Operators;
 using ProtoFlux.Runtimes.Execution.Nodes.Math;
 using ProtoFlux.Runtimes.Execution.Nodes.TimeAndDate;
-using System.Runtime.InteropServices;
-using static ProtoFluxContextualActions.Extensions.DictionaryExtensions;
 using System.Collections;
 
 namespace ProtoFluxContextualActions.Patches;

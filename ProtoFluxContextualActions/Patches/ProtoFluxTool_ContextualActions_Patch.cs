@@ -61,7 +61,7 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             __instance.StartTask(async () =>
             {
                 var menu = await __instance.LocalUser.OpenContextMenu(__instance, __instance.Slot);
-                Traverse.Create(menu).Field<float?>("_speedOverride").Value = 10;
+                Traverse.Create(menu).Field<float?>("_speedOverride").Value = 10; // faster for better swiping
 
                 switch (elementProxy)
                 {
