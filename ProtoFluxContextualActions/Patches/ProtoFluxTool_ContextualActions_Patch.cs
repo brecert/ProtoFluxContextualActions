@@ -28,6 +28,7 @@ using ProtoFluxContextualActions.Utils;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.References;
 using FrooxEngine.ProtoFlux.CoreNodes;
 using ProtoFlux.Runtimes.Execution.Nodes.Math.Bounds;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Worlds;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -384,6 +385,11 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             yield return new MenuItem(typeof(UserRefAsVariable));
         }
 
+        if (nodeType == typeof(CountOccurrences) || nodeType == typeof(ChildrenCount) || nodeType == typeof(WorldUserCount))
+        {
+            yield return new MenuItem(typeof(For));
+        }
+
         if (TypeUtils.MatchesType(typeof(IValue<>), outputType))
         {
             var typeArg = outputType!.GenericTypeArguments[0];
@@ -685,7 +691,6 @@ internal static class ProtoFluxTool_ContextualActions_Patch
         || nodeType == typeof(AsyncFor)
         || nodeType == typeof(While)
         || nodeType == typeof(AsyncWhile);
-
 
     [HarmonyReversePatch]
     [HarmonyPatch(typeof(ProtoFluxTool), "CleanupDraggedWire")]
