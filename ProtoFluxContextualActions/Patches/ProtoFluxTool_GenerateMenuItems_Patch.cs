@@ -22,7 +22,7 @@ internal static class ProtoFluxTool_GenerateMenuItems_Patch
   {
     var grabbedReference = __instance.GetGrabbedReference();
 
-    if (grabbedReference != null && TypeUtils.MatchInterface(typeof(IDynamicVariable<>), grabbedReference.GetType(), out var matchedType))
+    if (grabbedReference != null && TypeUtils.MatchInterface(grabbedReference.GetType(), typeof(IDynamicVariable<>), out var matchedType))
     {
       var variableName = ((IDynamicVariable)grabbedReference!).VariableName;
       var variableType = matchedType!.GenericTypeArguments[0];

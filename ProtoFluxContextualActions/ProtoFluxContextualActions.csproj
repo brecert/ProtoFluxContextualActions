@@ -48,6 +48,7 @@
         <ResoniteReference Include="ProtoFlux.Nodes.FrooxEngine" />
         <ResoniteReference Include="ProtoFluxBindings" />
         <ResoniteReference Include="Elements.Core" />
+        <ResoniteReference Include="Elements.Quantity" />
         <ResoniteReference Include="SharpPipe" />
     </ItemGroup>
 

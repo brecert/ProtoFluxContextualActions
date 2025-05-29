@@ -17,7 +17,7 @@ static class TypeUtils
     return false;
   }
 
-  public static bool MatchInterface(Type interfaceType, Type type, /* [NotNullWhen(true)] */ out Type? matchedType)
+  public static bool MatchInterface(Type type, Type interfaceType, /* [NotNullWhen(true)] */ out Type? matchedType)
   {
     if (type == interfaceType)
     {
@@ -25,9 +25,9 @@ static class TypeUtils
       return true;
     }
 
-    if (interfaceType.IsGenericTypeDefinition && type.IsGenericType)
+    if (interfaceType.IsGenericTypeDefinition)
     {
-      if (interfaceType == type.GetGenericTypeDefinition())
+      if (type.IsGenericType && interfaceType == type.GetGenericTypeDefinition())
       {
         matchedType = type;
       }

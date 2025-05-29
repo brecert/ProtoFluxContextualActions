@@ -29,6 +29,8 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.References;
 using FrooxEngine.ProtoFlux.CoreNodes;
 using ProtoFlux.Runtimes.Execution.Nodes.Math.Bounds;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Worlds;
+using Elements.Quantity;
+using ProtoFlux.Runtimes.Execution.Nodes.Math.Quantity;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -293,12 +295,12 @@ internal static class ProtoFluxTool_ContextualActions_Patch
 
                 if (coder.Property<bool>("SupportsComparison").Value)
                 {
-                    yield return new MenuItem(typeof(ValueLessThan<>).MakeGenericType(outputType));
-                    yield return new MenuItem(typeof(ValueLessOrEqual<>).MakeGenericType(outputType));
-                    yield return new MenuItem(typeof(ValueGreaterThan<>).MakeGenericType(outputType));
-                    yield return new MenuItem(typeof(ValueGreaterOrEqual<>).MakeGenericType(outputType));
+                    // yield return new MenuItem(typeof(ValueLessThan<>).MakeGenericType(outputType));
+                    // yield return new MenuItem(typeof(ValueLessOrEqual<>).MakeGenericType(outputType));
+                    // yield return new MenuItem(typeof(ValueGreaterThan<>).MakeGenericType(outputType));
+                    // yield return new MenuItem(typeof(ValueGreaterOrEqual<>).MakeGenericType(outputType));
                     yield return new MenuItem(typeof(ValueEquals<>).MakeGenericType(outputType));
-                    yield return new MenuItem(typeof(ValueNotEquals<>).MakeGenericType(outputType));
+                    // yield return new MenuItem(typeof(ValueNotEquals<>).MakeGenericType(outputType));
                 }
 
                 if (TryGetInverseNode(outputType, out var inverseNodeType))
@@ -385,9 +387,11 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             yield return new MenuItem(typeof(UserRefAsVariable));
         }
 
-        if (nodeType == typeof(CountOccurrences) || nodeType == typeof(ChildrenCount) || nodeType == typeof(WorldUserCount))
+        if (TypeUtils.MatchInterface(outputType, typeof(IQuantity<>), out var quantityType))
         {
-            yield return new MenuItem(typeof(For));
+            var baseType = quantityType.GenericTypeArguments[0];
+            yield return new MenuItem(typeof(BaseValue<>).MakeGenericType(baseType));
+            yield return new MenuItem(typeof(FormatQuantity<>).MakeGenericType(baseType));
         }
 
         if (TypeUtils.MatchesType(typeof(IValue<>), outputType))
@@ -412,6 +416,11 @@ internal static class ProtoFluxTool_ContextualActions_Patch
         if (typeof(IComponent).IsAssignableFrom(outputType))
         {
             yield return new MenuItem(typeof(GetSlot));
+        }
+
+        if (nodeType == typeof(CountOccurrences) || nodeType == typeof(ChildrenCount) || nodeType == typeof(WorldUserCount))
+        {
+            yield return new MenuItem(typeof(For));
         }
     }
 
@@ -495,6 +504,13 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             yield return new MenuItem(typeof(EncapsulateBounds));
             yield return new MenuItem(typeof(EncapsulatePoint));
             yield return new MenuItem(typeof(TransformBounds));
+        }
+
+        else if (TypeUtils.MatchInterface(inputType, typeof(IQuantity<>), out var quantityType))
+        {
+            var baseType = quantityType.GenericTypeArguments[0];
+            yield return new MenuItem(typeof(FromBaseValue<>).MakeGenericType(baseType));
+            yield return new MenuItem(typeof(ParseQuantity<>).MakeGenericType(baseType));
         }
 
         else if (nodeType == typeof(ValueMul<floatQ>) && inputProxy.ElementName == "B")
