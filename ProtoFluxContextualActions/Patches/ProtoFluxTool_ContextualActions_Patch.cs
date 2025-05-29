@@ -31,6 +31,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.Math.Bounds;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Worlds;
 using Elements.Quantity;
 using ProtoFlux.Runtimes.Execution.Nodes.Math.Quantity;
+using ProtoFlux.Runtimes.Execution.Nodes.Utility;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -418,6 +419,20 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             yield return new MenuItem(typeof(GetSlot));
         }
 
+        UniLog.Log(nodeType);
+        UniLog.Log(typeof(IndexOfFirstValueMatch<>).IsAssignableFrom(nodeType));
+
+        if (outputType == typeof(int) && (
+            nodeType == typeof(ImpulseDemultiplexer)
+            || TypeUtils.MatchesType(typeof(IndexOfFirstValueMatch<>), nodeType)
+            || TypeUtils.MatchesType(typeof(IndexOfFirstObjectMatch<>), nodeType)
+            ))
+        {
+            yield return new MenuItem(typeof(ValueMultiplex<dummy>), name: "Value Multiplex");
+            yield return new MenuItem(typeof(ImpulseMultiplexer), name: "Impulse Multiplex");
+            yield return new MenuItem(typeof(ValueDemultiplex<dummy>), name: "Value Demultiplex");
+        }
+
         if (nodeType == typeof(CountOccurrences) || nodeType == typeof(ChildrenCount) || nodeType == typeof(WorldUserCount))
         {
             yield return new MenuItem(typeof(For));
@@ -540,6 +555,16 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             yield return new MenuItem(typeof(ValueDec<int>));
             yield return new MenuItem(typeof(ChildrenCount));
             yield return new MenuItem(typeof(CountOccurrences));
+        }
+
+        if (inputType == typeof(int) && (
+            typeof(ValueMultiplex<>).IsAssignableFrom(nodeType)
+            || typeof(ObjectMultiplex<>).IsAssignableFrom(nodeType)
+            || typeof(ValueDemultiplex<>).IsAssignableFrom(nodeType)
+            || typeof(ObjectDemultiplex<>).IsAssignableFrom(nodeType)))
+        {
+            yield return new MenuItem(typeof(ImpulseDemultiplexer), name: "Impulse Demultiplexer");
+            yield return new MenuItem(typeof(IndexOfFirstValueMatch<dummy>));
         }
     }
 
