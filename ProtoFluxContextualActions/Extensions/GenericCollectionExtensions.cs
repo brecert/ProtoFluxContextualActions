@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ProtoFluxContextualActions.Extensions;
 
@@ -9,4 +10,7 @@ internal static class GenericCollectionExtensions
     key = pair.Key;
     value = pair.Value;
   }
+
+  public static IEnumerable<(T value, int index)> WithIndex<T>(this IEnumerable<T> enumerable)
+    => enumerable.Select((value, i) => (value, i));
 }
