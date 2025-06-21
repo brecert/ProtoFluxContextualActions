@@ -48,8 +48,6 @@ public static class MapExtensions
 
   public static void MapImpulses(this INode from, ProtoFluxNode to, Dictionary<INode, ProtoFluxNode> nodeMapping, bool undoable)
   {
-    UniLog.Log(from.AllImpulseSources().Join());
-
     foreach (var impulse in from.AllImpulseSources())
     {
       if (impulse.Target == null) continue;

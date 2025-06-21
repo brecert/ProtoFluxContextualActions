@@ -21,6 +21,7 @@ using ProtoFlux.Runtimes.Execution;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Variables;
 using ProtoFluxContextualActions.Extensions;
 using static ProtoFluxContextualActions.Extensions.NodeExtensions;
+using System.Runtime.InteropServices;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -161,19 +162,37 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     var oldNode = hitNode.NodeInstance;
     var binding = ProtoFluxHelper.GetBindingForNode(menuItem.node);
     var query = new NodeQueryAcceleration(oldNode.Runtime.Group);
+    var executionRuntime = Traverse.Create(hitNode.Group).Field<ExecutionRuntime<FrooxEngineContext>>("executionRuntime").Value;
+
 
     {
       var newNodeInstance = runtime.AddNode(menuItem.node);
       var tryByIndex = menuItem.connectionTransferType == ConnectionTransferType.ByIndexLossy;
-      SwapHelper.TransferElements(oldNode, newNodeInstance, query, tryByIndex);
+      var results = SwapHelper.TransferElements(oldNode, newNodeInstance, query, executionRuntime, tryByIndex, overload: true);
       var nodeMap = hitNode.Group.Nodes.ToDictionary(a => a.NodeInstance, a => a);
+      var swappedNodes = results.Where(r => r.overload?.OverloadedAnyNodes == true).SelectMany(r => r.overload?.SwappedNodes).ToList();
+
+
+      foreach (var (fromNode, intoNode) in swappedNodes)
+      {
+        var intoType = intoNode.GetType();
+        var swappedNode = (ProtoFluxNode)nodeMap[fromNode].Slot.AttachComponent(ProtoFluxHelper.GetBindingForNode(intoType));
+        nodeMap[intoNode] = swappedNode;
+        AssociateInstance(swappedNode, nodeMap[fromNode].Group, intoNode);
+      }
+
       var oldNodeInstance = hitNode.NodeInstance;
       var slot = hitNode.Slot;
 
       var newNode = (ProtoFluxNode)slot.AttachComponent(ProtoFluxHelper.GetBindingForNode(newNodeInstance.GetType()));
       nodeMap[newNodeInstance] = newNode;
-
       AssociateInstance(newNode, hitNode.Group, newNodeInstance);
+
+
+      foreach (var (_, intoNode) in swappedNodes)
+      {
+        intoNode.MapElements(nodeMap[intoNode], nodeMap, undoable: true);
+      }
 
       newNodeInstance.MapElements(newNode, nodeMap, undoable: true);
 
@@ -184,6 +203,22 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
         hitNode.ClearGroupAndInstance();
         hitNode.Destroy();
         runtime.RemoveNode(oldNode);
+
+        foreach (var (fromNode, _) in swappedNodes)
+        {
+          var oldFromNode = nodeMap[fromNode];
+          var oldVisualSlot = oldFromNode.GetVisualSlot();
+          oldVisualSlot?.Destroy();
+          oldVisualSlot?.Parent.GetComponent<Grabbable>()?.Destroy();
+          oldFromNode.ClearGroupAndInstance();
+          oldFromNode.Destroy();
+          runtime.RemoveNode(fromNode);
+        }
+      }
+
+      foreach (var (_, intoNode) in swappedNodes)
+      {
+        nodeMap[intoNode].EnsureVisual();
       }
 
       newNode.EnsureVisual();
@@ -368,7 +403,7 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
   static readonly HashSet<Type> ValueStoreTypes = [
     typeof(LocalValue<>),
     typeof(StoredValue<>),
-    // typeof(DataModelValueFieldStore<>),
+    typeof(DataModelValueFieldStore<>),
   ];
 
   static readonly Dictionary<Type, Type> protoFluxBindingMapping =

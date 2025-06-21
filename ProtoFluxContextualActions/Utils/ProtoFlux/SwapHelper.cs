@@ -1,4 +1,4 @@
-using System;
+using System.Collections.Generic;
 using Elements.Core;
 using FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes;
 using ProtoFlux.Core;
@@ -26,19 +26,24 @@ public static class SwapHelper
     }
   }
 
-  internal static void TransferExternalReferences(INode from, INode to, NodeQueryAcceleration query)
+  internal static IEnumerable<ConnectionResult> TransferExternalReferences<N>(INode from, INode to, NodeQueryAcceleration query, NodeRuntime<N> runtime, bool overload = true) where N : class, INode
   {
-    foreach (var referencingNode in query.GetReferencingNodes(from))
+    foreach (var source in query.GetReferencingSources(from))
     {
-      for (int i = 0; i < referencingNode.FixedReferenceCount; i++)
-      {
-        var reference = referencingNode.GetReferenceTarget(i);
-        if (reference == from)
-        {
-          referencingNode.SetReferenceTarget(i, to);
-        }
-      }
+      yield return runtime.SetReference(source.OwnerNode, source.ReferenceIndex, to, overload, allowMergingGroups: true);
     }
+
+    // foreach (var referencingNode in query.GetReferencingNodes(from))
+    // {
+    //   for (int i = 0; i < referencingNode.FixedReferenceCount; i++)
+    //   {
+    //     var reference = referencingNode.GetReferenceTarget(i);
+    //     if (reference == from)
+    //     {
+    //       // referencingNode.SetReferenceTarget(i, to);
+    //     }
+    //   }
+    // }
   }
 
   internal static void TransferImpulses(INode from, INode to, bool tryByIndex = false)
@@ -214,7 +219,7 @@ public static class SwapHelper
     }
   }
 
-  public static void TransferElements(INode oldNode, INode newNode, NodeQueryAcceleration query, bool tryByIndex = false)
+  public static IEnumerable<ConnectionResult> TransferElements<N>(INode oldNode, INode newNode, NodeQueryAcceleration query, NodeRuntime<N> runtime, bool tryByIndex = false, bool overload = true) where N : class, INode
   {
     // todo: Impulses, Operations, References, Globals
     newNode.CopyDynamicInputLayout(oldNode);
@@ -233,9 +238,11 @@ public static class SwapHelper
     TransferImpulses(oldNode, newNode, tryByIndex);
 
     // meow
-    TransferExternalReferences(oldNode, newNode, query);
+    var y = TransferExternalReferences(oldNode, newNode, query, runtime, overload);
 
     // meow
     TransferGlobals(oldNode, newNode, tryByIndex);
+
+    return y;
   }
 }
