@@ -22,6 +22,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Variables;
 using ProtoFluxContextualActions.Extensions;
 using static ProtoFluxContextualActions.Extensions.NodeExtensions;
 using System.Runtime.InteropServices;
+using ProtoFluxContextualActions.Utils;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -407,11 +408,28 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     {typeof(SetGlobalTransform), typeof(SetLocalTransform)},
   };
 
-  static readonly HashSet<Type> ValueStoreTypes = [
+  static readonly HashSet<Type> VariableStoreNodesGroup = [
     typeof(LocalValue<>),
+    typeof(LocalObject<>),
     typeof(StoredValue<>),
+    typeof(StoredObject<>),
+    typeof(DataModelUserRefStore),
+    typeof(DataModelTypeStore),
+    typeof(DataModelObjectAssetRefStore<>),
+    typeof(DataModelObjectAssetRefStore<>),
     typeof(DataModelValueFieldStore<>),
+    typeof(DataModelObjectRefStore<>),
+    typeof(DataModelObjectFieldStore<>),
   ];
+
+  private static Type GetIVariableValueType(Type type)
+  {
+    if (TypeUtils.MatchInterface(type, typeof(IVariable<,>), out var varType))
+    {
+      return varType.GenericTypeArguments[1];
+    }
+    throw new Exception($"Unable to find IVariable node for type '{type}'");
+  }
 
   static readonly Dictionary<Type, Type> protoFluxBindingMapping =
     Traverse.Create(typeof(ProtoFluxHelper)).Field<Dictionary<Type, Type>>("protoFluxToBindingMapping").Value.ToDictionary(a => a.Value, a => a.Key);
@@ -509,6 +527,23 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
       }
     }
 
+    if (VariableStoreNodesGroup.Any(t => nodeType.IsGenericType ? t == nodeType.GetGenericTypeDefinition() : t == nodeType))
+    {
+      var storageType = GetIVariableValueType(nodeType);
+      yield return new MenuItem(protoFluxBindingMapping[ProtoFluxHelper.GetLocalNode(storageType).GetGenericTypeDefinition()].MakeGenericType(storageType));
+      yield return new MenuItem(protoFluxBindingMapping[ProtoFluxHelper.GetStoreNode(storageType).GetGenericTypeDefinition()].MakeGenericType(storageType));
+
+      var dataModelStore = ProtoFluxHelper.GetDataModelStoreNode(storageType);
+      if (dataModelStore.IsGenericType)
+      {
+        yield return new MenuItem(protoFluxBindingMapping[dataModelStore.GetGenericTypeDefinition()].MakeGenericType(dataModelStore.GenericTypeArguments));
+      }
+      else
+      {
+        yield return new MenuItem(protoFluxBindingMapping[dataModelStore]);
+      }
+    }
+
     if (nodeType.TryGetGenericTypeDefinition(out var genericType))
     {
       if (ValueRelayGroup.Contains(genericType))
@@ -522,14 +557,6 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
       if (ObjectRelayGroup.Contains(genericType))
       {
         foreach (var match in ObjectRelayGroup)
-        {
-          yield return new MenuItem(match.MakeGenericType(nodeType.GenericTypeArguments[0]));
-        }
-      }
-
-      if (ValueStoreTypes.Contains(genericType))
-      {
-        foreach (var match in ValueStoreTypes)
         {
           yield return new MenuItem(match.MakeGenericType(nodeType.GenericTypeArguments[0]));
         }
