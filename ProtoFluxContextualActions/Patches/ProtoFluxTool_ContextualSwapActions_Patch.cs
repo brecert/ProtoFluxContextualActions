@@ -221,6 +221,13 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
         nodeMap[intoNode].EnsureVisual();
       }
 
+      var dynamicLists = newNode.NodeInputLists
+        .Concat(newNode.NodeOutputLists)
+        .Concat(newNode.NodeImpulseLists)
+        .Concat(newNode.NodeOperationLists);
+
+      foreach (var list in dynamicLists) list.EnsureElementCount(2);
+
       newNode.EnsureVisual();
     }
 

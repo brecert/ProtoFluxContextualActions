@@ -221,7 +221,6 @@ public static class SwapHelper
 
   public static IEnumerable<ConnectionResult> TransferElements<N>(INode oldNode, INode newNode, NodeQueryAcceleration query, NodeRuntime<N> runtime, bool tryByIndex = false, bool overload = true) where N : class, INode
   {
-    // todo: Impulses, Operations, References, Globals
     newNode.CopyDynamicInputLayout(oldNode);
     newNode.CopyDynamicOutputLayout(oldNode);
 

@@ -52,7 +52,7 @@ public static class MapExtensions
     {
       if (impulse.Target == null) continue;
       var nodeToImpulse = nodeMapping[impulse.Target.OwnerNode];
-      var impulseRef = to.GetImpulse(impulse.ImpulseIndex);
+      var impulseRef = to.GetImpulse(impulse.ElementIndex);
       if (undoable) impulseRef.CreateUndoPoint(forceNew: true);
       impulseRef.Target = nodeToImpulse.GetOperation(impulse.Target.FindLinearOperationIndex());
     }
@@ -62,11 +62,14 @@ public static class MapExtensions
   {
     foreach (var inputSource in from.AllInputSources().Where(s => s.Source != null))
     {
-      var index = inputSource.Source.FindLinearOutputIndex();
-      var inputNode = nodeMapping[inputSource.Source.OwnerNode];
-      var input = to.GetInput(index);
-      if (undoable) input.CreateUndoPoint(forceNew: true);
-      input.Target = inputNode.GetOutput(index);
+      var inputFrom = nodeMapping[inputSource.Source!.OwnerNode];
+      to.GetInput(inputSource)?.TrySet(inputFrom.GetOutput(inputSource.Source.FindLinearOutputIndex())!);
+
+      // var index = inputSource.Source.FindLinearOutputIndex();
+      // var inputNode = nodeMapping[inputSource.Source.OwnerNode];
+      // var input = to.GetInput(index);
+      // if (undoable) input.CreateUndoPoint(forceNew: true);
+      // input.Target = inputNode.GetOutput(index);
     }
   }
 
@@ -87,7 +90,9 @@ public static class MapExtensions
     foreach (var source in query.GetImpulsingSources(from))
     {
       var sourceNode = nodeMapping[source.OwnerNode];
-      sourceNode.GetImpulse(source.ImpulseIndex).TrySet(to.GetOperation(source.Target.FindLinearOperationIndex()));
+      var syncRef = sourceNode.GetImpulse(source);
+      if (undoable) syncRef?.CreateUndoPoint(forceNew: true);
+      syncRef?.TrySet(to.GetOperation(source.Target.FindLinearOperationIndex()));
     }
   }
 
@@ -96,7 +101,9 @@ public static class MapExtensions
     foreach (var source in query.GetEvaluatingSources(from))
     {
       var sourceNode = nodeMapping[source.OwnerNode];
-      sourceNode.GetInput(source.InputIndex).TrySet(to.GetOutput(source.Source.FindLinearOutputIndex()));
+      var syncRef = sourceNode.GetInput(source);
+      if (undoable) syncRef?.CreateUndoPoint(forceNew: true);
+      syncRef?.TrySet(to.GetOutput(source.Source.FindLinearOutputIndex()));
     }
   }
 }

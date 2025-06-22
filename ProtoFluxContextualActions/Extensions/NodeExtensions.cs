@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using FrooxEngine.ProtoFlux;
@@ -14,17 +15,35 @@ internal static partial class NodeExtensions
 
   public static IEnumerable<InputSource> AllInputSources(this INode node)
   {
-    for (int i = 0; i < node.InputCount; i++)
+    for (int i = 0; i < node.FixedInputCount; i++)
     {
-      yield return new(node, i);
+      yield return new(node, index: i);
+    }
+
+    for (int i = 0; i < node.DynamicInputCount; i++)
+    {
+      var list = node.GetInputList(i);
+      for (int j = 0; j < list.Count; j++)
+      {
+        yield return new(node, index: j, listIndex: i);
+      }
     }
   }
 
   public static IEnumerable<ImpulseSource> AllImpulseSources(this INode node)
   {
-    for (int i = 0; i < node.ImpulseCount; i++)
+    for (int i = 0; i < node.FixedImpulseCount; i++)
     {
       yield return new(node, i);
+    }
+
+    for (int i = 0; i < node.DynamicImpulseCount; i++)
+    {
+      var list = node.GetImpulseList(i);
+      for (int j = 0; j < list.Count; j++)
+      {
+        yield return new(node, j, i);
+      }
     }
   }
 
@@ -62,7 +81,7 @@ internal static partial class NodeExtensions
 
   public static void CopyDynamicInputLayout(this INode node, INode from)
   {
-    for (int i = 0; i < from.DynamicInputCount; i++)
+    for (int i = 0; i < Math.Min(from.DynamicInputCount, node.DynamicInputCount); i++)
     {
       node.GetInputList(i).EnsureSize(from.GetInputList(i).Count);
     }
@@ -70,7 +89,7 @@ internal static partial class NodeExtensions
 
   public static void CopyDynamicOutputLayout(this INode node, INode from)
   {
-    for (int i = 0; i < from.DynamicOutputCount; i++)
+    for (int i = 0; i < Math.Min(from.DynamicOutputCount, node.DynamicOutputCount); i++)
     {
       node.GetOutputList(i).EnsureSize(from.GetOutputList(i).Count);
     }

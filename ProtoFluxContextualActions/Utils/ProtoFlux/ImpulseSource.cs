@@ -2,41 +2,28 @@ using ProtoFlux.Core;
 
 namespace ProtoFluxContextualActions.Utils.ProtoFlux;
 
-public readonly struct ImpulseSource
+public readonly struct ImpulseSource(INode node, int elementIndex, int? elementListIndex = null) : IElementIndex
 {
-  public ImpulseSource(INode node, int index)
-  {
-    OwnerNode = node;
-    ImpulseIndex = index;
-  }
+  public readonly INode OwnerNode = node;
 
-  public ImpulseSource(INode node, IImpulse impulse)
-  {
-    OwnerNode = node;
-    ImpulseIndex = node.Metadata.FixedImpulses.Find(m => m.Field.GetValue(node).GetHashCode() == impulse.GetHashCode()).Index;
-  }
+  public readonly int ElementIndex = elementIndex;
 
-  public ImpulseSource(INode node, string name)
-  {
-    OwnerNode = node;
-    ImpulseIndex = node.Metadata.GetImpulseByName(name).Index;
-  }
-
-  public readonly INode OwnerNode;
-  public readonly int ImpulseIndex;
+  public readonly int? ElementListIndex = elementListIndex;
 
   public readonly IOperation? Target
   {
-    get => OwnerNode.GetImpulseTarget(ImpulseIndex);
-    set => OwnerNode.SetImpulseTarget(ImpulseIndex, value);
+    get => OwnerNode.GetImpulseTarget(ElementIndex);
+    set => OwnerNode.SetImpulseTarget(ElementIndex, value);
   }
 
-  public readonly string Name => OwnerNode.GetImpulseName(ImpulseIndex);
+  public readonly string Name => OwnerNode.GetImpulseName(ElementIndex);
 
-  public readonly ImpulseType TargetType => OwnerNode.GetImpulseType(ImpulseIndex);
+  public readonly ImpulseType TargetType => OwnerNode.GetImpulseType(ElementIndex);
 
-  public override string ToString()
-  {
-    return $"ImpulseSource.{TargetType} [{ImpulseIndex}] '{Name}' -> {Target}";
-  }
+  int IElementIndex.ElementIndex => ElementIndex;
+
+  int? IElementIndex.ElementListIndex => ElementListIndex;
+
+  public override string ToString() =>
+    $"ImpulseSource.{TargetType} [{ElementIndex}, {ElementListIndex}] '{Name}' -> {Target}";
 }
