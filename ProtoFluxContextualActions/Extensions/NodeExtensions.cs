@@ -13,6 +13,40 @@ internal static partial class NodeExtensions
   public static IEnumerable<(INode instance, ProtoFluxNode node)> NodeInstances(this ProtoFluxNodeGroup group) =>
     group.Nodes.Select(node => (node.NodeInstance, node));
 
+  public static IEnumerable<IImpulseList> ImpulseLists(this INode node)
+  {
+    for (int i = 0; i < node.DynamicImpulseCount; i++)
+    {
+      yield return node.GetImpulseList(i);
+    }
+  }
+
+  public static IEnumerable<IOperationList> OperationLists(this INode node)
+  {
+    for (int i = 0; i < node.DynamicOperationCount; i++)
+    {
+      yield return node.GetOperationList(i);
+    }
+  }
+
+
+  public static IEnumerable<IInputList> InputLists(this INode node)
+  {
+    for (int i = 0; i < node.DynamicInputCount; i++)
+    {
+      yield return node.GetInputList(i);
+    }
+  }
+
+  public static IEnumerable<IOutputList> OutputLists(this INode node)
+  {
+    for (int i = 0; i < node.DynamicOutputCount; i++)
+    {
+      yield return node.GetOutputList(i);
+    }
+  }
+
+
   public static IEnumerable<InputSource> AllInputSources(this INode node)
   {
     for (int i = 0; i < node.FixedInputCount; i++)
@@ -78,6 +112,24 @@ internal static partial class NodeExtensions
       list.AddOutput();
     }
   }
+
+  public static void EnsureSize(this IImpulseList list, int size)
+  {
+    for (int i = list.Count; i < size; i++)
+    {
+      list.AddImpulse();
+    }
+  }
+
+  public static void EnsureSize(this IOperationList list, int size)
+  {
+    for (int i = list.Count; i < size; i++)
+    {
+      list.AddOperation();
+    }
+  }
+
+
 
   public static void CopyDynamicInputLayout(this INode node, INode from)
   {

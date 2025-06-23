@@ -16,6 +16,21 @@ public readonly struct InputSource(INode owner, int index, int? listIndex = null
     set => OwnerNode.SetInputSource(ElementIndex, value);
   }
 
+  public OutputSource? OutputSource()
+  {
+    if (Source == null) return null;
+    Source.FindOutputIndex(out var index, out var listIndex);
+    if (listIndex >= 0)
+    {
+      return new(Source.OwnerNode, index, listIndex);
+    }
+    else
+    {
+      return new(Source.OwnerNode, index, null);
+    }
+  }
+
+
   public readonly string Name => OwnerNode.GetInputName(ElementIndex);
 
   public readonly Type ValueType => OwnerNode.GetInputType(ElementIndex);

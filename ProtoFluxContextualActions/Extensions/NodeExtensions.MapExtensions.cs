@@ -1,11 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Elements.Core;
 using FrooxEngine;
 using FrooxEngine.ProtoFlux;
 using FrooxEngine.Undo;
 using HarmonyLib;
 using ProtoFlux.Core;
+using ProtoFluxContextualActions.Utils.ProtoFlux;
 
 namespace ProtoFluxContextualActions.Extensions;
 
@@ -52,24 +54,22 @@ public static class MapExtensions
     {
       if (impulse.Target == null) continue;
       var nodeToImpulse = nodeMapping[impulse.Target.OwnerNode];
-      var impulseRef = to.GetImpulse(impulse.ElementIndex);
-      if (undoable) impulseRef.CreateUndoPoint(forceNew: true);
-      impulseRef.Target = nodeToImpulse.GetOperation(impulse.Target.FindLinearOperationIndex());
+      var syncRef = to.GetImpulse(impulse);
+      if (undoable) syncRef?.CreateUndoPoint(forceNew: true);
+      syncRef?.TrySet(nodeToImpulse.GetOperation(impulse.TargetSource().Value));
     }
   }
 
   public static void MapInputs(this INode from, ProtoFluxNode to, Dictionary<INode, ProtoFluxNode> nodeMapping, bool undoable)
   {
-    foreach (var inputSource in from.AllInputSources().Where(s => s.Source != null))
+    foreach (var source in from.AllInputSources())
     {
-      var inputFrom = nodeMapping[inputSource.Source!.OwnerNode];
-      to.GetInput(inputSource)?.TrySet(inputFrom.GetOutput(inputSource.Source.FindLinearOutputIndex())!);
-
-      // var index = inputSource.Source.FindLinearOutputIndex();
-      // var inputNode = nodeMapping[inputSource.Source.OwnerNode];
-      // var input = to.GetInput(index);
-      // if (undoable) input.CreateUndoPoint(forceNew: true);
-      // input.Target = inputNode.GetOutput(index);
+      UniLog.Log(source);
+      if (source.Source == null) continue;
+      var inputFrom = nodeMapping[source.Source.OwnerNode];
+      var syncRef = to.GetInput(source);
+      if (undoable) syncRef?.CreateUndoPoint(forceNew: true);
+      syncRef?.TrySet(inputFrom.GetOutput(source.OutputSource().Value));
     }
   }
 
@@ -92,7 +92,7 @@ public static class MapExtensions
       var sourceNode = nodeMapping[source.OwnerNode];
       var syncRef = sourceNode.GetImpulse(source);
       if (undoable) syncRef?.CreateUndoPoint(forceNew: true);
-      syncRef?.TrySet(to.GetOperation(source.Target.FindLinearOperationIndex()));
+      syncRef?.TrySet(to.GetOperation(source.TargetSource().Value));
     }
   }
 
@@ -103,7 +103,7 @@ public static class MapExtensions
       var sourceNode = nodeMapping[source.OwnerNode];
       var syncRef = sourceNode.GetInput(source);
       if (undoable) syncRef?.CreateUndoPoint(forceNew: true);
-      syncRef?.TrySet(to.GetOutput(source.Source.FindLinearOutputIndex()));
+      syncRef?.TrySet(to.GetOutput(source.OutputSource().Value));
     }
   }
 }

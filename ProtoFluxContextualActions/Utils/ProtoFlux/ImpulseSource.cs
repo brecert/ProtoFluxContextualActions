@@ -16,8 +16,21 @@ public readonly struct ImpulseSource(INode node, int elementIndex, int? elementL
     set => OwnerNode.SetImpulseTarget(ElementIndex, value);
   }
 
-  public readonly string Name => OwnerNode.GetImpulseName(ElementIndex);
+  public OperationSource? TargetSource()
+  {
+    if (Target == null) return null;
+    Target.FindOperationIndex(out var index, out var listIndex);
+    if (listIndex >= 0)
+    {
+      return new(Target.OwnerNode, index, listIndex);
+    }
+    else
+    {
+      return new(Target.OwnerNode, index, null);
+    }
+  }
 
+  public readonly string Name => OwnerNode.GetImpulseName(ElementIndex);
   public readonly ImpulseType TargetType => OwnerNode.GetImpulseType(ElementIndex);
 
   int IElementIndex.ElementIndex => ElementIndex;

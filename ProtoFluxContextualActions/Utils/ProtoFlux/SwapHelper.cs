@@ -224,6 +224,14 @@ public static class SwapHelper
     newNode.CopyDynamicInputLayout(oldNode);
     newNode.CopyDynamicOutputLayout(oldNode);
 
+    if (tryByIndex)
+    {
+      foreach (var list in newNode.InputLists()) list.EnsureSize(2);
+      foreach (var list in newNode.OutputLists()) list.EnsureSize(2);
+      foreach (var list in newNode.ImpulseLists()) list.EnsureSize(2);
+      foreach (var list in newNode.OperationLists()) list.EnsureSize(2);
+    }
+
     // while SwapNodes should handle things for us, it does not handle everything so we use our own as well;
     TransferInputs(oldNode, newNode, tryByIndex);
 
@@ -237,11 +245,11 @@ public static class SwapHelper
     TransferImpulses(oldNode, newNode, tryByIndex);
 
     // meow
-    var y = TransferExternalReferences(oldNode, newNode, query, runtime, overload);
+    var results = TransferExternalReferences(oldNode, newNode, query, runtime, overload);
 
     // meow
     TransferGlobals(oldNode, newNode, tryByIndex);
 
-    return y;
+    return results;
   }
 }
