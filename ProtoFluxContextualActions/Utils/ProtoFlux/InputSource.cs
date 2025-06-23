@@ -3,7 +3,7 @@ using ProtoFlux.Core;
 
 namespace ProtoFluxContextualActions.Utils.ProtoFlux;
 
-public readonly struct InputSource(INode owner, int index, int? listIndex = null) : IElementIndex
+public readonly struct InputElement(INode owner, int index, int? listIndex = null) : IElementIndex
 {
   public readonly INode OwnerNode = owner;
 
@@ -16,7 +16,7 @@ public readonly struct InputSource(INode owner, int index, int? listIndex = null
     set => OwnerNode.SetInputSource(ElementIndex, value);
   }
 
-  public OutputSource? OutputSource()
+  public OutputElement? OutputSource()
   {
     if (Source == null) return null;
     Source.FindOutputIndex(out var index, out var listIndex);

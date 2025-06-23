@@ -2,7 +2,7 @@ using ProtoFlux.Core;
 
 namespace ProtoFluxContextualActions.Utils.ProtoFlux;
 
-public readonly struct OperationSource(INode node, int elementIndex, int? elementListIndex = null) : IElementIndex
+public readonly struct OperationElement(INode node, int elementIndex, int? elementListIndex = null) : IElementIndex
 {
   public readonly INode OwnerNode = node;
 

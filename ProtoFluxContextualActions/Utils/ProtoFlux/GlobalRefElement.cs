@@ -3,7 +3,7 @@ using ProtoFlux.Core;
 
 namespace ProtoFluxContextualActions.Utils.ProtoFlux;
 
-public readonly struct GlobalRefSource(INode owner, int index)
+public readonly struct GlobalRefElement(INode owner, int index)
 {
   public readonly INode OwnerNode = owner;
 

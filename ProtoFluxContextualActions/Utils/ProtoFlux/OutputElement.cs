@@ -3,7 +3,7 @@ using ProtoFlux.Core;
 
 namespace ProtoFluxContextualActions.Utils.ProtoFlux;
 
-public readonly struct OutputSource(INode node, int elementIndex, int? elementListIndex = null) : IElementIndex
+public readonly struct OutputElement(INode node, int elementIndex, int? elementListIndex = null) : IElementIndex
 {
   public readonly INode OwnerNode = node;
 

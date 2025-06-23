@@ -3,7 +3,7 @@ using ProtoFlux.Core;
 
 namespace ProtoFluxContextualActions.Utils.ProtoFlux;
 
-  public readonly struct ReferenceSource(INode node, int index)
+  public readonly struct ReferenceElement(INode node, int index)
   {
     public readonly INode OwnerNode = node;
     public readonly int ReferenceIndex = index;

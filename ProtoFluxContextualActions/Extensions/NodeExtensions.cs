@@ -47,7 +47,7 @@ internal static partial class NodeExtensions
   }
 
 
-  public static IEnumerable<InputSource> AllInputSources(this INode node)
+  public static IEnumerable<InputElement> AllInputElements(this INode node)
   {
     for (int i = 0; i < node.FixedInputCount; i++)
     {
@@ -64,7 +64,7 @@ internal static partial class NodeExtensions
     }
   }
 
-  public static IEnumerable<ImpulseSource> AllImpulseSources(this INode node)
+  public static IEnumerable<ImpulseSource> AllImpulseElements(this INode node)
   {
     for (int i = 0; i < node.FixedImpulseCount; i++)
     {
@@ -81,7 +81,7 @@ internal static partial class NodeExtensions
     }
   }
 
-  public static IEnumerable<ReferenceSource> AllReferenceSources(this INode node)
+  public static IEnumerable<ReferenceElement> AllReferenceElements(this INode node)
   {
     for (int i = 0; i < node.FixedReferenceCount; i++)
     {
@@ -89,11 +89,11 @@ internal static partial class NodeExtensions
     }
   }
 
-  public static IEnumerable<GlobalRefSource> AllGlobalRefSources(this INode node)
+  public static IEnumerable<GlobalRefElement> AllGlobalRefElements(this INode node)
   {
     for (int i = 0; i < node.FixedGlobalRefCount; i++)
     {
-      yield return new GlobalRefSource(node, i);
+      yield return new GlobalRefElement(node, i);
     }
   }
 
@@ -170,7 +170,7 @@ internal static partial class NodeExtensions
     return null;
   }
 
-  public static GlobalRefSource? GetGlobalByName(this INode node, string name)
+  public static GlobalRefElement? GetGlobalByName(this INode node, string name)
   {
     var found = node.Metadata.FixedGlobalRefs.Where(g => g.Name == name).FirstOrDefault();
     if (found != null)

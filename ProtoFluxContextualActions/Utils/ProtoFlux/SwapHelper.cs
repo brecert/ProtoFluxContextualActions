@@ -8,7 +8,7 @@ public static class SwapHelper
 {
   internal static void TransferGlobals(INode from, INode to, bool tryByIndex = false)
   {
-    foreach (var fromGlobalRefSource in from.AllGlobalRefSources())
+    foreach (var fromGlobalRefSource in from.AllGlobalRefElements())
     {
       var globalByName = to.GetGlobalByName(fromGlobalRefSource.Name);
       if (globalByName.HasValue)
@@ -19,7 +19,7 @@ public static class SwapHelper
 
     if (tryByIndex)
     {
-      foreach (var globalRefSource in from.AllGlobalRefSources())
+      foreach (var globalRefSource in from.AllGlobalRefElements())
       {
         to.TrySetGlobalRefBinding(globalRefSource.RefIndex, globalRefSource.Target);
       }
@@ -28,7 +28,7 @@ public static class SwapHelper
 
   internal static IEnumerable<ConnectionResult> TransferExternalReferences<N>(INode from, INode to, NodeQueryAcceleration query, NodeRuntime<N> runtime, bool overload = true) where N : class, INode
   {
-    foreach (var source in query.GetReferencingSources(from))
+    foreach (var source in query.GetReferencingElements(from))
     {
       yield return runtime.SetReference(source.OwnerNode, source.ReferenceIndex, to, overload, allowMergingGroups: true);
     }
@@ -48,7 +48,7 @@ public static class SwapHelper
 
   internal static void TransferImpulses(INode from, INode to, bool tryByIndex = false)
   {
-    foreach (var source in from.AllImpulseSources())
+    foreach (var source in from.AllImpulseElements())
     {
       var toImpulse = to.GetImpulseByName(source.Name);
       if (toImpulse.HasValue)
@@ -80,9 +80,9 @@ public static class SwapHelper
   /// <param name="tryByIndex">if transfers should attempt to match by index instead of by name, this parameter is not stable</param>
   internal static void TransferOperations(INode from, INode to, NodeQueryAcceleration query, bool tryByIndex = false)
   {
-    var impulsingFromSources = query.GetImpulsingSources(from);
+    var impulsingFromElements = query.GetImpulsingElements(from);
 
-    foreach (var source in impulsingFromSources)
+    foreach (var source in impulsingFromElements)
     {
       var name = from.GetOperationName(source.Target.FindLinearOperationIndex());
       source.Target = to.GetOperationByName(name);
@@ -90,7 +90,7 @@ public static class SwapHelper
 
     if (tryByIndex)
     {
-      foreach (var source in impulsingFromSources)
+      foreach (var source in impulsingFromElements)
       {
         source.Target = to.GetOperation(source.Target.FindLinearOperationIndex());
       }

@@ -29,7 +29,7 @@ public static class MapExtensions
 
   public static void MapExternalReferences(this INode from, ProtoFluxNode to, Dictionary<INode, ProtoFluxNode> nodeMapping, NodeQueryAcceleration query, bool undoable)
   {
-    foreach (var source in query.GetReferencingSources(from))
+    foreach (var source in query.GetReferencingElements(from))
     {
       var referencingNode = nodeMapping[source.OwnerNode];
       var syncRef = referencingNode.GetReference(source.ReferenceIndex);
@@ -40,7 +40,7 @@ public static class MapExtensions
 
   public static void MapGlobals(this INode from, ProtoFluxNode to, bool undoable)
   {
-    foreach (var source in from.AllGlobalRefSources())
+    foreach (var source in from.AllGlobalRefElements())
     {
       var globalRef = to.GetGlobalRef(source.RefIndex);
       if (undoable) globalRef.CreateUndoPoint(forceNew: true);
@@ -50,7 +50,7 @@ public static class MapExtensions
 
   public static void MapImpulses(this INode from, ProtoFluxNode to, Dictionary<INode, ProtoFluxNode> nodeMapping, bool undoable)
   {
-    foreach (var impulse in from.AllImpulseSources())
+    foreach (var impulse in from.AllImpulseElements())
     {
       if (impulse.Target == null) continue;
       var nodeToImpulse = nodeMapping[impulse.Target.OwnerNode];
@@ -62,7 +62,7 @@ public static class MapExtensions
 
   public static void MapInputs(this INode from, ProtoFluxNode to, Dictionary<INode, ProtoFluxNode> nodeMapping, bool undoable)
   {
-    foreach (var source in from.AllInputSources())
+    foreach (var source in from.AllInputElements())
     {
       UniLog.Log(source);
       if (source.Source == null) continue;
@@ -75,7 +75,7 @@ public static class MapExtensions
 
   public static void MapInternalReferences(this INode from, ProtoFluxNode to, Dictionary<INode, ProtoFluxNode> nodeMapping, bool undoable)
   {
-    foreach (var source in from.AllReferenceSources())
+    foreach (var source in from.AllReferenceElements())
     {
       if (source.Target == null) continue;
       var target = nodeMapping[source.Target];
@@ -87,7 +87,7 @@ public static class MapExtensions
 
   public static void MapOperations(this INode from, ProtoFluxNode to, Dictionary<INode, ProtoFluxNode> nodeMapping, NodeQueryAcceleration query, bool undoable)
   {
-    foreach (var source in query.GetImpulsingSources(from))
+    foreach (var source in query.GetImpulsingElements(from))
     {
       var sourceNode = nodeMapping[source.OwnerNode];
       var syncRef = sourceNode.GetImpulse(source);
@@ -98,7 +98,7 @@ public static class MapExtensions
 
   public static void MapOutputs(this INode from, ProtoFluxNode to, Dictionary<INode, ProtoFluxNode> nodeMapping, NodeQueryAcceleration query, bool undoable)
   {
-    foreach (var source in query.GetEvaluatingSources(from))
+    foreach (var source in query.GetEvaluatingElements(from))
     {
       var sourceNode = nodeMapping[source.OwnerNode];
       var syncRef = sourceNode.GetInput(source);

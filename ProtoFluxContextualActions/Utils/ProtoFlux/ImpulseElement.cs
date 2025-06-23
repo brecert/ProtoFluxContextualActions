@@ -16,7 +16,7 @@ public readonly struct ImpulseSource(INode node, int elementIndex, int? elementL
     set => OwnerNode.SetImpulseTarget(ElementIndex, value);
   }
 
-  public OperationSource? TargetSource()
+  public OperationElement? TargetSource()
   {
     if (Target == null) return null;
     Target.FindOperationIndex(out var index, out var listIndex);
