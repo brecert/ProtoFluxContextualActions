@@ -23,6 +23,7 @@ using ProtoFluxContextualActions.Extensions;
 using static ProtoFluxContextualActions.Extensions.NodeExtensions;
 using System.Runtime.InteropServices;
 using ProtoFluxContextualActions.Utils;
+using System.Reflection;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -159,6 +160,9 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
   {
     var undoBatch = __instance.World.BeginUndoBatch($"Swap {hitNode.Name} to {menuItem.DisplayName}");
 
+    var ensureVisualMethodInfo = AccessTools.Method(typeof(ProtoFluxNodeGroup), "EnsureVisualOnRestore", [typeof(Worker)]);
+    var ensureVisualDelegate = AccessTools.MethodDelegate<Action<Worker>>(ensureVisualMethodInfo);
+
     var runtime = hitNode.NodeInstance.Runtime;
     var oldNode = hitNode.NodeInstance;
     var binding = ProtoFluxHelper.GetBindingForNode(menuItem.node);
@@ -171,8 +175,9 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
       var tryByIndex = menuItem.connectionTransferType == ConnectionTransferType.ByIndexLossy;
       var results = SwapHelper.TransferElements(oldNode, newNodeInstance, query, executionRuntime, tryByIndex, overload: true);
       var nodeMap = hitNode.Group.Nodes.ToDictionary(a => a.NodeInstance, a => a);
-      var swappedNodes = results.Where(r => r.overload?.OverloadedAnyNodes == true).SelectMany(r => r.overload?.SwappedNodes).ToList();
-
+      var swappedNodes = results.Where(r => r.overload?.OverloadedAnyNodes == true).SelectMany(r => r.overload?.SwappedNodes).Append(new(oldNode, newNodeInstance)).ToList();
+      UniLog.Log("swappedNodes.Join()");
+      UniLog.Log(swappedNodes.Join(delimiter: "\n---------------"));
 
       foreach (var (fromNode, intoNode) in swappedNodes)
       {
@@ -182,39 +187,20 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
         AssociateInstance(swappedNode, nodeMap[fromNode].Group, intoNode);
       }
 
-      var oldNodeInstance = hitNode.NodeInstance;
-      var slot = hitNode.Slot;
-
-      var newNode = (ProtoFluxNode)slot.AttachComponent(ProtoFluxHelper.GetBindingForNode(newNodeInstance.GetType()));
-      nodeMap[newNodeInstance] = newNode;
-      AssociateInstance(newNode, hitNode.Group, newNodeInstance);
-
-
       foreach (var (_, intoNode) in swappedNodes)
       {
         intoNode.MapElements(nodeMap[intoNode], nodeMap, undoable: true);
       }
 
-      newNodeInstance.MapElements(newNode, nodeMap, undoable: true);
-
+      foreach (var (fromNode, _) in swappedNodes)
       {
-        var visualSlot = hitNode.GetVisualSlot();
-        visualSlot?.Destroy();
-        visualSlot?.Parent.GetComponent<Grabbable>()?.Destroy();
-        hitNode.ClearGroupAndInstance();
-        hitNode.Destroy();
-        runtime.RemoveNode(oldNode);
-
-        foreach (var (fromNode, _) in swappedNodes)
-        {
-          var oldFromNode = nodeMap[fromNode];
-          var oldVisualSlot = oldFromNode.GetVisualSlot();
-          oldVisualSlot?.Destroy();
-          oldVisualSlot?.Parent.GetComponent<Grabbable>()?.Destroy();
-          oldFromNode.ClearGroupAndInstance();
-          oldFromNode.Destroy();
-          runtime.RemoveNode(fromNode);
-        }
+        var oldFromNode = nodeMap[fromNode];
+        var oldVisualSlot = oldFromNode.GetVisualSlot();
+        oldVisualSlot?.Destroy();
+        oldVisualSlot?.Parent.GetComponent<Grabbable>()?.Destroy();
+        oldFromNode.ClearGroupAndInstance();
+        oldFromNode.UndoableDestroy(oldVisualSlot != null ? ensureVisualDelegate : null);
+        runtime.RemoveNode(fromNode);
       }
 
       foreach (var (_, intoNode) in swappedNodes)
@@ -222,6 +208,7 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
         nodeMap[intoNode].EnsureVisual();
       }
 
+      var newNode = nodeMap[newNodeInstance];
       var dynamicLists = newNode.NodeInputLists
         .Concat(newNode.NodeOutputLists)
         .Concat(newNode.NodeImpulseLists)
@@ -230,6 +217,12 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
       foreach (var list in dynamicLists) list.EnsureElementCount(2);
 
       newNode.EnsureVisual();
+
+      foreach (var (_, intoNode) in swappedNodes)
+      {
+        var node = nodeMap[intoNode];
+        node.CreateSpawnUndoPoint(node.HasActiveVisual() ? ensureVisualDelegate : null);
+      }
     }
 
     __instance.World.EndUndoBatch();
