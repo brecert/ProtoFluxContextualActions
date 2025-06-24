@@ -9,7 +9,7 @@ namespace ProtoFluxContextualActions.Extensions;
 internal static partial class NodeQueryAccelerationExtensions
 {
   public static IEnumerable<ImpulseSource> GetImpulsingElements(this NodeQueryAcceleration query, INode node) =>
-    query.GetImpulsingNodes(node).SelectMany(n => n.AllImpulseElements().Where(i => i.Target?.OwnerNode == node));
+    query.GetImpulsingNodes(node).SelectMany((System.Func<INode, IEnumerable<ImpulseSource>>)(n => n.AllImpulseElements().Where((System.Func<ImpulseSource, bool>)(i => i.Target?.OwnerNode == node))));
 
   public static IEnumerable<InputElement> GetEvaluatingElements(this NodeQueryAcceleration query, INode node) =>
     query.GetEvaluatingNodes(node).SelectMany(n => n.AllInputElements().Where(i => i.Source?.OwnerNode == node));

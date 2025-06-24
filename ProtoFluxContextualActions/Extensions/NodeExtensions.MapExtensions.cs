@@ -56,7 +56,7 @@ public static class MapExtensions
       var nodeToImpulse = nodeMapping[impulse.Target.OwnerNode];
       var syncRef = to.GetImpulse(impulse);
       if (undoable) syncRef?.CreateUndoPoint(forceNew: true);
-      syncRef?.TrySet(nodeToImpulse.GetOperation(impulse.TargetSource().Value));
+      syncRef?.TrySet(nodeToImpulse.GetOperation(impulse.TargetElement().Value));
     }
   }
 
@@ -69,7 +69,7 @@ public static class MapExtensions
       var inputFrom = nodeMapping[source.Source.OwnerNode];
       var syncRef = to.GetInput(source);
       if (undoable) syncRef?.CreateUndoPoint(forceNew: true);
-      syncRef?.TrySet(inputFrom.GetOutput(source.OutputSource().Value));
+      syncRef?.TrySet(inputFrom.GetOutput(source.SourceElement().Value));
     }
   }
 
@@ -92,7 +92,7 @@ public static class MapExtensions
       var sourceNode = nodeMapping[source.OwnerNode];
       var syncRef = sourceNode.GetImpulse(source);
       if (undoable) syncRef?.CreateUndoPoint(forceNew: true);
-      syncRef?.TrySet(to.GetOperation(source.TargetSource().Value));
+      syncRef?.TrySet(to.GetOperation(source.TargetElement().Value));
     }
   }
 
@@ -103,7 +103,7 @@ public static class MapExtensions
       var sourceNode = nodeMapping[source.OwnerNode];
       var syncRef = sourceNode.GetInput(source);
       if (undoable) syncRef?.CreateUndoPoint(forceNew: true);
-      syncRef?.TrySet(to.GetOutput(source.OutputSource().Value));
+      syncRef?.TrySet(to.GetOutput(source.SourceElement().Value));
     }
   }
 }
