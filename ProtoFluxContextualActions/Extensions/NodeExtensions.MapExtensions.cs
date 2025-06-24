@@ -32,7 +32,7 @@ public static class MapExtensions
     foreach (var source in query.GetReferencingElements(from))
     {
       var referencingNode = nodeMapping[source.OwnerNode];
-      var syncRef = referencingNode.GetReference(source.ReferenceIndex);
+      var syncRef = referencingNode.GetReference(source.ElementIndex);
       if (undoable) syncRef.CreateUndoPoint(forceNew: true);
       syncRef.Target = to;
     }
@@ -42,7 +42,7 @@ public static class MapExtensions
   {
     foreach (var source in from.AllGlobalRefElements())
     {
-      var globalRef = to.GetGlobalRef(source.RefIndex);
+      var globalRef = to.GetGlobalRef(source.ElementIndex);
       if (undoable) globalRef.CreateUndoPoint(forceNew: true);
       globalRef.Target = (IWorldElement)to.Group.GetGlobal(source.Target.Index);
     }
@@ -64,7 +64,6 @@ public static class MapExtensions
   {
     foreach (var source in from.AllInputElements())
     {
-      UniLog.Log(source);
       if (source.Source == null) continue;
       var inputFrom = nodeMapping[source.Source.OwnerNode];
       var syncRef = to.GetInput(source);
@@ -79,7 +78,7 @@ public static class MapExtensions
     {
       if (source.Target == null) continue;
       var target = nodeMapping[source.Target];
-      var syncRef = to.GetReference(source.ReferenceIndex);
+      var syncRef = to.GetReference(source.ElementIndex);
       if (undoable) syncRef.CreateUndoPoint(forceNew: true);
       syncRef.Target = target;
     }

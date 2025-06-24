@@ -12,8 +12,13 @@ public readonly struct OperationElement(INode node, int elementIndex, int? eleme
 
   public readonly IOperation? Target
   {
-    get => OwnerNode.GetOperation(ElementIndex);
+    get => GetOperation();
   }
+
+  internal IOperation? GetOperation() =>
+      ElementListIndex is int listIndex
+        ? OwnerNode.GetOperationList(listIndex).GetOperation(ElementIndex)
+        : OwnerNode.GetOperation(ElementIndex);
 
   public readonly string Name => OwnerNode.GetImpulseName(ElementIndex);
 
@@ -24,5 +29,5 @@ public readonly struct OperationElement(INode node, int elementIndex, int? eleme
   int? IElementIndex.ElementListIndex => ElementListIndex;
 
   public override string ToString() =>
-    $"OperationSource.{TargetType} [{ElementIndex}, {ElementListIndex}] '{Name}' -> {Target}";
+    $"OperationElement.{TargetType} [{ElementIndex}, {ElementListIndex}] '{Name}' -> {Target}";
 }

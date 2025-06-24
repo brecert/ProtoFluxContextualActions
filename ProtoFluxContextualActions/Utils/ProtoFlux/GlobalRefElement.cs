@@ -3,19 +3,25 @@ using ProtoFlux.Core;
 
 namespace ProtoFluxContextualActions.Utils.ProtoFlux;
 
-public readonly struct GlobalRefElement(INode owner, int index)
+public readonly struct GlobalRefElement(INode owner, int index, int? elementListIndex = null) : IElementIndex
 {
   public readonly INode OwnerNode = owner;
 
-  public readonly int RefIndex = index;
+  public readonly int ElementIndex = index;
+
+  public readonly int? ElementListIndex = elementListIndex;
 
   public readonly Global? Target
   {
-    get => OwnerNode.GetGlobalRefBinding(RefIndex);
-    set => OwnerNode.SetGlobalRefBinding(RefIndex, value);
+    get => OwnerNode.GetGlobalRefBinding(ElementIndex);
+    set => OwnerNode.SetGlobalRefBinding(ElementIndex, value);
   }
 
-  public readonly string Name => OwnerNode.GetGlobalRefName(RefIndex);
+  public readonly string Name => OwnerNode.GetGlobalRefName(ElementIndex);
 
-  public readonly Type ValueType => OwnerNode.GetGlobalRefValueType(RefIndex);
+  public readonly Type ValueType => OwnerNode.GetGlobalRefValueType(ElementIndex);
+
+  int IElementIndex.ElementIndex => ElementIndex;
+
+  int? IElementIndex.ElementListIndex => ElementListIndex;
 }

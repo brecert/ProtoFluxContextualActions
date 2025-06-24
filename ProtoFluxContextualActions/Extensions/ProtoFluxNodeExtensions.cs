@@ -4,13 +4,13 @@ using FrooxEngine;
 using FrooxEngine.ProtoFlux;
 using ProtoFlux.Core;
 using ProtoFluxContextualActions.Utils.ProtoFlux;
-using ImpulseSource = ProtoFluxContextualActions.Utils.ProtoFlux.ImpulseSource;
+using ImpulseElement = ProtoFluxContextualActions.Utils.ProtoFlux.ImpulseElement;
 
 namespace ProtoFluxContextualActions.Extensions;
 
 internal static partial class ProtoFluxNodeExtensions
 {
-  public static ISyncRef? GetImpulse(this ProtoFluxNode node, ImpulseSource source) =>
+  public static ISyncRef? GetImpulse(this ProtoFluxNode node, ImpulseElement source) =>
     source.ElementListIndex is int listIndex
       ? node.GetImpulseList(listIndex).GetElement(source.ElementIndex) as ISyncRef
       : node.GetImpulse(source.ElementIndex);

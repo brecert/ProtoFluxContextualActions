@@ -16,6 +16,11 @@ public readonly struct OutputElement(INode node, int elementIndex, int? elementL
     get => OwnerNode.GetOutput(ElementIndex);
   }
 
+  internal IOutput? GetOutput() =>
+      ElementListIndex is int listIndex
+        ? OwnerNode.GetOutputList(listIndex).GetOutput(ElementIndex)
+        : OwnerNode.GetOutput(ElementIndex);
+
   public readonly string Name => OwnerNode.GetOutputName(ElementIndex);
 
   public readonly DataClass DataClass => OwnerNode.GetOutputTypeClass(ElementIndex);
@@ -27,5 +32,5 @@ public readonly struct OutputElement(INode node, int elementIndex, int? elementL
   int? IElementIndex.ElementListIndex => ElementListIndex;
 
   public override string ToString() =>
-    $"OperationSource.{DataClass} [{ElementIndex}, {ElementListIndex}] '{Name}' -> {Target}";
+    $"OutputElement.{DataClass} [{ElementIndex}, {ElementListIndex}] '{Name}'";
 }

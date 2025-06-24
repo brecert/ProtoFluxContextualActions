@@ -4,7 +4,7 @@ using System.Linq;
 using FrooxEngine.ProtoFlux;
 using ProtoFlux.Core;
 using ProtoFluxContextualActions.Utils.ProtoFlux;
-using ImpulseSource = ProtoFluxContextualActions.Utils.ProtoFlux.ImpulseSource;
+using ImpulseElement = ProtoFluxContextualActions.Utils.ProtoFlux.ImpulseElement;
 
 namespace ProtoFluxContextualActions.Extensions;
 
@@ -64,7 +64,7 @@ internal static partial class NodeExtensions
     }
   }
 
-  public static IEnumerable<ImpulseSource> AllImpulseElements(this INode node)
+  public static IEnumerable<ImpulseElement> AllImpulseElements(this INode node)
   {
     for (int i = 0; i < node.FixedImpulseCount; i++)
     {
@@ -129,8 +129,6 @@ internal static partial class NodeExtensions
     }
   }
 
-
-
   public static void CopyDynamicInputLayout(this INode node, INode from)
   {
     for (int i = 0; i < Math.Min(from.DynamicInputCount, node.DynamicInputCount); i++)
@@ -157,10 +155,10 @@ internal static partial class NodeExtensions
     return null;
   }
 
-  public static ImpulseSource GetImpulseByIndex(this INode node, int index) =>
+  public static ImpulseElement GetImpulseByIndex(this INode node, int index) =>
     new(node, index);
 
-  public static ImpulseSource? GetImpulseByName(this INode node, string name)
+  public static ImpulseElement? GetImpulseByName(this INode node, string name)
   {
     var found = node.Metadata.GetImpulseByName(name);
     if (found != null)

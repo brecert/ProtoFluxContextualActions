@@ -176,8 +176,6 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
       var results = SwapHelper.TransferElements(oldNode, newNodeInstance, query, executionRuntime, tryByIndex, overload: true);
       var nodeMap = hitNode.Group.Nodes.ToDictionary(a => a.NodeInstance, a => a);
       var swappedNodes = results.Where(r => r.overload?.OverloadedAnyNodes == true).SelectMany(r => r.overload?.SwappedNodes).Append(new(oldNode, newNodeInstance)).ToList();
-      UniLog.Log("swappedNodes.Join()");
-      UniLog.Log(swappedNodes.Join(delimiter: "\n---------------"));
 
       foreach (var (fromNode, intoNode) in swappedNodes)
       {

@@ -1,8 +1,9 @@
+using HarmonyLib;
 using ProtoFlux.Core;
 
 namespace ProtoFluxContextualActions.Utils.ProtoFlux;
 
-public readonly struct ImpulseSource(INode node, int elementIndex, int? elementListIndex = null) : IElementIndex
+public readonly struct ImpulseElement(INode node, int elementIndex, int? elementListIndex = null) : IElementIndex
 {
   public readonly INode OwnerNode = node;
 
@@ -12,8 +13,8 @@ public readonly struct ImpulseSource(INode node, int elementIndex, int? elementL
 
   public readonly IOperation? Target
   {
-    get => OwnerNode.GetImpulseTarget(ElementIndex);
-    set => OwnerNode.SetImpulseTarget(ElementIndex, value);
+    get => GetImpulseTarget();
+    set => SetImpulseTarget(value);
   }
 
   public OperationElement? TargetElement()
@@ -30,6 +31,24 @@ public readonly struct ImpulseSource(INode node, int elementIndex, int? elementL
     }
   }
 
+  internal IOperation? GetImpulseTarget() =>
+      ElementListIndex is int listIndex
+        ? OwnerNode.GetImpulseList(listIndex).GetImpulseTarget(ElementIndex)
+        : OwnerNode.GetImpulseTarget(ElementIndex);
+
+  internal void SetImpulseTarget(IOperation? value)
+  {
+    if (ElementListIndex is int listIndex)
+    {
+      OwnerNode.GetImpulseList(listIndex).SetImpulseTarget(ElementIndex, value);
+    }
+    else
+    {
+      OwnerNode.SetImpulseTarget(ElementIndex, value);
+    }
+  }
+
+
   public readonly string Name => OwnerNode.GetImpulseName(ElementIndex);
   public readonly ImpulseType TargetType => OwnerNode.GetImpulseType(ElementIndex);
 
@@ -38,5 +57,5 @@ public readonly struct ImpulseSource(INode node, int elementIndex, int? elementL
   int? IElementIndex.ElementListIndex => ElementListIndex;
 
   public override string ToString() =>
-    $"ImpulseSource.{TargetType} [{ElementIndex}, {ElementListIndex}] '{Name}' -> {Target}";
+    $"ImpulseElement.{TargetType} [{ElementIndex}, {ElementListIndex}] '{Name}' -> {Target}";
 }

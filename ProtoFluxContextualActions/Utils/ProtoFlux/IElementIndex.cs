@@ -18,7 +18,7 @@ public interface IElementIndex
   int? ElementListIndex { get; }
 }
 
-// public static class ElementIndexExtensions
-// {
-//   public static bool IsDynamic(this IElementIndex element) => element.ElementListIndex.HasValue;
-// }
+public static class ElementIndexExtensions
+{
+  // public static bool IsDynamic(this IElementIndex element) => element.ElementListIndex.HasValue;
+}

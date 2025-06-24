@@ -1,4 +1,5 @@
 using System;
+using Elements.Core;
 using ProtoFlux.Core;
 
 namespace ProtoFluxContextualActions.Utils.ProtoFlux;
@@ -12,8 +13,8 @@ public readonly struct InputElement(INode owner, int index, int? listIndex = nul
 
   public readonly IOutput? Source
   {
-    get => OwnerNode.GetInputSource(ElementIndex);
-    set => OwnerNode.SetInputSource(ElementIndex, value);
+    get => GetInputSource();
+    set => SetInputSource(value);
   }
 
   public OutputElement? SourceElement()
@@ -30,6 +31,22 @@ public readonly struct InputElement(INode owner, int index, int? listIndex = nul
     }
   }
 
+  internal IOutput? GetInputSource() =>
+      ElementListIndex is int listIndex
+        ? OwnerNode.GetInputList(listIndex).GetInputSource(ElementIndex)
+        : OwnerNode.GetInputSource(ElementIndex);
+
+  internal void SetInputSource(IOutput? value)
+  {
+    if (ElementListIndex is int listIndex)
+    {
+      OwnerNode.GetInputList(listIndex).SetInputSource(ElementIndex, value);
+    }
+    else
+    {
+      OwnerNode.SetInputSource(ElementIndex, value);
+    }
+  }
 
   public readonly string Name => OwnerNode.GetInputName(ElementIndex);
 
@@ -40,5 +57,5 @@ public readonly struct InputElement(INode owner, int index, int? listIndex = nul
   int? IElementIndex.ElementListIndex => ElementListIndex;
 
   public override string ToString() =>
-    $"ImpulseSource.{ValueType} [{ElementIndex}, {ElementListIndex}] '{Name}' <- {Source}";
+    $"InputElement.{ValueType} [{ElementIndex}, {ElementListIndex}] '{Name}' <- {Source}";
 }
