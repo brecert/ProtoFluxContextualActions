@@ -30,12 +30,25 @@ public static class SwapHelper
 
   internal static IEnumerable<ConnectionResult> TransferExternalReferences<N>(INode from, INode to, NodeQueryAcceleration query, NodeRuntime<N> runtime, bool overload = true) where N : class, INode
   {
-    // var outputs = to.AllReferenceElements().ToDictionary(o => o.DisplayName, o => o);
     foreach (var element in query.GetReferencingElements(from))
     {
       yield return runtime.SetReference(element.OwnerNode, element.ElementIndex, to, overload, allowMergingGroups: true);
     }
   }
+
+  internal static void TransferInternalReferences(INode from, INode to)
+  {
+    var lookup = to.AllReferenceElements().ToDictionary(o => o.DisplayName, o => o);
+
+    foreach (var element in from.AllReferenceElements())
+    {
+      if (element.Target is INode referencedNode && lookup.TryGetValue(element.DisplayName, out var toReference))
+      {
+        toReference.Target = referencedNode;
+      }
+    }
+  }
+
 
   internal static void TransferImpulses(INode from, INode to, bool tryByIndex = false)
   {
@@ -247,6 +260,8 @@ public static class SwapHelper
 
     var results = TransferExternalReferences(oldNode, newNode, query, runtime, overload);
 
+    TransferInternalReferences(newNode, oldNode);
+    
     TransferGlobals(oldNode, newNode, tryByIndex);
 
     return results;
