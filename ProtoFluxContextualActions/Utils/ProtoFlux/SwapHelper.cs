@@ -11,6 +11,8 @@ public static class SwapHelper
 {
   internal static void TransferGlobals(INode from, INode to, bool tryByIndex = false)
   {
+    // todo: type check
+    
     foreach (var fromGlobalRefSource in from.AllGlobalRefElements())
     {
       var globalByName = to.GetGlobalByName(fromGlobalRefSource.DisplayName);
@@ -33,6 +35,7 @@ public static class SwapHelper
   {
     foreach (var element in query.GetReferencingElements(from))
     {
+      // todo: type check
       yield return runtime.SetReference(element.OwnerNode, element.ElementIndex, to, overload, allowMergingGroups: true);
     }
   }
@@ -118,27 +121,27 @@ public static class SwapHelper
     var typeTuple = (from.GetType(), to.GetType());
     var outputs = to.AllOutputElements().ToDictionary(o => o.DisplayName, o => o);
 
-    foreach (var element in query.GetEvaluatingElements(from))
+    foreach (var evaluatingElement in query.GetEvaluatingElements(from))
     {
-      if (element.SourceElement() is OutputElement outputElement)
+      if (evaluatingElement.SourceElement() is OutputElement outputElement)
       {
-        if (tryByIndex && element.ValueType == outputElement.Target?.OutputType)
+        if (tryByIndex && evaluatingElement.ValueType == outputElement.Target?.OutputType)
         {
-          element.Source = to.GetOutput(outputElement.Target.FindLinearOutputIndex());
+          evaluatingElement.Source = to.GetOutput(outputElement.Target.FindLinearOutputIndex());
         }
-        if (outputs.TryGetValue(outputElement.DisplayName, out var matchedOutputElement))
+        if (outputs.TryGetValue(outputElement.DisplayName, out var matchedOutputElement) && evaluatingElement.ValueType == matchedOutputElement.Target?.OutputType)
         {
-          element.Source = matchedOutputElement.Target;
+          evaluatingElement.Source = matchedOutputElement.Target;
         }
 
         // This can be made into a lookup or something nicer later if it comes up again, this is fine for now.
         if (typeTuple == (typeof(For), typeof(RangeLoopInt)) && outputElement.DisplayName == "Iteration")
         {
-          element.Source = to.GetOutputElementByName("Current")!.Value.Target;
+          evaluatingElement.Source = to.GetOutputElementByName("Current")!.Value.Target;
         }
         else if (typeTuple == (typeof(RangeLoopInt), typeof(For)) && outputElement.DisplayName == "Current")
         {
-          element.Source = to.GetOutputElementByName("Iteration")!.Value.Target;
+          evaluatingElement.Source = to.GetOutputElementByName("Iteration")!.Value.Target;
         }
       }
     }
@@ -169,12 +172,11 @@ public static class SwapHelper
       }
     }
 
-    UniLog.Log(to.AllInputElements().Join(delimiter: "\n------------\n"));
     var lookup = to.AllInputElements().ToDictionary(e => e.DisplayName, e => e);
 
-    foreach (var inputElement in from.AllInputElements())
+    foreach (var fromElement in from.AllInputElements())
     {
-      if (inputElement.Source is IOutput output && lookup.TryGetValue(inputElement.DisplayName, out var toElement))
+      if (fromElement.Source is IOutput output && lookup.TryGetValue(fromElement.DisplayName, out var toElement) && fromElement.ValueType == toElement.ValueType)
       {
         toElement.Source = output;
       }
