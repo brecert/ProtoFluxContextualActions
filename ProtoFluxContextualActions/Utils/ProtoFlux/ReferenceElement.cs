@@ -15,7 +15,10 @@ public readonly struct ReferenceElement(INode node, int index, int? elementListI
     set => OwnerNode.SetReferenceTarget(ElementIndex, value);
   }
 
-  public readonly string Name => OwnerNode.GetReferenceName(ElementIndex);
+  public readonly string DisplayName =>
+    ElementListIndex is int listIndex
+      ? throw new NotImplementedException()
+      : OwnerNode.GetReferenceName(ElementIndex);
 
   public readonly Type TargetType => OwnerNode.GetReferenceType(ElementIndex);
 
@@ -25,6 +28,6 @@ public readonly struct ReferenceElement(INode node, int index, int? elementListI
 
   public override string ToString()
   {
-    return $"ReferenceElement.{TargetType} [{ElementIndex}] '{Name}' -> {Target}";
+    return $"ReferenceElement.{TargetType} [{ElementIndex}] '{DisplayName}' -> {Target}";
   }
 }

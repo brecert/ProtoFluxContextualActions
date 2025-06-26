@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Elements.Core;
 using ProtoFlux.Core;
 using ProtoFlux.Runtimes.Execution.Nodes;
@@ -11,7 +12,7 @@ public static class SwapHelper
   {
     foreach (var fromGlobalRefSource in from.AllGlobalRefElements())
     {
-      var globalByName = to.GetGlobalByName(fromGlobalRefSource.Name);
+      var globalByName = to.GetGlobalByName(fromGlobalRefSource.DisplayName);
       if (globalByName.HasValue)
       {
         to.TrySetGlobalRefBinding(globalByName.Value.ElementIndex, fromGlobalRefSource.Target);
@@ -29,29 +30,18 @@ public static class SwapHelper
 
   internal static IEnumerable<ConnectionResult> TransferExternalReferences<N>(INode from, INode to, NodeQueryAcceleration query, NodeRuntime<N> runtime, bool overload = true) where N : class, INode
   {
+    // var outputs = to.AllReferenceElements().ToDictionary(o => o.DisplayName, o => o);
     foreach (var element in query.GetReferencingElements(from))
     {
       yield return runtime.SetReference(element.OwnerNode, element.ElementIndex, to, overload, allowMergingGroups: true);
     }
-
-    // foreach (var referencingNode in query.GetReferencingNodes(from))
-    // {
-    //   for (int i = 0; i < referencingNode.FixedReferenceCount; i++)
-    //   {
-    //     var reference = referencingNode.GetReferenceTarget(i);
-    //     if (reference == from)
-    //     {
-    //       // referencingNode.SetReferenceTarget(i, to);
-    //     }
-    //   }
-    // }
   }
 
   internal static void TransferImpulses(INode from, INode to, bool tryByIndex = false)
   {
     foreach (var element in from.AllImpulseElements())
     {
-      var toImpulse = to.GetImpulseByName(element.Name);
+      var toImpulse = to.GetImpulseByName(element.DisplayName);
       if (toImpulse.HasValue)
       {
         var impulse = toImpulse.Value;
@@ -101,46 +91,50 @@ public static class SwapHelper
   internal static void TransferOutputs(INode from, INode to, NodeQueryAcceleration query, bool tryByIndex = false)
   {
     // resize dynamic inputs to fit before transferring the outputs
-    // foreach (var fromOutputListMeta in from.Metadata.DynamicOutputs)
-    // {
-    //   if (to.Metadata.GetOutputListByName(fromOutputListMeta.Name) is OutputListMetadata toOutputListMeta && fromOutputListMeta.TypeConstraint == toOutputListMeta.TypeConstraint)
-    //   {
-    //     var toOutputList = to.GetOutputList(toOutputListMeta.Index);
-    //     var fromOutputList = from.GetOutputList(fromOutputListMeta.Index);
+    foreach (var fromOutputListMeta in from.Metadata.DynamicOutputs)
+    {
+      if (to.Metadata.GetOutputListByName(fromOutputListMeta.Name) is OutputListMetadata toOutputListMeta && fromOutputListMeta.TypeConstraint == toOutputListMeta.TypeConstraint)
+      {
+        var toOutputList = to.GetOutputList(toOutputListMeta.Index);
+        var fromOutputList = from.GetOutputList(fromOutputListMeta.Index);
 
-    //     if (toOutputList.Count < fromOutputList.Count)
-    //     {
-    //       for (int i = 0; i < fromOutputList.Count - toOutputList.Count; i++)
-    //       {
-    //         toOutputList.AddOutput();
-    //       }
-    //     }
-    //   }
-    // }
+        if (toOutputList.Count < fromOutputList.Count)
+        {
+          for (int i = 0; i < fromOutputList.Count - toOutputList.Count; i++)
+          {
+            toOutputList.AddOutput();
+          }
+        }
+      }
+    }
+
+    var typeTuple = (from.GetType(), to.GetType());
+    var outputs = to.AllOutputElements().ToDictionary(o => o.DisplayName, o => o);
 
     foreach (var element in query.GetEvaluatingElements(from))
     {
       if (element.SourceElement() is OutputElement outputElement)
       {
-        element.Source = to.GetOutput(outputElement.Target.FindLinearOutputIndex());
+        if (tryByIndex && element.ValueType == outputElement.Target?.OutputType)
+        {
+          element.Source = to.GetOutput(outputElement.Target.FindLinearOutputIndex());
+        }
+        if (outputs.TryGetValue(outputElement.DisplayName, out var matchedOutputElement))
+        {
+          element.Source = matchedOutputElement.Target;
+        }
+
+        // This can be made into a lookup or something nicer later if it comes up again, this is fine for now.
+        if (typeTuple == (typeof(For), typeof(RangeLoopInt)) && outputElement.DisplayName == "Iteration")
+        {
+          element.Source = to.GetOutputElementByName("Current")!.Value.Target;
+        }
+        else if (typeTuple == (typeof(RangeLoopInt), typeof(For)) && outputElement.DisplayName == "Current")
+        {
+          element.Source = to.GetOutputElementByName("Iteration")!.Value.Target;
+        }
       }
     }
-
-    // if (tryByIndex || true)
-    // {
-    //   foreach (var node in query.GetEvaluatingNodes(from))
-    //   {
-    //     for (int i = 0; i < node.InputCount; i++)
-    //     {
-    //       var fromSource = node.GetInputSource(i);
-    //       if (fromSource?.OwnerNode == from)
-    //       {
-    //         var toSourceIndex = fromSource.FindLinearOutputIndex();
-    //         node.SetInputSource(i, to.GetOutput(toSourceIndex));
-    //       }
-    //     }
-    //   }
-    // }
   }
 
 
@@ -247,16 +241,12 @@ public static class SwapHelper
     // by now oldNode has lost the group while newNode has inherited it
     TransferOutputs(oldNode, newNode, query, tryByIndex);
 
-    // meow
     TransferOperations(oldNode, newNode, query, tryByIndex);
 
-    // meow
     TransferImpulses(oldNode, newNode, tryByIndex);
 
-    // meow
     var results = TransferExternalReferences(oldNode, newNode, query, runtime, overload);
 
-    // meow
     TransferGlobals(oldNode, newNode, tryByIndex);
 
     return results;

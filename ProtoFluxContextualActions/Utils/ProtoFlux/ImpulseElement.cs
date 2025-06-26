@@ -48,8 +48,11 @@ public readonly struct ImpulseElement(INode node, int elementIndex, int? element
     }
   }
 
+  public readonly string DisplayName =>
+    ElementListIndex is int listIndex
+      ? $"{OwnerNode.GetImpulseListName(listIndex)}[{ElementListIndex}]"
+      : OwnerNode.GetImpulseName(ElementIndex);
 
-  public readonly string Name => OwnerNode.GetImpulseName(ElementIndex);
   public readonly ImpulseType TargetType => OwnerNode.GetImpulseType(ElementIndex);
 
   int IElementIndex.ElementIndex => ElementIndex;
@@ -57,5 +60,5 @@ public readonly struct ImpulseElement(INode node, int elementIndex, int? element
   int? IElementIndex.ElementListIndex => ElementListIndex;
 
   public override string ToString() =>
-    $"ImpulseElement.{TargetType} [{ElementIndex}, {ElementListIndex}] '{Name}' -> {Target}";
+    $"ImpulseElement.{TargetType} [{ElementIndex}, {ElementListIndex}] '{DisplayName}' -> {Target}";
 }

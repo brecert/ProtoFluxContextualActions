@@ -48,7 +48,10 @@ public readonly struct InputElement(INode owner, int index, int? listIndex = nul
     }
   }
 
-  public readonly string Name => OwnerNode.GetInputName(ElementIndex);
+  public readonly string DisplayName =>
+    ElementListIndex is int listIndex
+      ? $"{OwnerNode.GetInputListName(listIndex)}[{ElementListIndex}]"
+      : OwnerNode.GetInputName(ElementIndex);
 
   public readonly Type ValueType => OwnerNode.GetInputType(ElementIndex);
 
@@ -57,5 +60,5 @@ public readonly struct InputElement(INode owner, int index, int? listIndex = nul
   int? IElementIndex.ElementListIndex => ElementListIndex;
 
   public override string ToString() =>
-    $"InputElement.{ValueType} [{ElementIndex}, {ElementListIndex}] '{Name}' <- {Source}";
+    $"InputElement.{ValueType} [{ElementIndex}, {ElementListIndex}] '{DisplayName}' <- {Source}";
 }

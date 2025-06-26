@@ -46,7 +46,6 @@ internal static partial class NodeExtensions
     }
   }
 
-
   public static IEnumerable<InputElement> AllInputElements(this INode node)
   {
     for (int i = 0; i < node.FixedInputCount; i++)
@@ -63,6 +62,24 @@ internal static partial class NodeExtensions
       }
     }
   }
+
+  public static IEnumerable<OutputElement> AllOutputElements(this INode node)
+  {
+    for (int i = 0; i < node.FixedOutputCount; i++)
+    {
+      yield return new(node, elementIndex: i);
+    }
+
+    for (int i = 0; i < node.DynamicOutputCount; i++)
+    {
+      var list = node.GetInputList(i);
+      for (int j = 0; j < list.Count; j++)
+      {
+        yield return new(node, elementIndex: j, elementListIndex: i);
+      }
+    }
+  }
+
 
   public static IEnumerable<ImpulseElement> AllImpulseElements(this INode node)
   {
@@ -157,6 +174,16 @@ internal static partial class NodeExtensions
 
   public static ImpulseElement GetImpulseByIndex(this INode node, int index) =>
     new(node, index);
+
+  public static OutputElement? GetOutputElementByName(this INode node, string name)
+  {
+    var found = node.Metadata.GetOutputByName(name);
+    if (found != null)
+    {
+      return new(node, found.Index);
+    }
+    return null;
+  }
 
   public static ImpulseElement? GetImpulseByName(this INode node, string name)
   {
