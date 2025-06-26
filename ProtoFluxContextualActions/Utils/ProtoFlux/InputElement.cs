@@ -50,7 +50,7 @@ public readonly struct InputElement(INode owner, int index, int? listIndex = nul
 
   public readonly string DisplayName =>
     ElementListIndex is int listIndex
-      ? $"{OwnerNode.GetInputListName(listIndex)}[{ElementListIndex}]"
+      ? $"{OwnerNode.GetInputListName(listIndex)}[{ElementIndex}]"
       : OwnerNode.GetInputName(ElementIndex);
 
   public readonly Type ValueType => OwnerNode.GetInputType(ElementIndex);

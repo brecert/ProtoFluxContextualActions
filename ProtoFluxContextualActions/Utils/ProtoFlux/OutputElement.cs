@@ -23,7 +23,7 @@ public readonly struct OutputElement(INode node, int elementIndex, int? elementL
 
   public readonly string DisplayName =>
     ElementListIndex is int listIndex
-      ? $"{OwnerNode.GetOutputListName(listIndex)}[{ElementListIndex}]"
+      ? $"{OwnerNode.GetOutputListName(listIndex)}[{ElementIndex}]"
       : OwnerNode.GetOutputName(ElementIndex);
 
   public readonly DataClass DataClass => OwnerNode.GetOutputTypeClass(ElementIndex);

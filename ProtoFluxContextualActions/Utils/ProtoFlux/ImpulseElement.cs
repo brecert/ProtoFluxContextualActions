@@ -50,7 +50,7 @@ public readonly struct ImpulseElement(INode node, int elementIndex, int? element
 
   public readonly string DisplayName =>
     ElementListIndex is int listIndex
-      ? $"{OwnerNode.GetImpulseListName(listIndex)}[{ElementListIndex}]"
+      ? $"{OwnerNode.GetImpulseListName(listIndex)}[{ElementIndex}]"
       : OwnerNode.GetImpulseName(ElementIndex);
 
   public readonly ImpulseType TargetType => OwnerNode.GetImpulseType(ElementIndex);

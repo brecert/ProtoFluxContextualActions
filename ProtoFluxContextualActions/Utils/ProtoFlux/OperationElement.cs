@@ -20,14 +20,16 @@ public readonly struct OperationElement(INode node, int elementIndex, int? eleme
         ? OwnerNode.GetOperationList(listIndex).GetOperation(ElementIndex)
         : OwnerNode.GetOperation(ElementIndex);
 
-  public readonly string Name => OwnerNode.GetImpulseName(ElementIndex);
+  public readonly string DisplayName =>
+    ElementListIndex is int listIndex
+      ? $"{OwnerNode.GetOperationName(listIndex)}[{ElementIndex}]"
+      : OwnerNode.GetInputName(ElementIndex);
 
-  public readonly ImpulseType TargetType => OwnerNode.GetImpulseType(ElementIndex);
 
   int IElementIndex.ElementIndex => ElementIndex;
 
   int? IElementIndex.ElementListIndex => ElementListIndex;
 
   public override string ToString() =>
-    $"OperationElement.{TargetType} [{ElementIndex}, {ElementListIndex}] '{Name}' -> {Target}";
+    $"OperationElement [{ElementIndex}, {ElementListIndex}] '{DisplayName}' -> {Target}";
 }

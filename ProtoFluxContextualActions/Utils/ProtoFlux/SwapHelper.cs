@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Elements.Core;
+using HarmonyLib;
 using ProtoFlux.Core;
 using ProtoFlux.Runtimes.Execution.Nodes;
 using ProtoFluxContextualActions.Extensions;
@@ -110,14 +111,7 @@ public static class SwapHelper
       {
         var toOutputList = to.GetOutputList(toOutputListMeta.Index);
         var fromOutputList = from.GetOutputList(fromOutputListMeta.Index);
-
-        if (toOutputList.Count < fromOutputList.Count)
-        {
-          for (int i = 0; i < fromOutputList.Count - toOutputList.Count; i++)
-          {
-            toOutputList.AddOutput();
-          }
-        }
+        toOutputList.EnsureSize(fromOutputList.Count);
       }
     }
 
@@ -160,14 +154,7 @@ public static class SwapHelper
       {
         var toInputList = to.GetInputList(toInputListMeta.Index);
         var fromInputList = from.GetInputList(fromInputListMeta.Index);
-
-        if (toInputList.Count < fromInputList.Count)
-        {
-          for (int i = 0; i < fromInputList.Count - toInputList.Count; i++)
-          {
-            toInputList.AddInput(null);
-          }
-        }
+        toInputList.EnsureSize(fromInputList.Count);
       }
     }
 
@@ -182,34 +169,14 @@ public static class SwapHelper
       }
     }
 
-    foreach (var fromInputMeta in from.Metadata.FixedInputs)
-    {
-      if (to.Metadata.GetInputByName(fromInputMeta.Name) is InputMetadata toInputMeta)
-      {
-        if (fromInputMeta.InputType != toInputMeta.InputType) continue;
-        if (from.GetInputSource(fromInputMeta.Index) is IOutput output)
-        {
-          to.SetInputSource(new ElementRef(toInputMeta.Index), output);
-        }
-      }
-    }
+    UniLog.Log(to.AllInputElements().Join(delimiter: "\n------------\n"));
+    var lookup = to.AllInputElements().ToDictionary(e => e.DisplayName, e => e);
 
-    foreach (var fromInputListMeta in from.Metadata.DynamicInputs)
+    foreach (var inputElement in from.AllInputElements())
     {
-      if (to.Metadata.GetInputListByName(fromInputListMeta.Name) is InputListMetadata toInputListMeta)
+      if (inputElement.Source is IOutput output && lookup.TryGetValue(inputElement.DisplayName, out var toElement))
       {
-        if (fromInputListMeta.TypeConstraint != toInputListMeta.TypeConstraint) continue;
-
-        var toInputList = to.GetInputList(toInputListMeta.Index);
-        var fromInputList = from.GetInputList(fromInputListMeta.Index);
-        for (int i = 0; i < fromInputList.Count; i++)
-        {
-          if (fromInputList.GetInputSource(i) is IOutput output)
-          {
-            toInputList.SetInputSource(i, output);
-          }
-        }
-        fromInputList.Clear();
+        toElement.Source = output;
       }
     }
 
@@ -261,7 +228,7 @@ public static class SwapHelper
     var results = TransferExternalReferences(oldNode, newNode, query, runtime, overload);
 
     TransferInternalReferences(newNode, oldNode);
-    
+
     TransferGlobals(oldNode, newNode, tryByIndex);
 
     return results;
