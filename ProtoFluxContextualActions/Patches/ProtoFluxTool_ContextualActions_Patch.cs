@@ -419,9 +419,6 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             yield return new MenuItem(typeof(GetSlot));
         }
 
-        UniLog.Log(nodeType);
-        UniLog.Log(typeof(IndexOfFirstValueMatch<>).IsAssignableFrom(nodeType));
-
         if (outputType == typeof(int) && (
             nodeType == typeof(ImpulseDemultiplexer)
             || TypeUtils.MatchesType(typeof(IndexOfFirstValueMatch<>), nodeType)
