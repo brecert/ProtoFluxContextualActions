@@ -24,6 +24,8 @@ using static ProtoFluxContextualActions.Extensions.NodeExtensions;
 using System.Runtime.InteropServices;
 using ProtoFluxContextualActions.Utils;
 using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
+using ProtoFluxContextualActions.Utils.ProtoFlux;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -75,7 +77,7 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
   // TODO: configurable
   const double DoublePressTime = 0.45;
 
-  private static readonly ConditionalWeakTable<ProtoFluxTool, ProtoFluxToolData> additionalData = new();
+  private static readonly ConditionalWeakTable<ProtoFluxTool, ProtoFluxToolData> additionalData = [];
 
   internal static bool Prefix(ProtoFluxTool __instance, SyncRef<ProtoFluxElementProxy> ____currentProxy)
   {
@@ -634,7 +636,7 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
   }
 
   // Utils
-  static bool TryGetGenericTypeDefinition(this Type type, out Type? genericTypeDefinition)
+  static bool TryGetGenericTypeDefinition(this Type type, [NotNullWhen(true)] out Type? genericTypeDefinition)
   {
     if (type.IsGenericType)
     {
@@ -651,14 +653,14 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     return protoFluxNodes.Values
       .Select(t => (name: t.GetNiceTypeName(), type: t))
       .Where(a => a.name.StartsWith(startingWith) && !a.type.IsGenericType)
-      .Select(a => (a.type, ParseUnderscoreGenerics(world, a.name.Substring(startingWith.Length))))
+      .Select(a => (a.type, ParseUnderscoreGenerics(world, a.name[startingWith.Length..])))
       // skip non matching
       .Where(a => a.Item2.All(t => t != null));
   }
 
   class ArrayComparer<T> : EqualityComparer<T[]>
   {
-    public override bool Equals(T[] x, T[] y) =>
+    public override bool Equals(T[]? x, T[]? y) =>
       StructuralComparisons.StructuralEqualityComparer.Equals(x, y);
 
     public override int GetHashCode(T[] obj) =>

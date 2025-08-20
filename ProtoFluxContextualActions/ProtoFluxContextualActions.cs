@@ -19,10 +19,10 @@ public class ProtoFluxContextualActions : ResoniteMod
 {
   private static Assembly ModAssembly => typeof(ProtoFluxContextualActions).Assembly;
 
-  public override string Name => ModAssembly.GetCustomAttribute<AssemblyTitleAttribute>().Title;
-  public override string Author => ModAssembly.GetCustomAttribute<AssemblyCompanyAttribute>().Company;
-  public override string Version => ModAssembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
-  public override string Link => ModAssembly.GetCustomAttributes<AssemblyMetadataAttribute>().First(meta => meta.Key == "RepositoryUrl").Value;
+  public override string Name => ModAssembly.GetCustomAttribute<AssemblyTitleAttribute>()!.Title;
+  public override string Author => ModAssembly.GetCustomAttribute<AssemblyCompanyAttribute>()!.Company;
+  public override string Version => ModAssembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion;
+  public override string Link => ModAssembly.GetCustomAttributes<AssemblyMetadataAttribute>().First(meta => meta.Key == "RepositoryUrl").Value!;
 
   internal static string HarmonyId => $"dev.bree.{ModAssembly.GetName()}";
 
@@ -41,7 +41,7 @@ public class ProtoFluxContextualActions : ResoniteMod
     var categoryKeys = types
       .Select(t => (patchCategory: t.GetCustomAttribute<HarmonyPatchCategory>(), tweakCategory: t.GetCustomAttribute<TweakCategoryAttribute>()))
       .Where(t => t.patchCategory != null && t.tweakCategory != null)
-      .Select(t => new ModConfigurationKey<bool>(t.patchCategory.info.category, t.tweakCategory.Description, computeDefault: () => t.tweakCategory.DefaultValue));
+      .Select(t => new ModConfigurationKey<bool>(t.patchCategory!.info.category, t.tweakCategory!.Description, computeDefault: () => t.tweakCategory.DefaultValue));
 
     foreach (var key in categoryKeys)
     {
@@ -77,11 +77,11 @@ public class ProtoFluxContextualActions : ResoniteMod
 #endif
   }
 
-  public void InitCategories()
+  public static void InitCategories()
   {
     foreach (var (category, key) in patchCategoryKeys)
     {
-      UpdatePatch(category, config.GetValue(key));
+      UpdatePatch(category, config!.GetValue(key));
     }
   }
 

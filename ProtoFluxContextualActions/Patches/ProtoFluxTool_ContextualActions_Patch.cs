@@ -32,6 +32,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Worlds;
 using Elements.Quantity;
 using ProtoFlux.Runtimes.Execution.Nodes.Math.Quantity;
 using ProtoFlux.Runtimes.Execution.Nodes.Utility;
+using System.Diagnostics.CodeAnalysis;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -613,13 +614,13 @@ internal static class ProtoFluxTool_ContextualActions_Patch
         // TODO: SH1<T>, SH2<T>, SH3<T>, SH4<T>
     };
 
-    internal static bool TryGetUnpackNode(Type nodeType, out Type[]? value)
+    internal static bool TryGetUnpackNode(Type nodeType, [NotNullWhen(true)] out Type[]? value)
     {
-        if (ReflectionHelper.IsNullable(nodeType) && Nullable.GetUnderlyingType(nodeType).IsUnmanaged())
+        if (ReflectionHelper.IsNullable(nodeType) && Nullable.GetUnderlyingType(nodeType).IsUnmanaged() && Nullable.GetUnderlyingType(nodeType) is var underlyingType and not null)
         {
             try
             {
-                value = [typeof(UnpackNullable<>).MakeGenericType(Nullable.GetUnderlyingType(nodeType))];
+                value = [typeof(UnpackNullable<>).MakeGenericType(underlyingType)];
                 return true;
             }
             catch
@@ -678,13 +679,13 @@ internal static class ProtoFluxTool_ContextualActions_Patch
         {typeof(ZitaParameters), [typeof(ConstructZitaParameters)]},
     };
 
-    internal static bool TryGetPackNode(Type nodeType, out Type[] value)
+    internal static bool TryGetPackNode(Type nodeType, [NotNullWhen(true)] out Type[]? value)
     {
-        if (ReflectionHelper.IsNullable(nodeType) && Nullable.GetUnderlyingType(nodeType).IsUnmanaged())
+        if (ReflectionHelper.IsNullable(nodeType) && Nullable.GetUnderlyingType(nodeType).IsUnmanaged() && Nullable.GetUnderlyingType(nodeType) is Type underlyingType)
         {
             try
             {
-                value = [typeof(PackNullable<>).MakeGenericType(Nullable.GetUnderlyingType(nodeType))];
+                value = [typeof(PackNullable<>).MakeGenericType(underlyingType)];
                 return true;
             }
             catch
@@ -709,8 +710,8 @@ internal static class ProtoFluxTool_ContextualActions_Patch
         {typeof(doubleQ), typeof(InverseRotation_doubleQ)},
     };
 
-    internal static bool TryGetInverseNode(Type valueType, out Type value) => InverseNodeMapping.TryGetValue(valueType, out value);
-
+    internal static bool TryGetInverseNode(Type valueType, [NotNullWhen(true)] out Type? value) =>
+        InverseNodeMapping.TryGetValue(valueType, out value);
 
     internal static readonly Dictionary<Type, Type> TransposeNodeMapping = new()
     {
@@ -722,7 +723,8 @@ internal static class ProtoFluxTool_ContextualActions_Patch
         {typeof(double4x4), typeof(Transpose_Double4x4)},
     };
 
-    internal static bool TryGetTransposeNode(Type valueType, out Type value) => TransposeNodeMapping.TryGetValue(valueType, out value);
+    internal static bool TryGetTransposeNode(Type valueType, [NotNullWhen(true)] out Type? value) =>
+        TransposeNodeMapping.TryGetValue(valueType, out value);
 
     private static bool IsIterationNode(Type nodeType) =>
         nodeType == typeof(For)

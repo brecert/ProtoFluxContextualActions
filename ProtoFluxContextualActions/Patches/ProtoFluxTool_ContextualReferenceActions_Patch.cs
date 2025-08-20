@@ -75,7 +75,7 @@ internal static class ProtoFluxTool_ContextualReferenceActions_Patch
             {
               var globalSyncRef = n.GetGlobalRef(0);
               var globalType = globalSyncRef.TargetType.GenericTypeArguments[0];
-              var globalRef = n.Slot.AttachComponent(typeof(GlobalReference<>).MakeGenericType(globalType)) as IGlobalValueProxy;
+              var globalRef = (IGlobalValueProxy)n.Slot.AttachComponent(typeof(GlobalReference<>).MakeGenericType(globalType));
               globalSyncRef.TrySet(globalRef);
               globalRef.TrySetValue(grabbedReference);
             }

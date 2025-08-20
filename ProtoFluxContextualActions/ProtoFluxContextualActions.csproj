@@ -9,7 +9,7 @@
 		<RepositoryUrl>https://github.com/brecert/ProtoFluxContextualActions</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>Resonite,Mod,ResoniteModLoader,Tweaks,ProtoFlux</PackageTags>
-		<Version>0.0.6.0</Version>
+		<Version>0.0.7.0</Version>
 		<PackageReadmeFile>../README.md</PackageReadmeFile>
 	</PropertyGroup>
 
@@ -28,7 +28,7 @@
     </PropertyGroup>
     
     <PropertyGroup>
-        <TargetFramework>net48</TargetFramework>
+        <TargetFramework>net9</TargetFramework>
         <ResoniteProjectType>mod</ResoniteProjectType>
         <ResoniteTarget>client</ResoniteTarget>
         <ResoniteInstallOnBuild>true</ResoniteInstallOnBuild>
@@ -57,8 +57,7 @@
     </ItemGroup>
 
     <PropertyGroup>
-        <_ResoniteAssemblyPath>$(ResonitePath)/Resonite_Data/Managed</_ResoniteAssemblyPath>
-        <_ResoniteAssemblyPath Condition="'$(ResoniteTarget)' == 'headless'">$(ResonitePath)</_ResoniteAssemblyPath>
+        <_ResoniteAssemblyPath>$(ResonitePath)</_ResoniteAssemblyPath>
         <ReferencePath>$(_ResoniteAssemblyPath);$(ReferencePath)</ReferencePath>
     </PropertyGroup>
 

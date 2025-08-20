@@ -5,14 +5,15 @@ using HarmonyLib;
 using ProtoFlux.Core;
 using ProtoFlux.Runtimes.Execution.Nodes;
 using ProtoFluxContextualActions.Extensions;
-using ProtoFluxContextualActions.Utils.ProtoFlux;
+
+namespace ProtoFluxContextualActions.Utils.ProtoFlux;
 
 public static class SwapHelper
 {
   internal static void TransferGlobals(INode from, INode to, bool tryByIndex = false)
   {
     // todo: type check
-    
+
     foreach (var fromGlobalRefSource in from.AllGlobalRefElements())
     {
       var globalByName = to.GetGlobalByName(fromGlobalRefSource.DisplayName);

@@ -1,7 +1,6 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using Elements.Core;
-using HarmonyLib;
 
 namespace ProtoFluxContextualActions.Utils;
 
@@ -17,7 +16,7 @@ static class TypeUtils
     return false;
   }
 
-  public static bool MatchInterface(Type type, Type interfaceType, /* [NotNullWhen(true)] */ out Type? matchedType)
+  public static bool MatchInterface(Type type, Type interfaceType, [NotNullWhen(true)] out Type? matchedType)
   {
     if (type == interfaceType)
     {
