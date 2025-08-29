@@ -462,8 +462,8 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
 
     var binaryOperationsMultiSwapMap = binaryOperationsGroup.Keys.Zip(binaryOperationsMultiGroup.Keys).ToBiDictionary();
 
-    var avgGroup = MapPsuedoGenericsToGenericTypes(__instance.World, "AVG_")
-      .Concat(MapPsuedoGenericsToGenericTypes(__instance.World, "AVGMulti_"))
+    var avgGroup = MapPsuedoGenericsToGenericTypes(__instance.World, "Avg_")
+      .Concat(MapPsuedoGenericsToGenericTypes(__instance.World, "AvgMulti_"))
       .ToDictionary((a) => protoFluxBindingMapping[a.Node], (a) => a.Types);
 
     if (GetDirectionGroup.Contains(nodeType))
@@ -581,7 +581,11 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
         var matchingNodes = avgGroup.Where(a => genericTypes.SequenceEqual(a.Value)).Select(a => a.Key);
         foreach (var match in matchingNodes)
         {
-          yield return new MenuItem(match);
+          yield return new MenuItem(
+            node: match,
+            name: match.GetNiceTypeName().Contains("Multi_") ? $"{NodeMetadataHelper.GetMetadata(match).Name} (Multi)" : null,
+            connectionTransferType: ConnectionTransferType.ByIndexLossy
+          );
         }
       }
     }
