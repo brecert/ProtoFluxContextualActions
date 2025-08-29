@@ -36,7 +36,6 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <ImplicitUsings>disable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>12</LangVersion>
     </PropertyGroup>
@@ -52,20 +51,16 @@
         <ResoniteReference Include="SharpPipe" />
     </ItemGroup>
 
-    <ItemGroup>
-        <PackageReference Include="StrictEmit" Version="2.9.0" />
-    </ItemGroup>
-
     <PropertyGroup>
-        <_ResoniteAssemblyPath>$(ResonitePath)</_ResoniteAssemblyPath>
-        <ReferencePath>$(_ResoniteAssemblyPath);$(ReferencePath)</ReferencePath>
+        <ResoniteAssemblyPath>$(ResonitePath)</ResoniteAssemblyPath>
+        <ReferencePath>$(ResoniteAssemblyPath);$(ReferencePath)</ReferencePath>
     </PropertyGroup>
 
     <ItemGroup>
         <Reference Include="@(ResoniteReference)">
             <Name>%(ResoniteReference.Identity)</Name>
-            <HintPath Condition="'%(HintPath)' == '' And Exists('$(_ResoniteAssemblyPath)/%(Identity).dll')">$(_ResoniteAssemblyPath)/%(Identity).dll</HintPath>
-            <HintPath Condition="'%(HintPath)' == '' And Exists('$(_ResoniteAssemblyPath)/%(Identity).exe')">$(_ResoniteAssemblyPath)/%(Identity).exe</HintPath>
+            <HintPath Condition="'%(HintPath)' == '' And Exists('$(ResoniteAssemblyPath)/%(Identity).dll')">$(ResoniteAssemblyPath)/%(Identity).dll</HintPath>
+            <HintPath Condition="'%(HintPath)' == '' And Exists('$(ResoniteAssemblyPath)/%(Identity).exe')">$(ResoniteAssemblyPath)/%(Identity).exe</HintPath>
         </Reference>
     </ItemGroup>
 

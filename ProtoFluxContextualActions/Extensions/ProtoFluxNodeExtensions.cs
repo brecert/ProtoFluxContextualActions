@@ -1,8 +1,5 @@
-using System.Collections.Generic;
-using System.Linq;
 using FrooxEngine;
 using FrooxEngine.ProtoFlux;
-using ProtoFlux.Core;
 using ProtoFluxContextualActions.Utils.ProtoFlux;
 using ImpulseElement = ProtoFluxContextualActions.Utils.ProtoFlux.ImpulseElement;
 
