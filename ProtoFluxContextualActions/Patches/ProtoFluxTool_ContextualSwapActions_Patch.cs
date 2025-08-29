@@ -360,6 +360,11 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     typeof(ValueRepeat<>),
   ];
 
+  static readonly HashSet<Type> ArithmeticNegateGroup = [
+    typeof(ValueNegate<>),
+    typeof(ValuePlusMinus<>),
+  ];
+
   static readonly HashSet<Type> ComparisonBinaryOperatorGroup = [
     typeof(ValueLessThan<>),
     typeof(ValueLessOrEqual<>),
@@ -704,6 +709,23 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
           yield return RepeatItem(typeof(ValueMod<>).MakeGenericType(opType));
         }
       }
+
+      if (ArithmeticNegateGroup.Contains(genericType))
+      {
+        var opType = nodeType.GenericTypeArguments[0];
+        var coder = Traverse.Create(typeof(Coder<>).MakeGenericType(opType));
+
+        if (coder.Property<bool>("SupportsNegate").Value)
+        {
+          yield return new(typeof(ValueNegate<>).MakeGenericType(opType));
+        }
+
+        if (coder.Property<bool>("SupportsAddSub").Value)
+        {
+          yield return new(typeof(ValuePlusMinus<>).MakeGenericType(opType));
+        }
+      }
+
 
       if (ComparisonBinaryOperatorGroup.Contains(genericType))
       {

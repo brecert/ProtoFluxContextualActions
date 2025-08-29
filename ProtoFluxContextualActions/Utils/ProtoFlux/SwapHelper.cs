@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Elements.Core;
-using HarmonyLib;
+using ProtoFlux.Runtimes.Execution.Nodes.Operators;
 using ProtoFlux.Core;
 using ProtoFlux.Runtimes.Execution.Nodes;
 using ProtoFluxContextualActions.Extensions;
@@ -119,7 +119,7 @@ public static class SwapHelper
       }
     }
 
-    var typeTuple = (from.GetType(), to.GetType());
+    var typeTuple = (from.GetType().GetGenericTypeDefinitionOrSameType(), to.GetType().GetGenericTypeDefinitionOrSameType());
     var outputs = to.AllOutputElements().ToDictionary(o => o.DisplayName, o => o);
 
     foreach (var evaluatingElement in query.GetEvaluatingElements(from))
@@ -143,6 +143,15 @@ public static class SwapHelper
         else if (typeTuple == (typeof(RangeLoopInt), typeof(For)) && outputElement.DisplayName == "Current")
         {
           evaluatingElement.Source = to.GetOutputElementByName("Iteration")!.Value.Target;
+        }
+        // This can be made into a lookup or something nicer later if it comes up again, this is fine for now.
+        else if (typeTuple == (typeof(ValueNegate<>), typeof(ValuePlusMinus<>)) && outputElement.DisplayName == "*")
+        {
+          evaluatingElement.Source = to.GetOutputElementByName("Minus")!.Value.Target;
+        }
+        else if (typeTuple == (typeof(ValuePlusMinus<>), typeof(ValueNegate<>)) && outputElement.DisplayName == "Minus")
+        {
+          evaluatingElement.Source = to.GetOutputElementByName("*")!.Value.Target;
         }
       }
     }
@@ -183,8 +192,10 @@ public static class SwapHelper
       }
     }
 
+
     // This can be made into a lookup or something nicer later if it comes up again, this is fine for now.
-    var typeTuple = (from.GetType(), to.GetType());
+    var typeTuple = (from.GetType().GetGenericTypeDefinitionOrSameType(), to.GetType().GetGenericTypeDefinitionOrSameType());
+
     if (typeTuple == (typeof(For), typeof(RangeLoopInt)))
     {
       var countIndex = from.Metadata.GetInputByName("Count").Index;
@@ -194,10 +205,28 @@ public static class SwapHelper
         to.SetInputSource(endIndex, output);
       }
     }
-    if (typeTuple == (typeof(RangeLoopInt), typeof(For)))
+    else if (typeTuple == (typeof(RangeLoopInt), typeof(For)))
     {
       var endIndex = from.Metadata.GetInputByName("End").Index;
       var countIndex = to.Metadata.GetInputByName("Count").Index;
+      if (from.GetInputSource(endIndex) is IOutput output)
+      {
+        to.SetInputSource(countIndex, output);
+      }
+    }
+    else if (typeTuple == (typeof(ValueNegate<>), typeof(ValuePlusMinus<>)))
+    {
+      var countIndex = from.Metadata.GetInputByName("N").Index;
+      var endIndex = to.Metadata.GetInputByName("Offset").Index;
+      if (from.GetInputSource(countIndex) is IOutput output)
+      {
+        to.SetInputSource(endIndex, output);
+      }
+    }
+    else if (typeTuple == (typeof(ValuePlusMinus<>), typeof(ValueNegate<>)))
+    {
+      var endIndex = from.Metadata.GetInputByName("Offset").Index;
+      var countIndex = to.Metadata.GetInputByName("N").Index;
       if (from.GetInputSource(endIndex) is IOutput output)
       {
         to.SetInputSource(countIndex, output);
