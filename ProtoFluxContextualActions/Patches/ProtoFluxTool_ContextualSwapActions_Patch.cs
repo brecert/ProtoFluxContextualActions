@@ -23,6 +23,7 @@ using ProtoFluxContextualActions.Extensions;
 using ProtoFluxContextualActions.Utils;
 using System.Diagnostics.CodeAnalysis;
 using ProtoFluxContextualActions.Utils.ProtoFlux;
+using System.Collections.Frozen;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -319,7 +320,8 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     typeof(EaseOutSineDouble),
   ];
 
-  static readonly BiDictionary<Type, Type> MultiInputMappingGroup = new() {
+  static readonly BiDictionary<Type, Type> MultiInputMappingGroup = new()
+  {
     {typeof(ValueAdd<>), typeof(ValueAddMulti<>)},
     {typeof(ValueSub<>), typeof(ValueSubMulti<>)},
     {typeof(ValueMul<>), typeof(ValueMulMulti<>)},
@@ -430,6 +432,40 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     var nodeType = node.GetType();
     var componentType = nodeComponent.GetType();
 
+    IEnumerable<IEnumerable<(Type Node, IEnumerable<Type> Types)>> binaryOperations = [
+      [.. MapPsuedoGenericsToGenericTypes(__instance.World, "AND_")],
+      [.. MapPsuedoGenericsToGenericTypes(__instance.World, "OR_")],
+      [.. MapPsuedoGenericsToGenericTypes(__instance.World, "NAND_")],
+      [.. MapPsuedoGenericsToGenericTypes(__instance.World, "NOR_")],
+      [.. MapPsuedoGenericsToGenericTypes(__instance.World, "XNOR_")],
+      [.. MapPsuedoGenericsToGenericTypes(__instance.World, "XOR_")]
+    ];
+
+    IEnumerable<IEnumerable<(Type Node, IEnumerable<Type> Types)>> binaryOperationsMulti = [
+      [.. MapPsuedoGenericsToGenericTypes(__instance.World, "AND_Multi_")],
+      [.. MapPsuedoGenericsToGenericTypes(__instance.World, "OR_Multi_")],
+      [.. MapPsuedoGenericsToGenericTypes(__instance.World, "NAND_Multi_")],
+      [.. MapPsuedoGenericsToGenericTypes(__instance.World, "NOR_Multi_")],
+      [.. MapPsuedoGenericsToGenericTypes(__instance.World, "XNOR_Multi_")],
+      [.. MapPsuedoGenericsToGenericTypes(__instance.World, "XOR_Multi_")]
+    ];
+
+    // todo: cache per-world?
+    // realistically with current resonite it doesn't matter and only needs to be done once.
+    var binaryOperationsGroup = binaryOperations
+        .SelectMany(a => a)
+        .ToDictionary((a) => protoFluxBindingMapping[a.Node], (a) => a.Types.ToArray());
+
+    var binaryOperationsMultiGroup = binaryOperationsMulti
+        .SelectMany(a => a)
+        .ToDictionary((a) => protoFluxBindingMapping[a.Node], (a) => a.Types.ToArray());
+
+    var binaryOperationsMultiSwapMap = binaryOperationsGroup.Keys.Zip(binaryOperationsMultiGroup.Keys).ToBiDictionary();
+
+    var avgGroup = MapPsuedoGenericsToGenericTypes(__instance.World, "AVG_")
+      .Concat(MapPsuedoGenericsToGenericTypes(__instance.World, "AVGMulti_"))
+      .ToDictionary((a) => protoFluxBindingMapping[a.Node], (a) => a.Types);
+
     if (GetDirectionGroup.Contains(nodeType))
     {
       foreach (var match in GetDirectionGroup)
@@ -496,20 +532,53 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     }
 
     {
-      // todo: cache per-world?
-      // realistically with current resonite it doesn't matter and only needs to be done once.
-      var binaryOperations =
-        MapPsuedoGenericsToGenericTypes(__instance.World, "AND_")
-        .Concat(MapPsuedoGenericsToGenericTypes(__instance.World, "OR_"))
-        .Concat(MapPsuedoGenericsToGenericTypes(__instance.World, "NAND_"))
-        .Concat(MapPsuedoGenericsToGenericTypes(__instance.World, "NOR_"))
-        .Concat(MapPsuedoGenericsToGenericTypes(__instance.World, "XNOR_"))
-        .Concat(MapPsuedoGenericsToGenericTypes(__instance.World, "XOR_"))
-        .ToDictionary((a) => protoFluxBindingMapping[a.Node], (a) => a.Types);
-
-      if (binaryOperations.TryGetValue(nodeType, out var genericTypes))
+      if (binaryOperationsGroup.TryGetValue(nodeType, out var genericTypes))
       {
-        var matchingNodes = binaryOperations.Where(a => genericTypes.SequenceEqual(a.Value)).Select(a => a.Key);
+        var matchingNodes = binaryOperationsGroup.Where(a => genericTypes.SequenceEqual(a.Value)).Select(a => a.Key);
+        foreach (var match in matchingNodes)
+        {
+          yield return new MenuItem(match);
+        }
+      }
+    }
+
+    {
+      if (binaryOperationsMultiGroup.TryGetValue(nodeType, out var genericTypes))
+      {
+        var matchingNodes = binaryOperationsMultiGroup.Where(a => genericTypes.SequenceEqual(a.Value)).Select(a => a.Key);
+        foreach (var match in matchingNodes)
+        {
+          yield return new MenuItem(
+            node: match,
+            name: $"{NodeMetadataHelper.GetMetadata(match).Name} (Multi)",
+            connectionTransferType: ConnectionTransferType.ByIndexLossy
+          );
+        }
+      }
+    }
+
+    {
+      if (binaryOperationsMultiSwapMap.TryGetFirst(nodeType, out var matched))
+      {
+        yield return new MenuItem(
+          node: matched,
+          connectionTransferType: ConnectionTransferType.ByIndexLossy
+        );
+      }
+      else if (binaryOperationsMultiSwapMap.TryGetSecond(nodeType, out matched))
+      {
+        yield return new MenuItem(
+          node: matched,
+          name: $"{NodeMetadataHelper.GetMetadata(matched).Name} (Multi)",
+          connectionTransferType: ConnectionTransferType.ByIndexLossy
+        );
+      }
+    }
+
+    {
+      if (avgGroup.TryGetValue(nodeType, out var genericTypes))
+      {
+        var matchingNodes = avgGroup.Where(a => genericTypes.SequenceEqual(a.Value)).Select(a => a.Key);
         foreach (var match in matchingNodes)
         {
           yield return new MenuItem(match);
@@ -632,6 +701,8 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     }
   }
 
+  #region Utils
+
   // Utils
   static bool TryGetGenericTypeDefinition(this Type type, [NotNullWhen(true)] out Type? genericTypeDefinition)
   {
@@ -704,6 +775,7 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
   [MethodImpl(MethodImplOptions.NoInlining)]
   internal static void ClearGroupAndInstance(this ProtoFluxNode instance) => throw new NotImplementedException();
 
+  #endregion
 
   // [HarmonyReversePatch]
   // [HarmonyPatch(typeof(ProtoFluxNode), "ReverseMapElements")]
