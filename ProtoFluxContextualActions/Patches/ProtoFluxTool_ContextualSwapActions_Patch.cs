@@ -355,6 +355,10 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     typeof(ValueDivMulti<>),
   ];
 
+  static readonly HashSet<Type> ArithmeticRepeatGroup = [
+    typeof(ValueMod<>),
+    typeof(ValueRepeat<>),
+  ];
 
   static readonly HashSet<Type> ComparisonBinaryOperatorGroup = [
     typeof(ValueLessThan<>),
@@ -677,6 +681,27 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
         if (coder.Property<bool>("SupportsDiv").Value)
         {
           yield return MultiMenuItem(typeof(ValueDivMulti<>).MakeGenericType(opType));
+        }
+      }
+
+      if (ArithmeticRepeatGroup.Contains(genericType))
+      {
+        var opType = nodeType.GenericTypeArguments[0];
+        var coder = Traverse.Create(typeof(Coder<>).MakeGenericType(opType));
+
+        static MenuItem RepeatItem(Type nodeType) => new(
+          node: nodeType,
+          connectionTransferType: ConnectionTransferType.ByIndexLossy
+        );
+
+        if (coder.Property<bool>("SupportsRepeat").Value)
+        {
+          yield return RepeatItem(typeof(ValueRepeat<>).MakeGenericType(opType));
+        }
+
+        if (coder.Property<bool>("SupportsMod").Value)
+        {
+          yield return RepeatItem(typeof(ValueMod<>).MakeGenericType(opType));
         }
       }
 
