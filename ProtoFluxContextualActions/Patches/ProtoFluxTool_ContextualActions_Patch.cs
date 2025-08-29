@@ -33,6 +33,8 @@ using Elements.Quantity;
 using ProtoFlux.Runtimes.Execution.Nodes.Math.Quantity;
 using ProtoFlux.Runtimes.Execution.Nodes.Utility;
 using System.Diagnostics.CodeAnalysis;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Rendering;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Assets;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -227,14 +229,19 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             yield return new MenuItem(typeof(SetLocalTransform));
         }
 
-        switch (impulseProxy.ImpulseType.Value)
+        else if (nodeType == typeof(RenderToTextureAsset))
         {
-            case ImpulseType.AsyncCall:
-            case ImpulseType.AsyncResumption:
-                yield return new MenuItem(typeof(AsyncFor));
-                yield return new MenuItem(typeof(AsyncSequence));
-                break;
+            yield return new MenuItem(typeof(AttachTexture2D));
         }
+
+        switch (impulseProxy.ImpulseType.Value)
+            {
+                case ImpulseType.AsyncCall:
+                case ImpulseType.AsyncResumption:
+                    yield return new MenuItem(typeof(AsyncFor));
+                    yield return new MenuItem(typeof(AsyncSequence));
+                    break;
+            }
     }
 
     private static IEnumerable<MenuItem> OperationMenuItems(ProtoFluxOperationProxy operationProxy)
