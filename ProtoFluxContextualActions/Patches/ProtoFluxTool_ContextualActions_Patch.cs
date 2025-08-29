@@ -232,6 +232,7 @@ internal static class ProtoFluxTool_ContextualActions_Patch
         else if (nodeType == typeof(RenderToTextureAsset))
         {
             yield return new MenuItem(typeof(AttachTexture2D));
+            yield return new MenuItem(typeof(AttachSprite));
         }
 
         switch (impulseProxy.ImpulseType.Value)
