@@ -385,6 +385,11 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             yield return new MenuItem(typeof(BoundingBoxProperties));
         }
 
+        else if (outputType == typeof(Camera))
+        {
+            yield return new(typeof(RenderToTextureAsset));
+        }
+
         else if (outputType == typeof(int) && (IsIterationNode(nodeType) || nodeType == typeof(IndexOfString)))
         {
             yield return new MenuItem(typeof(ValueInc<int>));
