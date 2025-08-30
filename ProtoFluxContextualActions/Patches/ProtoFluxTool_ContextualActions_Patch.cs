@@ -457,6 +457,12 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             yield return new MenuItem(typeof(ReferenceTarget<>).MakeGenericType(typeArg));
         }
 
+        if (TypeUtils.MatchInterface(outputType, typeof(IAssetProvider<AudioClip>), out _))
+        {
+            yield return new MenuItem(typeof(PlayOneShot));
+        }
+
+
         if (typeof(IComponent).IsAssignableFrom(outputType))
         {
             yield return new MenuItem(typeof(GetSlot));

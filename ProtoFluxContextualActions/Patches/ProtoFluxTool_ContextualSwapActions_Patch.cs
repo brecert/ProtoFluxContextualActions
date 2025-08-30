@@ -27,6 +27,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users.Roots;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Time;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Operators;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Audio;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -322,6 +323,12 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     typeof(EaseOutReboundDouble),
     typeof(EaseOutSineDouble),
   ];
+
+  static readonly HashSet<Type> PlayOneShotGroup = [
+    typeof(PlayOneShot),
+    typeof(PlayOneShotAndWait),
+  ];
+
 
   static readonly BiDictionary<Type, Type> MultiInputMappingGroup = new()
   {
@@ -660,6 +667,14 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     if (UserBoolCheck.Contains(nodeType))
     {
       foreach (var match in UserBoolCheck)
+      {
+        yield return new MenuItem(match);
+      }
+    }
+
+    if (PlayOneShotGroup.Contains(nodeType))
+    {
+      foreach (var match in PlayOneShotGroup)
       {
         yield return new MenuItem(match);
       }
