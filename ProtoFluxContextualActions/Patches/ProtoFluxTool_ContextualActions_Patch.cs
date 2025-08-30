@@ -236,13 +236,13 @@ internal static class ProtoFluxTool_ContextualActions_Patch
         }
 
         switch (impulseProxy.ImpulseType.Value)
-            {
-                case ImpulseType.AsyncCall:
-                case ImpulseType.AsyncResumption:
-                    yield return new MenuItem(typeof(AsyncFor));
-                    yield return new MenuItem(typeof(AsyncSequence));
-                    break;
-            }
+        {
+            case ImpulseType.AsyncCall:
+            case ImpulseType.AsyncResumption:
+                yield return new MenuItem(typeof(AsyncFor));
+                yield return new MenuItem(typeof(AsyncSequence));
+                break;
+        }
     }
 
     private static IEnumerable<MenuItem> OperationMenuItems(ProtoFluxOperationProxy operationProxy)
@@ -402,12 +402,22 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             yield return new MenuItem(typeof(UserRefAsVariable));
         }
 
-        if (TypeUtils.MatchInterface(outputType, typeof(IQuantity<>), out var quantityType))
+        if (outputType == typeof(User))
         {
-            var baseType = quantityType.GenericTypeArguments[0];
-            yield return new MenuItem(typeof(BaseValue<>).MakeGenericType(baseType));
-            yield return new MenuItem(typeof(FormatQuantity<>).MakeGenericType(baseType));
+            yield return new MenuItem(typeof(UserUsername));
+            yield return new MenuItem(typeof(UserUserID));
+            yield return new MenuItem(typeof(IsLocalUser));
+            yield return new MenuItem(typeof(UserVR_Active));
+            yield return new MenuItem(typeof(UserRootSlot));
+            yield return new MenuItem(typeof(UserUserRoot));
         }
+
+        if (TypeUtils.MatchInterface(outputType, typeof(IQuantity<>), out var quantityType))
+            {
+                var baseType = quantityType.GenericTypeArguments[0];
+                yield return new MenuItem(typeof(BaseValue<>).MakeGenericType(baseType));
+                yield return new MenuItem(typeof(FormatQuantity<>).MakeGenericType(baseType));
+            }
 
         if (TypeUtils.MatchesType(typeof(IValue<>), outputType))
         {

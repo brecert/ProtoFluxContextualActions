@@ -24,6 +24,7 @@ using ProtoFluxContextualActions.Utils;
 using System.Diagnostics.CodeAnalysis;
 using ProtoFluxContextualActions.Utils.ProtoFlux;
 using System.Collections.Frozen;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -400,6 +401,21 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     typeof(SetLocalTransform),
   ];
 
+  static readonly HashSet<Type> UserBoolCheck = [
+    typeof(IsLocalUser),
+    typeof(IsUserHost),
+  ];
+
+  static readonly HashSet<Type> UserInfoGroup = [
+    typeof(UserVR_Active),
+    typeof(UserFPS),
+    typeof(UserTime),
+    typeof(UserVoiceMode),
+    typeof(UserHeadOutputDevice),
+    typeof(UserActiveViewTargettingController),
+    typeof(UserPrimaryHand),
+  ];
+
   static readonly BiDictionary<Type, Type> GlobalLocalEquivilents = new()
   {
     {typeof(SetGlobalPosition), typeof(SetLocalPosition)},
@@ -536,6 +552,24 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
       }
     }
 
+
+    if (UserInfoGroup.Contains(nodeType))
+    {
+      foreach (var match in UserInfoGroup)
+      {
+        yield return new MenuItem(match);
+      }
+    }
+
+
+    if (UserBoolCheck.Contains(nodeType))
+    {
+      foreach (var match in UserBoolCheck)
+      {
+        yield return new MenuItem(match);
+      }
+    }
+
     if (GlobalLocalEquivilents.TryGetSecond(nodeType, out var second))
     {
       yield return new MenuItem(second);
@@ -632,6 +666,7 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
       }
     }
 
+    #region  Generics Handling
     if (nodeType.TryGetGenericTypeDefinition(out var genericType))
     {
       if (ValueRelayGroup.Contains(genericType))
@@ -768,9 +803,9 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     }
   }
 
-  #region Utils
+  #endregion
 
-  // Utils
+  #region Utils
   static bool TryGetGenericTypeDefinition(this Type type, [NotNullWhen(true)] out Type? genericTypeDefinition)
   {
     if (type.IsGenericType)
