@@ -23,8 +23,8 @@ using ProtoFluxContextualActions.Extensions;
 using ProtoFluxContextualActions.Utils;
 using System.Diagnostics.CodeAnalysis;
 using ProtoFluxContextualActions.Utils.ProtoFlux;
-using System.Collections.Frozen;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users.Roots;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -416,6 +416,67 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     typeof(UserPrimaryHand),
   ];
 
+  static readonly HashSet<Type> UserRootSlotGroup = [
+    typeof(HeadSlot),
+    typeof(HandSlot),
+    typeof(ControllerSlot),
+  ];
+
+  static readonly HashSet<Type> UserRootPositionGroup = [
+    typeof(HeadPosition),
+    typeof(HipsPosition),
+    typeof(LeftHandPosition),
+    typeof(RightHandPosition),
+    typeof(FeetPosition),
+  ];
+
+  static readonly HashSet<Type> UserRootRotationGroup = [
+    typeof(HeadRotation),
+    typeof(HipsRotation),
+    typeof(LeftHandRotation),
+    typeof(RightHandRotation),
+    typeof(FeetRotation),
+  ];
+
+  static readonly HashSet<Type> UserRootHeadRotationGroup = [
+    typeof(HeadRotation),
+    typeof(HeadFacingRotation),
+    typeof(HeadFacingDirection),
+  ];
+
+  static readonly HashSet<Type> SetUserRootPositionGroup = [
+    typeof(SetHeadPosition),
+    typeof(SetHipsPosition),
+    typeof(SetFeetPosition),
+  ];
+
+  static readonly HashSet<Type> SetUserRootRotationGroup = [
+    typeof(SetHeadRotation),
+    typeof(SetHipsRotation),
+    typeof(SetFeetRotation),
+  ];
+
+  static readonly HashSet<Type> SetUserRootHeadRotationGroup = [
+    typeof(SetHeadRotation),
+    typeof(SetHeadFacingRotation),
+    typeof(SetHeadFacingDirection),
+  ];
+
+  static readonly BiDictionary<Type, Type> GetUserRootSwapGroup =
+    UserRootPositionGroup.Zip(UserRootRotationGroup).ToBiDictionary();
+
+  static readonly BiDictionary<Type, Type> UserRootPositionSwapGroup =
+    UserRootPositionGroup.Zip(SetUserRootPositionGroup).ToBiDictionary();
+
+  static readonly BiDictionary<Type, Type> UserRootRotationSwapGroup =
+    UserRootRotationGroup.Zip(SetUserRootRotationGroup).ToBiDictionary();
+
+  static readonly BiDictionary<Type, Type> SetUserRootSwapGroup =
+    SetUserRootPositionGroup.Zip(SetUserRootRotationGroup).ToBiDictionary();
+
+  static readonly BiDictionary<Type, Type> HeadRotationSwapGroup =
+    UserRootHeadRotationGroup.Zip(SetUserRootHeadRotationGroup).ToBiDictionary();
+
   static readonly BiDictionary<Type, Type> GlobalLocalEquivilents = new()
   {
     {typeof(SetGlobalPosition), typeof(SetLocalPosition)},
@@ -569,6 +630,75 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
         yield return new MenuItem(match);
       }
     }
+
+    #region User Root
+    {
+      if (UserRootSlotGroup.Contains(nodeType))
+      {
+        foreach (var match in UserRootSlotGroup)
+        {
+          yield return new MenuItem(match);
+        }
+      }
+
+      if (UserRootPositionGroup.Contains(nodeType))
+      {
+        foreach (var match in UserRootPositionGroup)
+        {
+          yield return new MenuItem(match);
+        }
+      }
+
+      if (UserRootRotationGroup.Contains(nodeType))
+      {
+        foreach (var match in UserRootRotationGroup)
+        {
+          yield return new MenuItem(match);
+        }
+      }
+
+      if (SetUserRootPositionGroup.Contains(nodeType))
+      {
+        foreach (var match in SetUserRootPositionGroup)
+        {
+          yield return new MenuItem(match);
+        }
+      }
+
+      if (SetUserRootRotationGroup.Contains(nodeType))
+      {
+        foreach (var match in SetUserRootRotationGroup)
+        {
+          yield return new MenuItem(match);
+        }
+      }
+
+      if (UserRootHeadRotationGroup.Contains(nodeType))
+      {
+        foreach (var match in UserRootHeadRotationGroup)
+        {
+          yield return new MenuItem(match);
+        }
+      }
+
+      if (SetUserRootHeadRotationGroup.Contains(nodeType))
+      {
+        foreach (var match in SetUserRootHeadRotationGroup)
+        {
+          yield return new MenuItem(match);
+        }
+      }
+
+      {
+        if (TryGetSwap(GetUserRootSwapGroup, nodeType, out Type match)) yield return new(match);
+        if (TryGetSwap(UserRootPositionSwapGroup, nodeType, out match)) yield return new(match);
+        if (TryGetSwap(UserRootRotationSwapGroup, nodeType, out match)) yield return new(match);
+        if (TryGetSwap(SetUserRootSwapGroup, nodeType, out match)) yield return new(match);
+        if (TryGetSwap(HeadRotationSwapGroup, nodeType, out match)) yield return new(match);
+      }
+    }
+    #endregion
+
 
     if (GlobalLocalEquivilents.TryGetSecond(nodeType, out var second))
     {
@@ -802,6 +932,9 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
       }
     }
   }
+
+  private static bool TryGetSwap(BiDictionary<Type, Type> swaps, Type nodeType, out Type match) =>
+    swaps.TryGetSecond(nodeType, out match) || swaps.TryGetFirst(nodeType, out match);
 
   #endregion
 

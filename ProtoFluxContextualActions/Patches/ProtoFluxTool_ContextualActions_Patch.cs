@@ -36,6 +36,7 @@ using System.Diagnostics.CodeAnalysis;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Rendering;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Assets;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Utility;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users.Roots;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -401,6 +402,15 @@ internal static class ProtoFluxTool_ContextualActions_Patch
         if (outputType == typeof(UserRef))
         {
             yield return new MenuItem(typeof(UserRefAsVariable));
+        }
+
+        if (outputType == typeof(UserRoot))
+        {
+            yield return new MenuItem(typeof(ActiveUserRootUser));
+            yield return new MenuItem(typeof(UserRootGlobalScale));
+            yield return new MenuItem(typeof(HeadSlot));
+            yield return new MenuItem(typeof(HeadPosition));
+            yield return new MenuItem(typeof(HeadRotation));
         }
 
         if (outputType == typeof(User))
