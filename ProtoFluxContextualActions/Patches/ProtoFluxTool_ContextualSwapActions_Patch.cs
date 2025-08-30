@@ -333,6 +333,15 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     {typeof(ValueMax<>), typeof(ValueMaxMulti<>)},
   };
 
+  static readonly HashSet<Type> MinMaxGroup = [
+    typeof(ValueMin<>),
+    typeof(ValueMax<>),
+  ];
+
+  static readonly HashSet<Type> MinMaxMultiGroup = [
+    typeof(ValueMinMulti<>),
+    typeof(ValueMaxMulti<>),
+  ];
 
   static readonly HashSet<Type> TimespanInstanceGroup = [
     typeof(TimeSpanFromDays),
@@ -791,6 +800,27 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
             connectionTransferType: ConnectionTransferType.ByIndexLossy
           );
         }
+        if (nodeType.GetNiceTypeName().Contains("Multi_"))
+        {
+          foreach (var match in MinMaxMultiGroup)
+          {
+            yield return new MenuItem(
+              node: match.MakeGenericType([.. genericTypes]),
+              name: $"{NodeMetadataHelper.GetMetadata(match).Name} (Multi)",
+              connectionTransferType: ConnectionTransferType.ByIndexLossy
+            );
+          }
+        }
+        else
+        {
+          foreach (var match in MinMaxGroup)
+          {
+            yield return new MenuItem(
+              node: match.MakeGenericType([.. genericTypes]),
+              connectionTransferType: ConnectionTransferType.ByIndexLossy
+            );
+          }
+        }
       }
     }
 
@@ -843,6 +873,53 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
         foreach (var match in DeltaTimeOperationGroup)
         {
           yield return new MenuItem(match.MakeGenericType(nodeType.GenericTypeArguments[0]));
+        }
+      }
+
+      {
+        if (MinMaxGroup.Contains(genericType))
+        {
+          var innerType = nodeType.GenericTypeArguments[0];
+          foreach (var match in MinMaxGroup)
+          {
+            yield return new MenuItem(match.MakeGenericType(innerType));
+          }
+
+          var matchingNodes = avgGroup
+            .Where(a => a.Value.FirstOrDefault() == innerType)
+            .Select(a => a.Key)
+            .Where(a => !a.GetNiceTypeName().Contains("Multi_"));
+
+          foreach (var match in matchingNodes)
+          {
+            yield return new MenuItem(
+              node: match,
+              connectionTransferType: ConnectionTransferType.ByIndexLossy
+            );
+          }
+        }
+
+        if (MinMaxMultiGroup.Contains(genericType))
+        {
+          var innerType = nodeType.GenericTypeArguments[0];
+          foreach (var match in MinMaxMultiGroup)
+          {
+            yield return new MenuItem(match.MakeGenericType(innerType));
+          }
+
+          var matchingNodes = avgGroup
+            .Where(a => a.Value.FirstOrDefault() == innerType)
+            .Select(a => a.Key)
+            .Where(a => a.GetNiceTypeName().Contains("Multi_"));
+
+          foreach (var match in matchingNodes)
+          {
+            yield return new MenuItem(
+              node: match,
+              name: $"{NodeMetadataHelper.GetMetadata(match).Name} (Multi)",
+              connectionTransferType: ConnectionTransferType.ByIndexLossy
+            );
+          }
         }
       }
 
