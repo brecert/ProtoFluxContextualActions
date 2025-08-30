@@ -385,7 +385,7 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     typeof(ContinuouslyChangingObjectRelay<>)
   ];
 
-  static readonly HashSet<Type> SlotTranformGlobalOperationGroup = [
+  static readonly HashSet<Type> SetSlotTranformGlobalOperationGroup = [
     typeof(SetGlobalPosition),
     typeof(SetGlobalPositionRotation),
     typeof(SetGlobalRotation),
@@ -393,7 +393,7 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     typeof(SetGlobalTransform),
   ];
 
-  static readonly HashSet<Type> SlotTranformLocalOperationGroup = [
+  static readonly HashSet<Type> SetSlotTranformLocalOperationGroup = [
     typeof(SetLocalPosition),
     typeof(SetLocalPositionRotation),
     typeof(SetLocalRotation),
@@ -477,14 +477,14 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
   static readonly BiDictionary<Type, Type> HeadRotationSwapGroup =
     UserRootHeadRotationGroup.Zip(SetUserRootHeadRotationGroup).ToBiDictionary();
 
-  static readonly BiDictionary<Type, Type> GlobalLocalEquivilents = new()
+  static readonly BiDictionary<Type, Type> GetGlobalLocalEquivilents = new()
   {
-    {typeof(SetGlobalPosition), typeof(SetLocalPosition)},
-    {typeof(SetGlobalPositionRotation), typeof(SetLocalPositionRotation)},
-    {typeof(SetGlobalRotation), typeof(SetLocalRotation)},
-    {typeof(SetGlobalScale), typeof(SetLocalScale)},
-    {typeof(SetGlobalTransform), typeof(SetLocalTransform)},
+    {typeof(GlobalTransform), typeof(LocalTransform)}
   };
+
+
+  static readonly BiDictionary<Type, Type> SetGlobalLocalEquivilents =
+    SetSlotTranformGlobalOperationGroup.Zip(SetSlotTranformLocalOperationGroup).ToBiDictionary();
 
   static readonly HashSet<Type> VariableStoreNodesGroup = [
     typeof(LocalValue<>),
@@ -597,17 +597,17 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
       }
     }
 
-    if (SlotTranformGlobalOperationGroup.Contains(nodeType))
+    if (SetSlotTranformGlobalOperationGroup.Contains(nodeType))
     {
-      foreach (var match in SlotTranformGlobalOperationGroup)
+      foreach (var match in SetSlotTranformGlobalOperationGroup)
       {
         yield return new MenuItem(match);
       }
     }
 
-    if (SlotTranformLocalOperationGroup.Contains(nodeType))
+    if (SetSlotTranformLocalOperationGroup.Contains(nodeType))
     {
-      foreach (var match in SlotTranformLocalOperationGroup)
+      foreach (var match in SetSlotTranformLocalOperationGroup)
       {
         yield return new MenuItem(match);
       }
@@ -699,14 +699,9 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     }
     #endregion
 
-
-    if (GlobalLocalEquivilents.TryGetSecond(nodeType, out var second))
     {
-      yield return new MenuItem(second);
-    }
-    else if (GlobalLocalEquivilents.TryGetFirst(nodeType, out var first))
-    {
-      yield return new MenuItem(first);
+      if (TryGetSwap(SetGlobalLocalEquivilents, nodeType, out var match)) yield return new(match);
+      if (TryGetSwap(GetGlobalLocalEquivilents, nodeType, out match)) yield return new(match);
     }
 
     {
