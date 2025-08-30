@@ -810,6 +810,14 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
         }
       }
 
+      if (ComparisonBinaryOperatorGroup.Contains(genericType))
+      {
+        foreach (var match in ComparisonBinaryOperatorGroup)
+        {
+          yield return new MenuItem(match.MakeGenericType(nodeType.GenericTypeArguments[0]));
+        }
+      }
+
       if (ArithmeticBinaryOperatorGroup.Contains(genericType))
       {
         var opType = nodeType.GenericTypeArguments[0];
@@ -899,15 +907,6 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
         if (coder.Property<bool>("SupportsAddSub").Value)
         {
           yield return new(typeof(ValuePlusMinus<>).MakeGenericType(opType));
-        }
-      }
-
-
-      if (ComparisonBinaryOperatorGroup.Contains(genericType))
-      {
-        foreach (var match in ComparisonBinaryOperatorGroup)
-        {
-          yield return new MenuItem(match.MakeGenericType(nodeType.GenericTypeArguments[0]));
         }
       }
 
