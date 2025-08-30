@@ -35,6 +35,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.Utility;
 using System.Diagnostics.CodeAnalysis;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Rendering;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Assets;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Utility;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -410,6 +411,13 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             yield return new MenuItem(typeof(UserVR_Active));
             yield return new MenuItem(typeof(UserRootSlot));
             yield return new MenuItem(typeof(UserUserRoot));
+        }
+
+        if (outputType == typeof(Type))
+        {
+            yield return new MenuItem(typeof(IndexOfFirstObjectMatch<Type>));
+            yield return new MenuItem(typeof(TypeColor));
+            yield return new MenuItem(typeof(NiceTypeName));
         }
 
         if (TypeUtils.MatchInterface(outputType, typeof(IQuantity<>), out var quantityType))
