@@ -579,6 +579,11 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
       .Concat(MapPsuedoGenericsToGenericTypes(__instance.World, "AvgMulti_"))
       .ToDictionary((a) => protoFluxBindingMapping[a.Node], (a) => a.Types);
 
+    var approximatelyGroup = MapPsuedoGenericsToGenericTypes(__instance.World, "Approximately_")
+      .Concat(MapPsuedoGenericsToGenericTypes(__instance.World, "ApproximatelyNot_"))
+      .ToDictionary((a) => protoFluxBindingMapping[a.Node], (a) => a.Types);
+
+
     if (GetDirectionGroup.Contains(nodeType))
     {
       foreach (var match in GetDirectionGroup)
@@ -787,6 +792,18 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
         }
       }
     }
+
+    {
+      if (approximatelyGroup.TryGetValue(nodeType, out var genericTypes))
+      {
+        var matchingNodes = approximatelyGroup.Where(a => genericTypes.SequenceEqual(a.Value)).Select(a => a.Key);
+        foreach (var match in matchingNodes)
+        {
+          yield return new MenuItem(match);
+        }
+      }
+    }
+
 
     {
       if (avgGroup.TryGetValue(nodeType, out var genericTypes))
