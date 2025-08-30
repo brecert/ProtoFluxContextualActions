@@ -37,6 +37,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Rendering;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Assets;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Utility;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users.Roots;
+using ProtoFluxContextualActions.Extensions;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -431,27 +432,27 @@ internal static class ProtoFluxTool_ContextualActions_Patch
         }
 
         if (TypeUtils.MatchInterface(outputType, typeof(IQuantity<>), out var quantityType))
-            {
-                var baseType = quantityType.GenericTypeArguments[0];
-                yield return new MenuItem(typeof(BaseValue<>).MakeGenericType(baseType));
-                yield return new MenuItem(typeof(FormatQuantity<>).MakeGenericType(baseType));
-            }
+        {
+            var baseType = quantityType.GenericTypeArguments[0];
+            yield return new MenuItem(typeof(BaseValue<>).MakeGenericType(baseType));
+            yield return new MenuItem(typeof(FormatQuantity<>).MakeGenericType(baseType));
+        }
 
         if (TypeUtils.MatchesType(typeof(IValue<>), outputType))
         {
-            var typeArg = outputType!.GenericTypeArguments[0];
+            var typeArg = outputType.GenericTypeArguments[0];
             yield return new MenuItem(typeof(FieldAsVariable<>).MakeGenericType(typeArg));
         }
 
         if (TypeUtils.MatchesType(typeof(ISyncRef<>), outputType))
         {
-            var typeArg = outputType!.GenericTypeArguments[0];
+            var typeArg = outputType.GenericTypeArguments[0];
             yield return new MenuItem(typeof(ReferenceInterfaceAsVariable<>).MakeGenericType(typeArg));
         }
 
         if (TypeUtils.MatchesType(typeof(SyncRef<>), outputType))
         {
-            var typeArg = outputType!.GenericTypeArguments[0];
+            var typeArg = outputType.GenericTypeArguments[0];
             yield return new MenuItem(typeof(ReferenceAsVariable<>).MakeGenericType(typeArg));
             yield return new MenuItem(typeof(ReferenceTarget<>).MakeGenericType(typeArg));
         }
@@ -475,6 +476,14 @@ internal static class ProtoFluxTool_ContextualActions_Patch
         if (nodeType == typeof(CountOccurrences) || nodeType == typeof(ChildrenCount) || nodeType == typeof(WorldUserCount))
         {
             yield return new MenuItem(typeof(For));
+        }
+
+        if (ProtoFluxTool_ContextualSwapActions_Patch.DeltaTimeGroup.Contains(nodeType.GetGenericTypeDefinitionOrSameType()))
+        {
+            foreach (var dtOperationType in ProtoFluxTool_ContextualSwapActions_Patch.DeltaTimeOperationGroup)
+            {
+                yield return new MenuItem(dtOperationType.MakeGenericType(typeof(float)));
+            }
         }
     }
 

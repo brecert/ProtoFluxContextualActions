@@ -25,6 +25,8 @@ using System.Diagnostics.CodeAnalysis;
 using ProtoFluxContextualActions.Utils.ProtoFlux;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users.Roots;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Time;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Operators;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -401,6 +403,18 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     typeof(SetLocalTransform),
   ];
 
+  public static readonly HashSet<Type> DeltaTimeGroup = [
+    typeof(DeltaTime),
+    typeof(SmoothDeltaTime),
+    typeof(InvertedDeltaTime),
+    typeof(InvertedSmoothDeltaTime),
+  ];
+
+  public static readonly HashSet<Type> DeltaTimeOperationGroup = [
+    typeof(MulDeltaTime<>),
+    typeof(DivDeltaTime<>),
+  ];
+
   static readonly HashSet<Type> UserBoolCheck = [
     typeof(IsLocalUser),
     typeof(IsUserHost),
@@ -481,7 +495,6 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
   {
     {typeof(GlobalTransform), typeof(LocalTransform)}
   };
-
 
   static readonly BiDictionary<Type, Type> SetGlobalLocalEquivilents =
     SetSlotTranformGlobalOperationGroup.Zip(SetSlotTranformLocalOperationGroup).ToBiDictionary();
@@ -622,6 +635,13 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
       }
     }
 
+    if (DeltaTimeGroup.Contains(nodeType))
+    {
+      foreach (var match in DeltaTimeGroup)
+      {
+        yield return new MenuItem(match);
+      }
+    }
 
     if (UserBoolCheck.Contains(nodeType))
     {
@@ -813,6 +833,14 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
       if (ComparisonBinaryOperatorGroup.Contains(genericType))
       {
         foreach (var match in ComparisonBinaryOperatorGroup)
+        {
+          yield return new MenuItem(match.MakeGenericType(nodeType.GenericTypeArguments[0]));
+        }
+      }
+
+      if (DeltaTimeOperationGroup.Contains(genericType))
+      {
+        foreach (var match in DeltaTimeOperationGroup)
         {
           yield return new MenuItem(match.MakeGenericType(nodeType.GenericTypeArguments[0]));
         }
