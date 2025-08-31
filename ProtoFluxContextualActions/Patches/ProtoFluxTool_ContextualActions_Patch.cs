@@ -353,7 +353,7 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             yield return new MenuItem(typeof(GetForward));
             yield return new MenuItem(typeof(GetChild));
             yield return new MenuItem(typeof(ChildrenCount));
-            yield return new MenuItem(typeof(FindChildByName));
+            yield return new MenuItem(typeof(FindChildByTag)); // use tag here because it has less inputs which fits better when going to swap.
         }
 
         else if (outputType == typeof(bool))
