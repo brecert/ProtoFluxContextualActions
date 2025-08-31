@@ -38,6 +38,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Assets;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Utility;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users.Roots;
 using ProtoFluxContextualActions.Extensions;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Physics;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -425,6 +426,18 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             yield return new MenuItem(typeof(UserUserRoot));
         }
 
+        if (outputType == typeof(CharacterController))
+        {
+            yield return new MenuItem(typeof(CharacterLinearVelocity));
+            yield return new MenuItem(typeof(IsCharacterOnGround));
+            yield return new MenuItem(typeof(CharacterControllerUser));
+
+            yield return new MenuItem(typeof(SetCharacterVelocity));
+            yield return new MenuItem(typeof(SetCharacterGravity));
+            yield return new MenuItem(typeof(ApplyCharacterForce));
+            yield return new MenuItem(typeof(ApplyCharacterImpulse));
+        }
+
         if (outputType == typeof(Type))
         {
             yield return new MenuItem(typeof(IndexOfFirstObjectMatch<Type>));
@@ -437,6 +450,12 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             var baseType = quantityType.GenericTypeArguments[0];
             yield return new MenuItem(typeof(BaseValue<>).MakeGenericType(baseType));
             yield return new MenuItem(typeof(FormatQuantity<>).MakeGenericType(baseType));
+        }
+
+        if (TypeUtils.MatchInterface(outputType, typeof(ICollider), out _))
+        {
+            yield return new MenuItem(typeof(IsCharacterController));
+            yield return new MenuItem(typeof(AsCharacterController));
         }
 
         if (TypeUtils.MatchesType(typeof(IValue<>), outputType))
@@ -574,6 +593,12 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             yield return new MenuItem(typeof(EncapsulateBounds));
             yield return new MenuItem(typeof(EncapsulatePoint));
             yield return new MenuItem(typeof(TransformBounds));
+        }
+
+        else if (inputType == typeof(CharacterController))
+        {
+            yield return new MenuItem(typeof(FindCharacterControllerFromSlot));
+            yield return new MenuItem(typeof(FindCharacterControllerFromUser));
         }
 
         else if (TypeUtils.MatchInterface(inputType, typeof(IQuantity<>), out var quantityType))
