@@ -39,6 +39,10 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Utility;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users.Roots;
 using ProtoFluxContextualActions.Extensions;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Physics;
+using Renderite.Shared;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Avatar;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Avatar.BodyNodes;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Interaction;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -330,6 +334,7 @@ internal static class ProtoFluxTool_ContextualActions_Patch
         }
     }
 
+    #region Output Items
     /// <summary>
     /// Yields menu items when holding an output wire. 
     /// </summary>
@@ -426,6 +431,18 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             yield return new MenuItem(typeof(UserUserRoot));
         }
 
+        if (outputType == typeof(BodyNode))
+        {
+            yield return new MenuItem(typeof(BodyNodeSlot));
+            yield return new MenuItem(typeof(BodyNodeChirality));
+            yield return new MenuItem(typeof(OtherSide));
+        }
+
+        if (outputType == typeof(Grabber))
+        {
+            yield return new MenuItem(typeof(GrabberBodyNode));
+        }
+
         if (outputType == typeof(CharacterController))
         {
             yield return new MenuItem(typeof(CharacterLinearVelocity));
@@ -512,6 +529,7 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             }
         }
     }
+    #endregion
 
     /// <summary>
     /// Generates menu items when holding an input wire.
