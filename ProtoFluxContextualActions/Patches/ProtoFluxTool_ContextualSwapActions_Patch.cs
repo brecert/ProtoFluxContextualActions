@@ -28,6 +28,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users.Roots;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Time;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Operators;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Audio;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Slots;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -403,6 +404,11 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     typeof(ContinuouslyChangingObjectRelay<>)
   ];
 
+  static readonly HashSet<Type> FindSlotGroup = [
+    typeof(FindChildByName),
+    typeof(FindChildByTag),
+  ];
+
   static readonly HashSet<Type> SetSlotTranformGlobalOperationGroup = [
     typeof(SetGlobalPosition),
     typeof(SetGlobalPositionRotation),
@@ -675,6 +681,15 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     if (PlayOneShotGroup.Contains(nodeType))
     {
       foreach (var match in PlayOneShotGroup)
+      {
+        yield return new MenuItem(match);
+      }
+    }
+
+
+    if (FindSlotGroup.Contains(nodeType))
+    {
+      foreach (var match in FindSlotGroup)
       {
         yield return new MenuItem(match);
       }

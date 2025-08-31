@@ -5,6 +5,9 @@ using ProtoFlux.Runtimes.Execution.Nodes.Operators;
 using ProtoFlux.Core;
 using ProtoFlux.Runtimes.Execution.Nodes;
 using ProtoFluxContextualActions.Extensions;
+using System;
+using System.Diagnostics.CodeAnalysis;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Slots;
 
 namespace ProtoFluxContextualActions.Utils.ProtoFlux;
 
@@ -106,6 +109,14 @@ public static class SwapHelper
     }
   }
 
+  internal static Dictionary<(Type, Type), (string FromName, string ToName)[]> OutputMap = new() {
+    {(typeof(For), typeof(RangeLoopInt)), [("Iteration", "Current")]},
+    {(typeof(ValueNegate<>), typeof(ValuePlusMinus<>)), [("*", "Minus")]},
+  };
+
+  internal static bool TryGetOutputMap((Type, Type) typeTuple, [MaybeNullWhen(false)] out (string FromName, string ToName)[] elementMap) =>
+    TryGetTypeTupleMapping(OutputMap, typeTuple, out elementMap);
+
   internal static void TransferOutputs(INode from, INode to, NodeQueryAcceleration query, bool tryByIndex = false)
   {
     // resize dynamic inputs to fit before transferring the outputs
@@ -121,6 +132,8 @@ public static class SwapHelper
 
     var typeTuple = (from.GetType().GetGenericTypeDefinitionOrSameType(), to.GetType().GetGenericTypeDefinitionOrSameType());
     var outputs = to.AllOutputElements().ToDictionary(o => o.DisplayName, o => o);
+    var hasOutputMap = TryGetOutputMap(typeTuple, out var outputMap);
+    var outputMapTable = outputMap?.ToDictionary();
 
     foreach (var evaluatingElement in query.GetEvaluatingElements(from))
     {
@@ -135,27 +148,22 @@ public static class SwapHelper
           evaluatingElement.Source = matchedOutputElement.Target;
         }
 
-        // This can be made into a lookup or something nicer later if it comes up again, this is fine for now.
-        if (typeTuple == (typeof(For), typeof(RangeLoopInt)) && outputElement.DisplayName == "Iteration")
+        if (hasOutputMap && (outputMapTable?.TryGetValue(outputElement.DisplayName, out var remappedName) ?? false))
         {
-          evaluatingElement.Source = to.GetOutputElementByName("Current")!.Value.Target;
-        }
-        else if (typeTuple == (typeof(RangeLoopInt), typeof(For)) && outputElement.DisplayName == "Current")
-        {
-          evaluatingElement.Source = to.GetOutputElementByName("Iteration")!.Value.Target;
-        }
-        // This can be made into a lookup or something nicer later if it comes up again, this is fine for now.
-        else if (typeTuple == (typeof(ValueNegate<>), typeof(ValuePlusMinus<>)) && outputElement.DisplayName == "*")
-        {
-          evaluatingElement.Source = to.GetOutputElementByName("Minus")!.Value.Target;
-        }
-        else if (typeTuple == (typeof(ValuePlusMinus<>), typeof(ValueNegate<>)) && outputElement.DisplayName == "Minus")
-        {
-          evaluatingElement.Source = to.GetOutputElementByName("*")!.Value.Target;
+          evaluatingElement.Source = to.GetOutputElementByName(remappedName)!.Value.Target;
         }
       }
     }
   }
+
+  internal static Dictionary<(Type, Type), (string FromName, string ToName)[]> InputMap = new() {
+    {(typeof(For), typeof(RangeLoopInt)), [("Count", "End")]},
+    {(typeof(ValueNegate<>), typeof(ValuePlusMinus<>)), [("Offset", "N")]},
+    {(typeof(FindChildByName), typeof(FindChildByTag)), [("Name", "Tag")]},
+  };
+
+  internal static bool TryGetInput((Type, Type) typeTuple, [MaybeNullWhen(false)] out (string FromName, string ToName)[] elementMap) =>
+    TryGetTypeTupleMapping(InputMap, typeTuple, out elementMap);
 
 
   internal static void TransferInputs(INode from, INode to, bool tryByIndex = false)
@@ -196,40 +204,16 @@ public static class SwapHelper
     // This can be made into a lookup or something nicer later if it comes up again, this is fine for now.
     var typeTuple = (from.GetType().GetGenericTypeDefinitionOrSameType(), to.GetType().GetGenericTypeDefinitionOrSameType());
 
-    if (typeTuple == (typeof(For), typeof(RangeLoopInt)))
+    if (TryGetInput(typeTuple, out var elementMap))
     {
-      var countIndex = from.Metadata.GetInputByName("Count").Index;
-      var endIndex = to.Metadata.GetInputByName("End").Index;
-      if (from.GetInputSource(countIndex) is IOutput output)
+      foreach (var (fromName, toName) in elementMap)
       {
-        to.SetInputSource(endIndex, output);
-      }
-    }
-    else if (typeTuple == (typeof(RangeLoopInt), typeof(For)))
-    {
-      var endIndex = from.Metadata.GetInputByName("End").Index;
-      var countIndex = to.Metadata.GetInputByName("Count").Index;
-      if (from.GetInputSource(endIndex) is IOutput output)
-      {
-        to.SetInputSource(countIndex, output);
-      }
-    }
-    else if (typeTuple == (typeof(ValueNegate<>), typeof(ValuePlusMinus<>)))
-    {
-      var countIndex = from.Metadata.GetInputByName("N").Index;
-      var endIndex = to.Metadata.GetInputByName("Offset").Index;
-      if (from.GetInputSource(countIndex) is IOutput output)
-      {
-        to.SetInputSource(endIndex, output);
-      }
-    }
-    else if (typeTuple == (typeof(ValuePlusMinus<>), typeof(ValueNegate<>)))
-    {
-      var endIndex = from.Metadata.GetInputByName("Offset").Index;
-      var countIndex = to.Metadata.GetInputByName("N").Index;
-      if (from.GetInputSource(endIndex) is IOutput output)
-      {
-        to.SetInputSource(countIndex, output);
+        var countIndex = from.Metadata.GetInputByName(fromName).Index;
+        var endIndex = to.Metadata.GetInputByName(toName).Index;
+        if (from.GetInputSource(countIndex) is IOutput output)
+        {
+          to.SetInputSource(endIndex, output);
+        }
       }
     }
   }
@@ -264,5 +248,19 @@ public static class SwapHelper
     TransferGlobals(oldNode, newNode, tryByIndex);
 
     return results;
+  }
+
+  internal static bool TryGetTypeTupleMapping(Dictionary<(Type, Type), (string, string)[]> mapping, (Type, Type) typeTuple, [MaybeNullWhen(false)] out (string FromName, string ToName)[] elementMap)
+  {
+    if (mapping.TryGetValue(typeTuple, out elementMap))
+    {
+      return true;
+    }
+    else if (mapping.TryGetValue(typeTuple.SwapValues(), out elementMap))
+    {
+      elementMap = [.. elementMap.Select(t => t.SwapValues())];
+      return true;
+    }
+    return false;
   }
 }
