@@ -404,6 +404,11 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     typeof(ContinuouslyChangingObjectRelay<>)
   ];
 
+  static readonly HashSet<Type> SlotMetaGroup = [
+    typeof(GetSlotName),
+    typeof(GetTag),
+  ];
+
   static readonly HashSet<Type> FindSlotGroup = [
     typeof(FindChildByName),
     typeof(FindChildByTag),
@@ -690,6 +695,14 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
     if (FindSlotGroup.Contains(nodeType))
     {
       foreach (var match in FindSlotGroup)
+      {
+        yield return new MenuItem(match);
+      }
+    }
+
+    if (SlotMetaGroup.Contains(nodeType))
+    {
+      foreach (var match in SlotMetaGroup)
       {
         yield return new MenuItem(match);
       }
