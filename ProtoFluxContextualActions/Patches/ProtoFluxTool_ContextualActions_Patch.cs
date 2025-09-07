@@ -43,6 +43,7 @@ using Renderite.Shared;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Avatar;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Avatar.BodyNodes;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Interaction;
+using ProtoFlux.Runtimes.Execution.Nodes.Enums;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -50,6 +51,36 @@ namespace ProtoFluxContextualActions.Patches;
 [HarmonyPatch(typeof(ProtoFluxTool), nameof(ProtoFluxTool.OnSecondaryPress))]
 internal static class ProtoFluxTool_ContextualActions_Patch
 {
+    internal static class NodeHelper
+    {
+        static readonly Dictionary<Type, Type> EnumToNumberTypeMap = new()
+        {
+            {typeof(byte), typeof(EnumToByte<>)},
+            {typeof(int), typeof(EnumToInt<>)},
+            {typeof(long), typeof(EnumToLong<>)},
+            {typeof(sbyte), typeof(EnumToSbyte<>)},
+            {typeof(short), typeof(EnumToShort<>)},
+            {typeof(uint), typeof(EnumToUint<>)},
+            {typeof(ulong), typeof(EnumToUlong<>)},
+            {typeof(ushort), typeof(EnumToUshort<>)},
+        };
+
+        static readonly Dictionary<Type, Type> NumberToEnumTypeMap = new()
+        {
+            {typeof(byte), typeof(ByteToEnum<>)},
+            {typeof(int), typeof(IntToEnum<>)},
+            {typeof(long), typeof(LongToEnum<>)},
+            {typeof(sbyte),typeof(SbyteToEnum<>)},
+            {typeof(short),typeof(ShortToEnum<>)},
+            {typeof(uint), typeof(UintToEnum<>)},
+            {typeof(ulong), typeof(UlongToEnum<>)},
+            {typeof(ushort), typeof(UshortToEnum<>)},
+        };
+        public static bool TryGetEnumToNumberNode(Type enumType, [MaybeNullWhen(false)] out Type type) => EnumToNumberTypeMap.TryGetValue(enumType, out type);
+
+        public static bool TryGetNumbeToEnumNode(Type enumType, [MaybeNullWhen(false)] out Type type) => NumberToEnumTypeMap.TryGetValue(enumType, out type);
+    }
+
     internal readonly struct MenuItem(Type node, Type? binding = null, string? name = null, bool overload = false)
     {
         internal readonly Type node = node;
@@ -463,6 +494,18 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             yield return new MenuItem(typeof(NiceTypeName));
         }
 
+        if (outputType.IsEnum)
+        {
+            yield return new MenuItem(typeof(NextValue<>).MakeGenericType(outputType));
+            yield return new MenuItem(typeof(ShiftEnum<>).MakeGenericType(outputType));
+
+            var enumType = outputType.GetEnumUnderlyingType();
+            if (NodeHelper.TryGetEnumToNumberNode(enumType, out var toNumberType))
+            {
+                yield return new MenuItem(toNumberType.MakeGenericType(outputType));
+            }
+        }
+
         if (TypeUtils.MatchInterface(outputType, typeof(IQuantity<>), out var quantityType))
         {
             var baseType = quantityType.GenericTypeArguments[0];
@@ -654,6 +697,19 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             yield return new MenuItem(typeof(ValueDec<int>));
             yield return new MenuItem(typeof(ChildrenCount));
             yield return new MenuItem(typeof(CountOccurrences));
+        }
+
+
+        if (inputType.IsEnum)
+        {
+            // yield return new MenuItem(typeof(NextValue<>).MakeGenericType(inputType));
+            // yield return new MenuItem(typeof(ShiftEnum<>).MakeGenericType(inputType));
+
+            var enumType = inputType.GetEnumUnderlyingType();
+            if (NodeHelper.TryGetNumbeToEnumNode(enumType, out var toNumberType))
+            {
+                yield return new MenuItem(toNumberType.MakeGenericType(inputType));
+            }
         }
 
         if (inputType == typeof(int) && (
