@@ -953,7 +953,6 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
         }
       }
 
-
       {
         if (MinMaxGroup.Contains(genericType))
         {
@@ -1094,28 +1093,18 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
       }
 
       {
-        if (EnumToNumberGroup.TryGetSecond(genericType, out var mapped))
+        if (TryGetSwap(EnumToNumberGroup, genericType, out var match))
         {
           var enumType = nodeType.GenericTypeArguments[0];
-          yield return new MenuItem(mapped.MakeGenericType(enumType));
-        }
-        else if (EnumToNumberGroup.TryGetFirst(genericType, out mapped))
-        {
-          var enumType = nodeType.GenericTypeArguments[0];
-          yield return new MenuItem(mapped.MakeGenericType(enumType));
+          yield return new MenuItem(match.MakeGenericType(enumType));
         }
       }
 
       {
-        if (NumberToEnumGroup.TryGetSecond(genericType, out var mapped))
+        if (TryGetSwap(NumberToEnumGroup, genericType, out var match))
         {
           var enumType = nodeType.GenericTypeArguments[0];
-          yield return new MenuItem(mapped.MakeGenericType(enumType));
-        }
-        else if (NumberToEnumGroup.TryGetFirst(genericType, out mapped))
-        {
-          var enumType = nodeType.GenericTypeArguments[0];
-          yield return new MenuItem(mapped.MakeGenericType(enumType));
+          yield return new MenuItem(match.MakeGenericType(enumType));
         }
       }
 

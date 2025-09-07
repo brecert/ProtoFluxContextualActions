@@ -469,12 +469,14 @@ internal static class ProtoFluxTool_ContextualActions_Patch
         {
             yield return new MenuItem(typeof(NextValue<>).MakeGenericType(outputType), name: typeof(NextValue<>).GetNiceName());
             yield return new MenuItem(typeof(ShiftEnum<>).MakeGenericType(outputType), name: typeof(ShiftEnum<>).GetNiceName());
+            yield return new MenuItem(typeof(TryEnumToInt<>).MakeGenericType(outputType), name: "TryEnumToInt<T>");
 
             var enumType = outputType.GetEnumUnderlyingType();
             if (NodeUtils.TryGetEnumToNumberNode(enumType, out var toNumberType))
             {
                 yield return new MenuItem(toNumberType.MakeGenericType(outputType));
             }
+
         }
 
         if (TypeUtils.MatchInterface(outputType, typeof(IQuantity<>), out var quantityType))
@@ -514,7 +516,6 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             yield return new MenuItem(typeof(PlayOneShot));
         }
 
-
         if (typeof(IComponent).IsAssignableFrom(outputType))
         {
             yield return new MenuItem(typeof(GetSlot));
@@ -529,6 +530,12 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             yield return new MenuItem(typeof(ValueMultiplex<dummy>), name: "Value Multiplex");
             yield return new MenuItem(typeof(ImpulseMultiplexer), name: "Impulse Multiplex");
             yield return new MenuItem(typeof(ValueDemultiplex<dummy>), name: "Value Demultiplex");
+        }
+
+
+        if (TypeUtils.MatchesType(typeof(EnumToInt<>), nodeType) || TypeUtils.MatchesType(typeof(TryEnumToInt<>), nodeType))
+        {
+            yield return new MenuItem(typeof(ValueMultiplex<dummy>));
         }
 
         if (nodeType == typeof(CountOccurrences) || nodeType == typeof(ChildrenCount) || nodeType == typeof(WorldUserCount))
