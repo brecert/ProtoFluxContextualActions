@@ -29,6 +29,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Time;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Operators;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Audio;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Slots;
+using ProtoFlux.Runtimes.Execution.Nodes.Enums;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -526,6 +527,14 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
   static readonly BiDictionary<Type, Type> SetGlobalLocalEquivilents =
     SetSlotTranformGlobalOperationGroup.Zip(SetSlotTranformLocalOperationGroup).ToBiDictionary();
 
+  static readonly BiDictionary<Type, Type> EnumToNumberGroup = NodeUtils.EnumToNumberTypeMap.Values.Zip(NodeUtils.TryEnumToNumberTypeMap.Values).ToBiDictionary();
+  static readonly BiDictionary<Type, Type> NumberToEnumGroup = NodeUtils.NumberToEnumTypeMap.Values.Zip(NodeUtils.TryNumberToEnumTypeMap.Values).ToBiDictionary();
+  static readonly HashSet<Type> EnumShiftGroup = [
+    typeof(NextValue<>),
+    typeof(PreviousValue<>),
+    typeof(ShiftEnum<>),
+  ];
+
   static readonly HashSet<Type> VariableStoreNodesGroup = [
     typeof(LocalValue<>),
     typeof(LocalObject<>),
@@ -936,6 +945,15 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
         }
       }
 
+      if (EnumShiftGroup.Contains(genericType))
+      {
+        foreach (var match in EnumShiftGroup)
+        {
+          yield return new MenuItem(match.MakeGenericType(nodeType.GenericTypeArguments[0]), name: match.GetNiceName());
+        }
+      }
+
+
       {
         if (MinMaxGroup.Contains(genericType))
         {
@@ -1075,19 +1093,47 @@ internal static class ProtoFluxTool_ContextualSwapActions_Patch
         }
       }
 
-      if (MultiInputMappingGroup.TryGetSecond(genericType, out var mapped))
       {
-        var binopType = nodeType.GenericTypeArguments[0];
-        yield return new MenuItem(
-          node: mapped.MakeGenericType(binopType),
-          name: mapped.GetNiceTypeName(),
-          connectionTransferType: ConnectionTransferType.ByIndexLossy
-        );
+        if (EnumToNumberGroup.TryGetSecond(genericType, out var mapped))
+        {
+          var enumType = nodeType.GenericTypeArguments[0];
+          yield return new MenuItem(mapped.MakeGenericType(enumType));
+        }
+        else if (EnumToNumberGroup.TryGetFirst(genericType, out mapped))
+        {
+          var enumType = nodeType.GenericTypeArguments[0];
+          yield return new MenuItem(mapped.MakeGenericType(enumType));
+        }
       }
-      else if (MultiInputMappingGroup.TryGetFirst(genericType, out mapped))
+
       {
-        var binopType = nodeType.GenericTypeArguments[0];
-        yield return new MenuItem(mapped.MakeGenericType(binopType), connectionTransferType: ConnectionTransferType.ByIndexLossy);
+        if (NumberToEnumGroup.TryGetSecond(genericType, out var mapped))
+        {
+          var enumType = nodeType.GenericTypeArguments[0];
+          yield return new MenuItem(mapped.MakeGenericType(enumType));
+        }
+        else if (NumberToEnumGroup.TryGetFirst(genericType, out mapped))
+        {
+          var enumType = nodeType.GenericTypeArguments[0];
+          yield return new MenuItem(mapped.MakeGenericType(enumType));
+        }
+      }
+
+      {
+        if (MultiInputMappingGroup.TryGetSecond(genericType, out var mapped))
+        {
+          var binopType = nodeType.GenericTypeArguments[0];
+          yield return new MenuItem(
+            node: mapped.MakeGenericType(binopType),
+            name: mapped.GetNiceTypeName(),
+            connectionTransferType: ConnectionTransferType.ByIndexLossy
+          );
+        }
+        else if (MultiInputMappingGroup.TryGetFirst(genericType, out mapped))
+        {
+          var binopType = nodeType.GenericTypeArguments[0];
+          yield return new MenuItem(mapped.MakeGenericType(binopType), connectionTransferType: ConnectionTransferType.ByIndexLossy);
+        }
       }
     }
   }

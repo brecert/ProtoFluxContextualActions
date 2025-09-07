@@ -51,35 +51,6 @@ namespace ProtoFluxContextualActions.Patches;
 [HarmonyPatch(typeof(ProtoFluxTool), nameof(ProtoFluxTool.OnSecondaryPress))]
 internal static class ProtoFluxTool_ContextualActions_Patch
 {
-    internal static class NodeHelper
-    {
-        static readonly Dictionary<Type, Type> EnumToNumberTypeMap = new()
-        {
-            {typeof(byte), typeof(EnumToByte<>)},
-            {typeof(int), typeof(EnumToInt<>)},
-            {typeof(long), typeof(EnumToLong<>)},
-            {typeof(sbyte), typeof(EnumToSbyte<>)},
-            {typeof(short), typeof(EnumToShort<>)},
-            {typeof(uint), typeof(EnumToUint<>)},
-            {typeof(ulong), typeof(EnumToUlong<>)},
-            {typeof(ushort), typeof(EnumToUshort<>)},
-        };
-
-        static readonly Dictionary<Type, Type> NumberToEnumTypeMap = new()
-        {
-            {typeof(byte), typeof(ByteToEnum<>)},
-            {typeof(int), typeof(IntToEnum<>)},
-            {typeof(long), typeof(LongToEnum<>)},
-            {typeof(sbyte),typeof(SbyteToEnum<>)},
-            {typeof(short),typeof(ShortToEnum<>)},
-            {typeof(uint), typeof(UintToEnum<>)},
-            {typeof(ulong), typeof(UlongToEnum<>)},
-            {typeof(ushort), typeof(UshortToEnum<>)},
-        };
-        public static bool TryGetEnumToNumberNode(Type enumType, [MaybeNullWhen(false)] out Type type) => EnumToNumberTypeMap.TryGetValue(enumType, out type);
-
-        public static bool TryGetNumbeToEnumNode(Type enumType, [MaybeNullWhen(false)] out Type type) => NumberToEnumTypeMap.TryGetValue(enumType, out type);
-    }
 
     internal readonly struct MenuItem(Type node, Type? binding = null, string? name = null, bool overload = false)
     {
@@ -496,11 +467,11 @@ internal static class ProtoFluxTool_ContextualActions_Patch
 
         if (outputType.IsEnum)
         {
-            yield return new MenuItem(typeof(NextValue<>).MakeGenericType(outputType));
-            yield return new MenuItem(typeof(ShiftEnum<>).MakeGenericType(outputType));
+            yield return new MenuItem(typeof(NextValue<>).MakeGenericType(outputType), name: typeof(NextValue<>).GetNiceName());
+            yield return new MenuItem(typeof(ShiftEnum<>).MakeGenericType(outputType), name: typeof(ShiftEnum<>).GetNiceName());
 
             var enumType = outputType.GetEnumUnderlyingType();
-            if (NodeHelper.TryGetEnumToNumberNode(enumType, out var toNumberType))
+            if (NodeUtils.TryGetEnumToNumberNode(enumType, out var toNumberType))
             {
                 yield return new MenuItem(toNumberType.MakeGenericType(outputType));
             }
@@ -706,7 +677,7 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             // yield return new MenuItem(typeof(ShiftEnum<>).MakeGenericType(inputType));
 
             var enumType = inputType.GetEnumUnderlyingType();
-            if (NodeHelper.TryGetNumbeToEnumNode(enumType, out var toNumberType))
+            if (NodeUtils.TryGetNumberToEnumNode(enumType, out var toNumberType))
             {
                 yield return new MenuItem(toNumberType.MakeGenericType(inputType));
             }
