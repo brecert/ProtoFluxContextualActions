@@ -4,7 +4,7 @@ using FrooxEngine;
 using FrooxEngine.ProtoFlux;
 
 using ProtoFluxContextualActions.Attributes;
-using static ProtoFluxContextualActions.Utils.PsuedoGenericHelper;
+using static ProtoFluxContextualActions.Utils.PsuedoGenericUtils;
 using HarmonyLib;
 using System.Runtime.CompilerServices;
 using System.Collections.Generic;

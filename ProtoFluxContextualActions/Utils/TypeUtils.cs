@@ -6,6 +6,17 @@ namespace ProtoFluxContextualActions.Utils;
 
 static class TypeUtils
 {
+  public static bool TryGetGenericTypeDefinition(this Type type, [NotNullWhen(true)] out Type? genericTypeDefinition)
+  {
+    if (type.IsGenericType)
+    {
+      genericTypeDefinition = type.GetGenericTypeDefinition();
+      return true;
+    }
+    genericTypeDefinition = null;
+    return false;
+  }
+
   public static bool MatchesType(Type match, Type type)
   {
     if (match == type) return true;

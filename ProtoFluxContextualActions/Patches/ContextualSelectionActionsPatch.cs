@@ -4,7 +4,7 @@ using FrooxEngine;
 using FrooxEngine.ProtoFlux;
 
 using ProtoFluxContextualActions.Attributes;
-using static ProtoFluxContextualActions.Utils.PsuedoGenericHelper;
+using static ProtoFluxContextualActions.Utils.PsuedoGenericUtils;
 using HarmonyLib;
 using System.Runtime.CompilerServices;
 using System.Collections.Generic;
@@ -287,14 +287,12 @@ internal static class ContextualSelectionActionsPatch
 
                 if (isQuaternion)
                 {
-                    var slerpNodes = MapPsuedoGenericsToGenericTypes(world, "Slerp_").Where(n => n.Types.Count() == 1).Select(n => (n.Types.First(), NodeUtils.ProtoFluxBindingMapping[n.Node])).ToDictionary();
-                    if (slerpNodes.TryGetValue(outputType, out var slerpType))
+                    if (TryGetPsuedoGenericForType(world, "Slerp_", outputType) is Type slerpType)
                     {
                         yield return new MenuItem(slerpType);
                     }
 
-                    var powNodes = MapPsuedoGenericsToGenericTypes(world, "Pow_").Where(n => n.Types.Count() == 1).Select(n => (n.Types.First(), NodeUtils.ProtoFluxBindingMapping[n.Node])).ToDictionary();
-                    if (powNodes.TryGetValue(outputType, out var powType))
+                    if (TryGetPsuedoGenericForType(world, "Pow_", outputType) is Type powType)
                     {
                         yield return new MenuItem(powType);
                     }
