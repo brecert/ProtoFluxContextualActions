@@ -46,6 +46,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Avatar.BodyNodes;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Interaction;
 using ProtoFlux.Runtimes.Execution.Nodes.Enums;
 using ProtoFlux.Runtimes.Execution.Nodes.Math.Constants;
+using ProtoFlux.Runtimes.Execution.Nodes.Math.Random;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -729,6 +730,12 @@ internal static class ContextualSelectionActionsPatch
       {
         yield return new MenuItem(typeof(RadToDeg), overload: true);
       }
+    }
+
+    // todo: playoneshot group
+    if (nodeType == typeof(PlayOneShot) || nodeType == typeof(PlayOneShotAndWait) && inputProxy.ElementName == "Speed")
+    {
+      yield return new MenuItem(typeof(RandomFloat));
     }
   }
 
