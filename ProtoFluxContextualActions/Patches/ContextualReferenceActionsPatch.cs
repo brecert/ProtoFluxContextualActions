@@ -15,7 +15,7 @@ namespace ProtoFluxContextualActions.Patches;
 
 [HarmonyPatchCategory("ProtoFluxTool Reference Node Creation"), TweakCategory("Adds l.")]
 [HarmonyPatch(typeof(ProtoFluxTool), nameof(ProtoFluxTool.OnSecondaryPress))]
-internal static class ProtoFluxTool_ContextualReferenceActions_Patch
+internal static class ContextualReferenceActionsPatch
 {
   internal readonly struct MenuItem(Type node, Type? binding = null, string? name = null)
   {

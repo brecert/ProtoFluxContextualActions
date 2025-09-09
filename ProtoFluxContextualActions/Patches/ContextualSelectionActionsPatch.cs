@@ -49,7 +49,7 @@ namespace ProtoFluxContextualActions.Patches;
 
 [HarmonyPatchCategory("ProtoFluxTool Contextual Actions"), TweakCategory("Adds 'Contextual Actions' to the ProtoFlux Tool. The secondary press while holding a protoflux tool will be open a context menu of quick actions based on what wire you're dragging instead of always spawning an input node. Pressing secondary again will spawn out an input node like normal.")]
 [HarmonyPatch(typeof(ProtoFluxTool), nameof(ProtoFluxTool.OnSecondaryPress))]
-internal static class ProtoFluxTool_ContextualActions_Patch
+internal static class ContextualSelectionActionsPatch
 {
 
     internal readonly struct MenuItem(Type node, Type? binding = null, string? name = null, bool overload = false)
@@ -543,9 +543,9 @@ internal static class ProtoFluxTool_ContextualActions_Patch
             yield return new MenuItem(typeof(For));
         }
 
-        if (ProtoFluxTool_ContextualSwapActions_Patch.DeltaTimeGroup.Contains(nodeType.GetGenericTypeDefinitionOrSameType()))
+        if (ContextualSwapActionsPatch.DeltaTimeGroup.Contains(nodeType.GetGenericTypeDefinitionOrSameType()))
         {
-            foreach (var dtOperationType in ProtoFluxTool_ContextualSwapActions_Patch.DeltaTimeOperationGroup)
+            foreach (var dtOperationType in ContextualSwapActionsPatch.DeltaTimeOperationGroup)
             {
                 yield return new MenuItem(dtOperationType.MakeGenericType(typeof(float)));
             }

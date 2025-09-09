@@ -35,7 +35,7 @@ namespace ProtoFluxContextualActions.Patches;
 
 [HarmonyPatch(typeof(ProtoFluxTool), nameof(ProtoFluxTool.OnSecondaryPress))]
 [HarmonyPatchCategory("ProtoFluxTool Contextual Swap Actions"), TweakCategory("Adds 'Contextual Swapping Actions' to the ProtoFlux Tool. Double pressing secondary pointing at a node with protoflux tool will be open a context menu of actions to swap the node for another node.", defaultValue: true)] // unstable, disable by default
-internal static class ProtoFluxTool_ContextualSwapActions_Patch
+internal static class ContextualSwapActionsPatch
 {
   // TODO: This can be replaced in the future with flags or a combination of the three automatically.
   //       progress has already been made.
