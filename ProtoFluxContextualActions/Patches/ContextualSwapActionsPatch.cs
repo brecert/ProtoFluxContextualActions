@@ -260,6 +260,11 @@ internal static class ContextualSwapActionsPatch
     typeof(RangeLoopInt),
   ];
 
+  static readonly HashSet<Type> NullCoalesceGroup = [
+    typeof(NullCoalesce<>),
+    typeof(MultiNullCoalesce<>),
+  ];
+
   // todo: currently there's too many, page support or custom uix menus are needed
   static readonly HashSet<Type> EasingGroupFloat = [
     typeof(EaseInBounceFloat),
@@ -807,7 +812,7 @@ internal static class ContextualSwapActionsPatch
         {
           yield return new MenuItem(
             node: match,
-            name: $"{NodeMetadataHelper.GetMetadata(match).Name} (Multi)",
+            name: FormatMultiName(match),
             connectionTransferType: ConnectionTransferType.ByIndexLossy
           );
         }
@@ -826,7 +831,7 @@ internal static class ContextualSwapActionsPatch
       {
         yield return new MenuItem(
           node: matched,
-          name: $"{NodeMetadataHelper.GetMetadata(matched).Name} (Multi)",
+          name: FormatMultiName(matched),
           connectionTransferType: ConnectionTransferType.ByIndexLossy
         );
       }
@@ -863,7 +868,7 @@ internal static class ContextualSwapActionsPatch
         {
           yield return new MenuItem(
             node: match,
-            name: match.GetNiceTypeName().Contains("Multi_") ? $"{NodeMetadataHelper.GetMetadata(match).Name} (Multi)" : null,
+            name: match.GetNiceTypeName().Contains("Multi_") ? FormatMultiName(match) : null,
             connectionTransferType: ConnectionTransferType.ByIndexLossy
           );
         }
@@ -873,7 +878,7 @@ internal static class ContextualSwapActionsPatch
           {
             yield return new MenuItem(
               node: match.MakeGenericType([.. genericTypes]),
-              name: $"{NodeMetadataHelper.GetMetadata(match).Name} (Multi)",
+              name: FormatMultiName(match),
               connectionTransferType: ConnectionTransferType.ByIndexLossy
             );
           }
@@ -951,6 +956,14 @@ internal static class ContextualSwapActionsPatch
         }
       }
 
+      if (NullCoalesceGroup.Contains(genericType))
+      {
+        foreach (var match in NullCoalesceGroup)
+        {
+          yield return new MenuItem(match.MakeGenericType(nodeType.GenericTypeArguments[0]), name: match == typeof(MultiNullCoalesce<>) ? FormatMultiName(nodeType) : null);
+        }
+      }
+
       {
         if (MinMaxGroup.Contains(genericType))
         {
@@ -991,7 +1004,7 @@ internal static class ContextualSwapActionsPatch
           {
             yield return new MenuItem(
               node: match,
-              name: $"{NodeMetadataHelper.GetMetadata(match).Name} (Multi)",
+              name: FormatMultiName(match),
               connectionTransferType: ConnectionTransferType.ByIndexLossy
             );
           }
@@ -1123,6 +1136,11 @@ internal static class ContextualSwapActionsPatch
         }
       }
     }
+  }
+
+  private static string FormatMultiName(Type match)
+  {
+    return $"{NodeMetadataHelper.GetMetadata(match).Name} (Multi)";
   }
 
   private static bool TryGetSwap(BiDictionary<Type, Type> swaps, Type nodeType, out Type match) =>
