@@ -37,11 +37,11 @@ internal static class ContextualReferenceActionsPatch
     {
       var nodeBinding = item.binding ?? ProtoFluxHelper.GetBindingForNode(item.node);
       __instance.SpawnNode(nodeBinding, n =>
-          {
-            n.EnsureElementsInDynamicLists();
-            setup(n);
-            __instance.LocalUser.CloseContextMenu(__instance);
-          });
+      {
+        n.EnsureElementsInDynamicLists();
+        setup(n);
+        __instance.LocalUser.CloseContextMenu(__instance);
+      });
     };
   }
 

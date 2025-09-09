@@ -92,24 +92,24 @@ internal static class ContextualSelectionActionsPatch
               foreach (var item in items)
               {
                 AddMenuItem(__instance, menu, inputProxy.InputType.Value.GetTypeColor(), item, n =>
-                      {
-                        if (item.overload)
-                        {
-                          __instance.StartTask(async () =>
-                                {
-                                  // this is dumb
-                                  // TODO: investigate why it's needed to avoid the one or two update disconnect issue
-                                  await new Updates(1);
-                                  var output = n.GetOutput(0); // TODO: specify
-                                  elementProxy.Node.Target.TryConnectInput(inputProxy.NodeInput.Target, output, allowExplicitCast: false, undoable: true);
-                                });
-                        }
-                        else
-                        {
-                          var output = n.NodeOutputs.First(o => typeof(INodeOutput<>).MakeGenericType(inputProxy.InputType).IsAssignableFrom(o.GetType()));
-                          elementProxy.Node.Target.TryConnectInput(inputProxy.NodeInput.Target, output, allowExplicitCast: false, undoable: true);
-                        }
-                      });
+                {
+                  if (item.overload)
+                  {
+                    __instance.StartTask(async () =>
+                    {
+                      // this is dumb
+                      // TODO: investigate why it's needed to avoid the one or two update disconnect issue
+                      await new Updates(1);
+                      var output = n.GetOutput(0); // TODO: specify
+                      elementProxy.Node.Target.TryConnectInput(inputProxy.NodeInput.Target, output, allowExplicitCast: false, undoable: true);
+                    });
+                  }
+                  else
+                  {
+                    var output = n.NodeOutputs.First(o => typeof(INodeOutput<>).MakeGenericType(inputProxy.InputType).IsAssignableFrom(o.GetType()));
+                    elementProxy.Node.Target.TryConnectInput(inputProxy.NodeInput.Target, output, allowExplicitCast: false, undoable: true);
+                  }
+                });
               }
               break;
             }
@@ -118,17 +118,17 @@ internal static class ContextualSelectionActionsPatch
               foreach (var item in items)
               {
                 AddMenuItem(__instance, menu, outputProxy.OutputType.Value.GetTypeColor(), item, n =>
-                      {
-                        if (item.overload) throw new Exception("Overloading with ProtoFluxOutputProxy is not supported");
-                        var input = n.NodeInputs.First(i => i.TargetType.IsGenericType && (outputProxy.OutputType.Value.IsAssignableFrom(i.TargetType.GenericTypeArguments[0]) || ProtoFlux.Core.TypeHelper.CanImplicitlyConvertTo(outputProxy.OutputType, i.TargetType.GenericTypeArguments[0])));
-                        __instance.StartTask(async () =>
-                              {
-                                // this is dumb
-                                // TODO: investigate why it's needed for casting to work
-                                await new Updates();
-                                n.TryConnectInput(input, outputProxy.NodeOutput.Target, allowExplicitCast: false, undoable: true);
-                              });
-                      });
+                {
+                  if (item.overload) throw new Exception("Overloading with ProtoFluxOutputProxy is not supported");
+                  var input = n.NodeInputs.First(i => i.TargetType.IsGenericType && (outputProxy.OutputType.Value.IsAssignableFrom(i.TargetType.GenericTypeArguments[0]) || ProtoFlux.Core.TypeHelper.CanImplicitlyConvertTo(outputProxy.OutputType, i.TargetType.GenericTypeArguments[0])));
+                  __instance.StartTask(async () =>
+                  {
+                    // this is dumb
+                    // TODO: investigate why it's needed for casting to work
+                    await new Updates();
+                    n.TryConnectInput(input, outputProxy.NodeOutput.Target, allowExplicitCast: false, undoable: true);
+                  });
+                });
               }
               break;
             }
@@ -138,10 +138,10 @@ internal static class ContextualSelectionActionsPatch
               {
                 // the colors should almost always be the same so unique colors are more important maybe?
                 AddMenuItem(__instance, menu, item.node.GetTypeColor(), item, n =>
-                      {
-                        if (item.overload) throw new Exception("Overloading with ProtoFluxImpulseProxy is not supported");
-                        n.TryConnectImpulse(impulseProxy.NodeImpulse.Target, n.GetOperation(0), undoable: true);
-                      });
+                {
+                  if (item.overload) throw new Exception("Overloading with ProtoFluxImpulseProxy is not supported");
+                  n.TryConnectImpulse(impulseProxy.NodeImpulse.Target, n.GetOperation(0), undoable: true);
+                });
               }
               break;
             }
@@ -150,10 +150,10 @@ internal static class ContextualSelectionActionsPatch
               foreach (var item in items)
               {
                 AddMenuItem(__instance, menu, item.node.GetTypeColor(), item, n =>
-                      {
-                        if (item.overload) throw new Exception("Overloading with ProtoFluxOperationProxy is not supported");
-                        n.TryConnectImpulse(n.GetImpulse(0), operationProxy.NodeOperation.Target, undoable: true);
-                      });
+                {
+                  if (item.overload) throw new Exception("Overloading with ProtoFluxOperationProxy is not supported");
+                  n.TryConnectImpulse(n.GetImpulse(0), operationProxy.NodeOperation.Target, undoable: true);
+                });
               }
               break;
             }
@@ -177,12 +177,12 @@ internal static class ContextualSelectionActionsPatch
     {
       var nodeBinding = item.binding ?? ProtoFluxHelper.GetBindingForNode(item.node);
       __instance.SpawnNode(nodeBinding, n =>
-          {
-            n.EnsureElementsInDynamicLists();
-            setup(n);
-            __instance.LocalUser.CloseContextMenu(__instance);
-            CleanupDraggedWire(__instance);
-          });
+      {
+        n.EnsureElementsInDynamicLists();
+        setup(n);
+        __instance.LocalUser.CloseContextMenu(__instance);
+        CleanupDraggedWire(__instance);
+      });
     };
   }
 
