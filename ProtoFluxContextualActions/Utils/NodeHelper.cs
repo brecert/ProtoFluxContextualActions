@@ -11,6 +11,7 @@ namespace ProtoFluxContextualActions.Patches;
 
 internal static class NodeUtils
 {
+
   public static readonly Dictionary<Type, Type> EnumToNumberTypeMap = new()
     {
         {typeof(byte), typeof(EnumToByte<>)},

@@ -47,6 +47,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Interaction;
 using ProtoFlux.Runtimes.Execution.Nodes.Enums;
 using ProtoFlux.Runtimes.Execution.Nodes.Math.Constants;
 using ProtoFlux.Runtimes.Execution.Nodes.Math.Random;
+using ProtoFluxContextualActions.Tagging;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -553,6 +554,14 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(ValueDemultiplex<dummy>), name: "Value Demultiplex");
     }
 
+    if (Groups.WorldTimeFloatGroup.Contains(nodeType))
+    {
+      yield return new MenuItem(typeof(Sin_Float));
+    }
+    else if (Groups.WorldTimeDoubleGroup.Contains(nodeType))
+    {
+      yield return new MenuItem(typeof(Sin_Double));
+    }
 
     if (TypeUtils.MatchesType(typeof(EnumToInt<>), nodeType) || TypeUtils.MatchesType(typeof(TryEnumToInt<>), nodeType))
     {
