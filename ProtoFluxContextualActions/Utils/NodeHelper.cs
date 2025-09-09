@@ -11,7 +11,7 @@ namespace ProtoFluxContextualActions.Patches;
 
 internal static class NodeUtils
 {
-    public static readonly Dictionary<Type, Type> EnumToNumberTypeMap = new()
+  public static readonly Dictionary<Type, Type> EnumToNumberTypeMap = new()
     {
         {typeof(byte), typeof(EnumToByte<>)},
         {typeof(int), typeof(EnumToInt<>)},
@@ -23,7 +23,7 @@ internal static class NodeUtils
         {typeof(ushort), typeof(EnumToUshort<>)},
     };
 
-    public static readonly Dictionary<Type, Type> NumberToEnumTypeMap = new()
+  public static readonly Dictionary<Type, Type> NumberToEnumTypeMap = new()
     {
         {typeof(byte), typeof(ByteToEnum<>)},
         {typeof(int), typeof(IntToEnum<>)},
@@ -35,7 +35,7 @@ internal static class NodeUtils
         {typeof(ushort), typeof(UshortToEnum<>)},
     };
 
-    public static readonly Dictionary<Type, Type> TryEnumToNumberTypeMap = new()
+  public static readonly Dictionary<Type, Type> TryEnumToNumberTypeMap = new()
     {
         {typeof(byte), typeof(TryEnumToByte<>)},
         {typeof(int), typeof(TryEnumToInt<>)},
@@ -47,7 +47,7 @@ internal static class NodeUtils
         {typeof(ushort), typeof(TryEnumToUshort<>)},
     };
 
-    public static readonly Dictionary<Type, Type> TryNumberToEnumTypeMap = new()
+  public static readonly Dictionary<Type, Type> TryNumberToEnumTypeMap = new()
     {
         {typeof(byte), typeof(TryByteToEnum<>)},
         {typeof(int), typeof(TryIntToEnum<>)},
@@ -59,10 +59,10 @@ internal static class NodeUtils
         {typeof(ushort), typeof(UshortToEnum<>)},
     };
 
-    public static bool TryGetEnumToNumberNode(Type enumType, [MaybeNullWhen(false)] out Type type) => EnumToNumberTypeMap.TryGetValue(enumType, out type);
+  public static bool TryGetEnumToNumberNode(Type enumType, [MaybeNullWhen(false)] out Type type) => EnumToNumberTypeMap.TryGetValue(enumType, out type);
 
-    public static bool TryGetNumberToEnumNode(Type enumType, [MaybeNullWhen(false)] out Type type) => NumberToEnumTypeMap.TryGetValue(enumType, out type);
+  public static bool TryGetNumberToEnumNode(Type enumType, [MaybeNullWhen(false)] out Type type) => NumberToEnumTypeMap.TryGetValue(enumType, out type);
 
-    public static readonly Dictionary<Type, Type> ProtoFluxBindingMapping =
-      Traverse.Create(typeof(ProtoFluxHelper)).Field<Dictionary<Type, Type>>("protoFluxToBindingMapping").Value.ToDictionary(a => a.Value, a => a.Key);
+  public static readonly Dictionary<Type, Type> ProtoFluxBindingMapping =
+    Traverse.Create(typeof(ProtoFluxHelper)).Field<Dictionary<Type, Type>>("protoFluxToBindingMapping").Value.ToDictionary(a => a.Value, a => a.Key);
 }

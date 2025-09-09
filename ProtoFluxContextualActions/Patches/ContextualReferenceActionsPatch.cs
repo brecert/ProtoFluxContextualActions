@@ -50,7 +50,7 @@ internal static class ContextualReferenceActionsPatch
   internal static bool Prefix(ProtoFluxTool __instance)
   {
     var grabbedReference = __instance.GetGrabbedReference();
-    if (grabbedReference == null) return true; 
+    if (grabbedReference == null) return true;
 
     var items = cache.GetOrCreate(grabbedReference.GetType(), () => MenuItems(__instance, grabbedReference).Take(10).ToArray());
 
