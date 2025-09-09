@@ -22,7 +22,6 @@ using ProtoFlux.Runtimes.Execution;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Variables;
 using ProtoFluxContextualActions.Extensions;
 using ProtoFluxContextualActions.Utils;
-using System.Diagnostics.CodeAnalysis;
 using ProtoFluxContextualActions.Utils.ProtoFlux;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users.Roots;
@@ -609,10 +608,10 @@ internal static class ContextualSwapActionsPatch
       .Concat(MapPsuedoGenericsToGenericTypes(__instance.World, "AvgMulti_"))
       .ToDictionary((a) => NodeUtils.ProtoFluxBindingMapping[a.Node], (a) => a.Types);
 
-    var approximatelyGroup = MapPsuedoGenericsToGenericTypes(__instance.World, "Approximately_")
-      .Concat(MapPsuedoGenericsToGenericTypes(__instance.World, "ApproximatelyNot_"))
-      .ToDictionary((a) => NodeUtils.ProtoFluxBindingMapping[a.Node], (a) => a.Types);
+    var approximatelyNodes = MapPsuedoGenericsToGenericTypes(__instance.World, "Approximately_").ToBiDictionary(t => NodeUtils.ProtoFluxBindingMapping[t.Node], t => t.Types.First());
+    var approximatelyNotNodes = MapPsuedoGenericsToGenericTypes(__instance.World, "ApproximatelyNot_").ToBiDictionary(t => NodeUtils.ProtoFluxBindingMapping[t.Node], t => t.Types.First());
 
+    var approximatelyGroup = approximatelyNodes.AsEnumerable().Concat(approximatelyNotNodes.AsEnumerable()).ToDictionary(a => a.First, a => a.Second);
 
     if (GetDirectionGroup.Contains(nodeType))
     {
@@ -849,16 +848,25 @@ internal static class ContextualSwapActionsPatch
     }
 
     {
-      if (approximatelyGroup.TryGetValue(nodeType, out var genericTypes))
+      if (approximatelyGroup.TryGetValue(nodeType, out var typeArgument))
       {
-        var matchingNodes = approximatelyGroup.Where(a => genericTypes.SequenceEqual(a.Value)).Select(a => a.Key);
+        var matchingNodes = approximatelyGroup.Where(a => a.Value == typeArgument).Select(a => a.Key);
         foreach (var match in matchingNodes)
         {
           yield return new MenuItem(match);
         }
+
+        // todo: invert so nodeType.IsApproxamatelyNotNode()
+        if (approximatelyNodes.ContainsFirst(nodeType))
+        {
+          yield return new MenuItem(typeof(ValueEquals<>).MakeGenericType(typeArgument));
+        }
+        else if (approximatelyNotNodes.ContainsFirst(nodeType))
+        {
+          yield return new MenuItem(typeof(ValueNotEquals<>).MakeGenericType(typeArgument));
+        }
       }
     }
-
 
     {
       if (avgGroup.TryGetValue(nodeType, out var genericTypes))
@@ -1133,6 +1141,17 @@ internal static class ContextualSwapActionsPatch
         {
           var binopType = nodeType.GenericTypeArguments[0];
           yield return new MenuItem(mapped.MakeGenericType(binopType), connectionTransferType: ConnectionTransferType.ByIndexLossy);
+        }
+      }
+
+      {
+        if (genericType == typeof(ValueEquals<>) && approximatelyNodes.TryGetFirst(nodeType.GenericTypeArguments[0], out var first))
+        {
+          yield return new MenuItem(first);
+        }
+        else if (genericType == typeof(ValueNotEquals<>) && approximatelyNotNodes.TryGetFirst(nodeType.GenericTypeArguments[0], out first))
+        {
+          yield return new MenuItem(first);
         }
       }
     }
