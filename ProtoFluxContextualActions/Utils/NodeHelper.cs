@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using FrooxEngine.ProtoFlux;
+using HarmonyLib;
 using ProtoFlux.Runtimes.Execution.Nodes.Enums;
 
 namespace ProtoFluxContextualActions.Patches;
@@ -59,4 +62,7 @@ internal static class NodeUtils
     public static bool TryGetEnumToNumberNode(Type enumType, [MaybeNullWhen(false)] out Type type) => EnumToNumberTypeMap.TryGetValue(enumType, out type);
 
     public static bool TryGetNumberToEnumNode(Type enumType, [MaybeNullWhen(false)] out Type type) => NumberToEnumTypeMap.TryGetValue(enumType, out type);
+
+    public static readonly Dictionary<Type, Type> ProtoFluxBindingMapping =
+      Traverse.Create(typeof(ProtoFluxHelper)).Field<Dictionary<Type, Type>>("protoFluxToBindingMapping").Value.ToDictionary(a => a.Value, a => a.Key);
 }

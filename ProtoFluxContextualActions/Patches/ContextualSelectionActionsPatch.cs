@@ -4,6 +4,7 @@ using FrooxEngine;
 using FrooxEngine.ProtoFlux;
 
 using ProtoFluxContextualActions.Attributes;
+using static ProtoFluxContextualActions.Utils.PsuedoGenericHelper;
 using HarmonyLib;
 using System.Runtime.CompilerServices;
 using System.Collections.Generic;
@@ -278,50 +279,70 @@ internal static class ContextualSelectionActionsPatch
             //       Feels a little weird though, ux is difficult. A custom uix menu could help.
             if (target is ProtoFluxOutputProxy { OutputType.Value: var outputType } && (outputType.IsUnmanaged() || typeof(ISphericalHarmonics).IsAssignableFrom(outputType)))
             {
+                var world = target.World;
                 var coder = Traverse.Create(typeof(Coder<>).MakeGenericType(outputType));
-                var isMatrix = typeof(IMatrix).IsAssignableFrom(outputType);
+                var isMatrix = outputType.IsMatrixType();
+                var isQuaternion = outputType.IsQuaternionType();
                 // only handle values
 
-                if (coder.Property<bool>("SupportsAddSub").Value)
+                if (isQuaternion)
                 {
-                    yield return new MenuItem(typeof(ValueAdd<>).MakeGenericType(outputType));
-                    yield return new MenuItem(typeof(ValueSub<>).MakeGenericType(outputType));
+                    var slerpNodes = MapPsuedoGenericsToGenericTypes(world, "Slerp_").Where(n => n.Types.Count() == 1).Select(n => (n.Types.First(), NodeUtils.ProtoFluxBindingMapping[n.Node])).ToDictionary();
+                    if (slerpNodes.TryGetValue(outputType, out var slerpType))
+                    {
+                        yield return new MenuItem(slerpType);
+                    }
+
+                    var powNodes = MapPsuedoGenericsToGenericTypes(world, "Pow_").Where(n => n.Types.Count() == 1).Select(n => (n.Types.First(), NodeUtils.ProtoFluxBindingMapping[n.Node])).ToDictionary();
+                    if (powNodes.TryGetValue(outputType, out var powType))
+                    {
+                        yield return new MenuItem(powType);
+                    }
+                }
+                else
+                {
+                    if (coder.Property<bool>("SupportsAddSub").Value)
+                    {
+                        yield return new MenuItem(typeof(ValueAdd<>).MakeGenericType(outputType));
+                        yield return new MenuItem(typeof(ValueSub<>).MakeGenericType(outputType));
+                    }
+
+                    if (coder.Property<bool>("SupportsMul").Value)
+                    {
+                        yield return new MenuItem(typeof(ValueMul<>).MakeGenericType(outputType));
+                    }
+
+                    if (coder.Property<bool>("SupportsDiv").Value)
+                    {
+                        yield return new MenuItem(typeof(ValueDiv<>).MakeGenericType(outputType));
+                    }
+
+                    if (coder.Property<bool>("SupportsNegate").Value)
+                    {
+                        yield return new MenuItem(typeof(ValueNegate<>).MakeGenericType(outputType));
+                    }
+
+                    if (coder.Property<bool>("SupportsMod").Value)
+                    {
+                        yield return new MenuItem(typeof(ValueMod<>).MakeGenericType(outputType));
+                    }
+
+                    if (coder.Property<bool>("SupportsAbs").Value && !isMatrix)
+                    {
+                        yield return new MenuItem(typeof(ValueAbs<>).MakeGenericType(outputType));
+                    }
+
+                    if (coder.Property<bool>("SupportsComparison").Value)
+                    {
+                        // yield return new MenuItem(typeof(ValueLessThan<>).MakeGenericType(outputType));
+                        // yield return new MenuItem(typeof(ValueLessOrEqual<>).MakeGenericType(outputType));
+                        // yield return new MenuItem(typeof(ValueGreaterThan<>).MakeGenericType(outputType));
+                        // yield return new MenuItem(typeof(ValueGreaterOrEqual<>).MakeGenericType(outputType));
+                        yield return new MenuItem(typeof(ValueEquals<>).MakeGenericType(outputType));
+                        // yield return new MenuItem(typeof(ValueNotEquals<>).MakeGenericType(outputType));
+                    }
                 }
 
-                if (coder.Property<bool>("SupportsMul").Value)
-                {
-                    yield return new MenuItem(typeof(ValueMul<>).MakeGenericType(outputType));
-                }
-
-                if (coder.Property<bool>("SupportsDiv").Value)
-                {
-                    yield return new MenuItem(typeof(ValueDiv<>).MakeGenericType(outputType));
-                }
-
-                if (coder.Property<bool>("SupportsNegate").Value)
-                {
-                    yield return new MenuItem(typeof(ValueNegate<>).MakeGenericType(outputType));
-                }
-
-                if (coder.Property<bool>("SupportsMod").Value)
-                {
-                    yield return new MenuItem(typeof(ValueMod<>).MakeGenericType(outputType));
-                }
-
-                if (coder.Property<bool>("SupportsAbs").Value && !isMatrix)
-                {
-                    yield return new MenuItem(typeof(ValueAbs<>).MakeGenericType(outputType));
-                }
-
-                if (coder.Property<bool>("SupportsComparison").Value)
-                {
-                    // yield return new MenuItem(typeof(ValueLessThan<>).MakeGenericType(outputType));
-                    // yield return new MenuItem(typeof(ValueLessOrEqual<>).MakeGenericType(outputType));
-                    // yield return new MenuItem(typeof(ValueGreaterThan<>).MakeGenericType(outputType));
-                    // yield return new MenuItem(typeof(ValueGreaterOrEqual<>).MakeGenericType(outputType));
-                    yield return new MenuItem(typeof(ValueEquals<>).MakeGenericType(outputType));
-                    // yield return new MenuItem(typeof(ValueNotEquals<>).MakeGenericType(outputType));
-                }
 
                 if (TryGetInverseNode(outputType, out var inverseNodeType))
                 {

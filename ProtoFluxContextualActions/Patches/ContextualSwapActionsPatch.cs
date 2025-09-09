@@ -4,6 +4,7 @@ using FrooxEngine;
 using FrooxEngine.ProtoFlux;
 
 using ProtoFluxContextualActions.Attributes;
+using static ProtoFluxContextualActions.Utils.PsuedoGenericHelper;
 using HarmonyLib;
 using System.Runtime.CompilerServices;
 using System.Collections.Generic;
@@ -558,9 +559,6 @@ internal static class ContextualSwapActionsPatch
     throw new Exception($"Unable to find IVariable node for type '{type}'");
   }
 
-  static readonly Dictionary<Type, Type> protoFluxBindingMapping =
-    Traverse.Create(typeof(ProtoFluxHelper)).Field<Dictionary<Type, Type>>("protoFluxToBindingMapping").Value.ToDictionary(a => a.Value, a => a.Key);
-
   internal static IEnumerable<MenuItem> GetMenuItems(ProtoFluxTool __instance, ProtoFluxNode nodeComponent)
   {
     var node = nodeComponent.NodeInstance;
@@ -589,26 +587,26 @@ internal static class ContextualSwapActionsPatch
     // realistically with current resonite it doesn't matter and only needs to be done once.
     var binaryOperationsGroup = binaryOperations
         .SelectMany(a => a)
-        .ToDictionary((a) => protoFluxBindingMapping[a.Node], (a) => a.Types.ToArray());
+        .ToDictionary((a) => NodeUtils.ProtoFluxBindingMapping[a.Node], (a) => a.Types.ToArray());
 
     var binaryOperationsMultiGroup = binaryOperationsMulti
         .SelectMany(a => a)
-        .ToDictionary((a) => protoFluxBindingMapping[a.Node], (a) => a.Types.ToArray());
+        .ToDictionary((a) => NodeUtils.ProtoFluxBindingMapping[a.Node], (a) => a.Types.ToArray());
 
     var binaryOperationsMultiSwapMap = binaryOperationsGroup.Keys.Zip(binaryOperationsMultiGroup.Keys).ToBiDictionary();
 
     var numericLogGroup = MapPsuedoGenericsToGenericTypes(__instance.World, "Log_")
       .Concat(MapPsuedoGenericsToGenericTypes(__instance.World, "Log10_"))
       .Concat(MapPsuedoGenericsToGenericTypes(__instance.World, "LogN_"))
-      .ToDictionary((a) => protoFluxBindingMapping[a.Node], (a) => a.Types.ToArray());
+      .ToDictionary((a) => NodeUtils.ProtoFluxBindingMapping[a.Node], (a) => a.Types.ToArray());
 
     var avgGroup = MapPsuedoGenericsToGenericTypes(__instance.World, "Avg_")
       .Concat(MapPsuedoGenericsToGenericTypes(__instance.World, "AvgMulti_"))
-      .ToDictionary((a) => protoFluxBindingMapping[a.Node], (a) => a.Types);
+      .ToDictionary((a) => NodeUtils.ProtoFluxBindingMapping[a.Node], (a) => a.Types);
 
     var approximatelyGroup = MapPsuedoGenericsToGenericTypes(__instance.World, "Approximately_")
       .Concat(MapPsuedoGenericsToGenericTypes(__instance.World, "ApproximatelyNot_"))
-      .ToDictionary((a) => protoFluxBindingMapping[a.Node], (a) => a.Types);
+      .ToDictionary((a) => NodeUtils.ProtoFluxBindingMapping[a.Node], (a) => a.Types);
 
 
     if (GetDirectionGroup.Contains(nodeType))
@@ -896,17 +894,17 @@ internal static class ContextualSwapActionsPatch
     if (VariableStoreNodesGroup.Any(t => nodeType.IsGenericType ? t == nodeType.GetGenericTypeDefinition() : t == nodeType))
     {
       var storageType = GetIVariableValueType(nodeType);
-      yield return new MenuItem(protoFluxBindingMapping[ProtoFluxHelper.GetLocalNode(storageType).GetGenericTypeDefinition()].MakeGenericType(storageType));
-      yield return new MenuItem(protoFluxBindingMapping[ProtoFluxHelper.GetStoreNode(storageType).GetGenericTypeDefinition()].MakeGenericType(storageType));
+      yield return new MenuItem(NodeUtils.ProtoFluxBindingMapping[ProtoFluxHelper.GetLocalNode(storageType).GetGenericTypeDefinition()].MakeGenericType(storageType));
+      yield return new MenuItem(NodeUtils.ProtoFluxBindingMapping[ProtoFluxHelper.GetStoreNode(storageType).GetGenericTypeDefinition()].MakeGenericType(storageType));
 
       var dataModelStore = ProtoFluxHelper.GetDataModelStoreNode(storageType);
       if (dataModelStore.IsGenericType)
       {
-        yield return new MenuItem(protoFluxBindingMapping[dataModelStore.GetGenericTypeDefinition()].MakeGenericType(dataModelStore.GenericTypeArguments));
+        yield return new MenuItem(NodeUtils.ProtoFluxBindingMapping[dataModelStore.GetGenericTypeDefinition()].MakeGenericType(dataModelStore.GenericTypeArguments));
       }
       else
       {
-        yield return new MenuItem(protoFluxBindingMapping[dataModelStore]);
+        yield return new MenuItem(NodeUtils.ProtoFluxBindingMapping[dataModelStore]);
       }
     }
 
@@ -1133,27 +1131,6 @@ internal static class ContextualSwapActionsPatch
   #endregion
 
   #region Utils
-  static bool TryGetGenericTypeDefinition(this Type type, [NotNullWhen(true)] out Type? genericTypeDefinition)
-  {
-    if (type.IsGenericType)
-    {
-      genericTypeDefinition = type.GetGenericTypeDefinition();
-      return true;
-    }
-    genericTypeDefinition = null;
-    return false;
-  }
-
-  public static IEnumerable<(Type Node, IEnumerable<Type> Types)> MapPsuedoGenericsToGenericTypes(World world, string startingWith)
-  {
-    var protoFluxNodes = Traverse.Create(typeof(ProtoFluxHelper)).Field<Dictionary<string, Type>>("protoFluxNodes").Value;
-    return protoFluxNodes.Values
-      .Select(t => (name: t.GetNiceTypeName(), type: t))
-      .Where(a => a.name.StartsWith(startingWith) && !a.type.IsGenericType)
-      .Select(a => (a.type, ParseUnderscoreGenerics(world, a.name[startingWith.Length..])))
-      // skip non matching
-      .Where(a => a.Item2.All(t => t != null));
-  }
 
   class ArrayComparer<T> : EqualityComparer<T[]>
   {
@@ -1163,10 +1140,6 @@ internal static class ContextualSwapActionsPatch
     public override int GetHashCode(T[] obj) =>
       StructuralComparisons.StructuralEqualityComparer.GetHashCode(obj);
   }
-
-  static IEnumerable<Type> ParseUnderscoreGenerics(World world, string generics) =>
-    generics.Split('_').Select(name => world.Types.DecodeType(name.ToLower()) ?? world.Types.DecodeType(name));
-
 
   [HarmonyReversePatch]
   [HarmonyPatch(typeof(ProtoFluxTool), "CleanupDraggedWire")]
