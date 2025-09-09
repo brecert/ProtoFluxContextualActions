@@ -45,6 +45,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Avatar;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Avatar.BodyNodes;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Interaction;
 using ProtoFlux.Runtimes.Execution.Nodes.Enums;
+using ProtoFlux.Runtimes.Execution.Nodes.Math.Constants;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -717,6 +718,17 @@ internal static class ContextualSelectionActionsPatch
     {
       yield return new MenuItem(typeof(ImpulseDemultiplexer), name: "Impulse Demultiplexer");
       yield return new MenuItem(typeof(IndexOfFirstValueMatch<dummy>));
+    }
+
+
+    if (TypeUtils.MatchesType(typeof(ValueMul<>), nodeType))
+    {
+      var atan2Type = TryGetPsuedoGenericForType(inputProxy.World, "Atan2_", nodeType.GenericTypeArguments[0]);
+      var nodeHasAtan2Connection = inputProxy.Node.Target.NodeInstance.AllInputElements().Any(i => i.Source?.OwnerNode.GetType() == atan2Type);
+      if (nodeHasAtan2Connection)
+      {
+        yield return new MenuItem(typeof(RadToDeg), overload: true);
+      }
     }
   }
 
