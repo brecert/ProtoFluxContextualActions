@@ -299,6 +299,16 @@ internal static class ContextualSelectionActionsPatch
           {
             yield return new MenuItem(powType);
           }
+
+          if (coder.Property<bool>("SupportsMul").Value)
+          {
+            yield return new MenuItem(typeof(ValueMul<>).MakeGenericType(outputType));
+          }
+          
+          if (coder.Property<bool>("SupportsDiv").Value)
+          {
+            yield return new MenuItem(typeof(ValueDiv<>).MakeGenericType(outputType));
+          }
         }
         else
         {
