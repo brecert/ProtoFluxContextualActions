@@ -789,7 +789,7 @@ internal static class ContextualSwapActionsPatch
 
     {
       if (TryGetSwap(SetGlobalLocalEquivilents, nodeType, out var match)) yield return new(match);
-      if (TryGetSwap(GetGlobalLocalEquivilents, nodeType, out match)) yield return new(match);
+      if (TryGetSwap(GetGlobalLocalEquivilents, nodeType, out match)) yield return new(match, connectionTransferType: ConnectionTransferType.ByIndexLossy);
     }
 
     {
