@@ -717,6 +717,11 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(CountOccurrences));
     }
 
+    if (TypeUtils.MatchInterface(inputType, typeof(IAsset), out _))
+    {
+      yield return new MenuItem(typeof(GetAsset<>).MakeGenericType(inputType));
+    }
+
 
     if (inputType.IsEnum)
     {
