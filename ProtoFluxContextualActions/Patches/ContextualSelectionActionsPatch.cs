@@ -502,6 +502,7 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(NextValue<>).MakeGenericType(outputType), name: typeof(NextValue<>).GetNiceName());
       yield return new MenuItem(typeof(ShiftEnum<>).MakeGenericType(outputType), name: typeof(ShiftEnum<>).GetNiceName());
       yield return new MenuItem(typeof(TryEnumToInt<>).MakeGenericType(outputType), name: "TryEnumToInt<T>");
+      yield return new MenuItem(typeof(ValueEquals<>).MakeGenericType(outputType));
 
       var enumType = outputType.GetEnumUnderlyingType();
       if (NodeUtils.TryGetEnumToNumberNode(enumType, out var toNumberType))
