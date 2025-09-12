@@ -265,73 +265,6 @@ internal static class ContextualSwapActionsPatch
     typeof(MultiNullCoalesce<>),
   ];
 
-  // todo: currently there's too many, page support or custom uix menus are needed
-  static readonly HashSet<Type> EasingGroupFloat = [
-    typeof(EaseInBounceFloat),
-    typeof(EaseInCircularFloat),
-    typeof(EaseInCubicFloat),
-    typeof(EaseInElasticFloat),
-    typeof(EaseInExponentialFloat),
-    typeof(EaseInOutBounceFloat),
-    typeof(EaseInOutCircularFloat),
-    typeof(EaseInOutCubicFloat),
-    typeof(EaseInOutElasticFloat),
-    typeof(EaseInOutExponentialFloat),
-    typeof(EaseInOutQuadraticFloat),
-    typeof(EaseInOutQuarticFloat),
-    typeof(EaseInOutQuinticFloat),
-    typeof(EaseInOutReboundFloat),
-    typeof(EaseInOutSineFloat),
-    typeof(EaseInQuadraticFloat),
-    typeof(EaseInQuarticFloat),
-    typeof(EaseInQuinticFloat),
-    typeof(EaseInReboundFloat),
-    typeof(EaseInSineFloat),
-    typeof(EaseOutBounceFloat),
-    typeof(EaseOutCircularFloat),
-    typeof(EaseOutCubicFloat),
-    typeof(EaseOutElasticFloat),
-    typeof(EaseOutExponentialFloat),
-    typeof(EaseOutQuadraticFloat),
-    typeof(EaseOutQuarticFloat),
-    typeof(EaseOutQuinticFloat),
-    typeof(EaseOutReboundFloat),
-    typeof(EaseOutSineFloat),
-  ];
-
-  static readonly HashSet<Type> EasingGroupDouble = [
-    typeof(EaseInBounceDouble),
-    typeof(EaseInCircularDouble),
-    typeof(EaseInCubicDouble),
-    typeof(EaseInElasticDouble),
-    typeof(EaseInExponentialDouble),
-    typeof(EaseInOutBounceDouble),
-    typeof(EaseInOutCircularDouble),
-    typeof(EaseInOutCubicDouble),
-    typeof(EaseInOutElasticDouble),
-    typeof(EaseInOutExponentialDouble),
-    typeof(EaseInOutQuadraticDouble),
-    typeof(EaseInOutQuarticDouble),
-    typeof(EaseInOutQuinticDouble),
-    typeof(EaseInOutReboundDouble),
-    typeof(EaseInOutSineDouble),
-    typeof(EaseInQuadraticDouble),
-    typeof(EaseInQuarticDouble),
-    typeof(EaseInQuinticDouble),
-    typeof(EaseInReboundDouble),
-    typeof(EaseInSineDouble),
-    typeof(EaseOutBounceDouble),
-    typeof(EaseOutCircularDouble),
-    typeof(EaseOutCubicDouble),
-    typeof(EaseOutElasticDouble),
-    typeof(EaseOutExponentialDouble),
-    typeof(EaseOutQuadraticDouble),
-    typeof(EaseOutQuarticDouble),
-    typeof(EaseOutQuinticDouble),
-    typeof(EaseOutReboundDouble),
-    typeof(EaseOutSineDouble),
-  ];
-
   static readonly HashSet<Type> PlayOneShotGroup = [
     typeof(PlayOneShot),
     typeof(PlayOneShotAndWait),
@@ -630,17 +563,17 @@ internal static class ContextualSwapActionsPatch
       }
     }
 
-    if (EasingGroupFloat.Contains(nodeType))
+    if (EasingGroups.ContainsNodeFloat(nodeType))
     {
-      foreach (var match in EasingGroupFloat)
+      foreach (var match in EasingGroups.GetEasingOfSameKindFloat(nodeType))
       {
         yield return new MenuItem(match);
       }
     }
 
-    if (EasingGroupDouble.Contains(nodeType))
+    if (EasingGroups.ContainsNodeDouble(nodeType))
     {
-      foreach (var match in EasingGroupDouble)
+      foreach (var match in EasingGroups.GetEasingOfSameKindDouble(nodeType))
       {
         yield return new MenuItem(match);
       }
