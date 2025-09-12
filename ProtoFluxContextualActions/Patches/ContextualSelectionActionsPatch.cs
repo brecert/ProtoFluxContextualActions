@@ -48,6 +48,8 @@ using ProtoFlux.Runtimes.Execution.Nodes.Enums;
 using ProtoFlux.Runtimes.Execution.Nodes.Math.Constants;
 using ProtoFlux.Runtimes.Execution.Nodes.Math.Random;
 using ProtoFluxContextualActions.Tagging;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Mouse;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users.LocalScreen;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -304,7 +306,7 @@ internal static class ContextualSelectionActionsPatch
           {
             yield return new MenuItem(typeof(ValueMul<>).MakeGenericType(outputType));
           }
-          
+
           if (coder.Property<bool>("SupportsDiv").Value)
           {
             yield return new MenuItem(typeof(ValueDiv<>).MakeGenericType(outputType));
@@ -509,7 +511,6 @@ internal static class ContextualSelectionActionsPatch
       {
         yield return new MenuItem(toNumberType.MakeGenericType(outputType));
       }
-
     }
 
     if (TypeUtils.MatchInterface(outputType, typeof(IQuantity<>), out var quantityType))
@@ -563,6 +564,14 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(ValueMultiplex<dummy>), name: "Value Multiplex");
       yield return new MenuItem(typeof(ImpulseMultiplexer), name: "Impulse Multiplex");
       yield return new MenuItem(typeof(ValueDemultiplex<dummy>), name: "Value Demultiplex");
+    }
+
+    if (Groups.MousePositionGroup.Contains(nodeType))
+    {
+      foreach (var node in Groups.ScreenPointGroup)
+      {
+        yield return new(node);
+      }
     }
 
     if (Groups.WorldTimeFloatGroup.Contains(nodeType))
@@ -718,11 +727,15 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(CountOccurrences));
     }
 
+    if (inputProxy.ElementName == nameof(LocalScreenPointToDirection.NormalizedScreenPoint))
+    {
+      yield return new MenuItem(typeof(NormalizedMousePosition));
+    }
+
     if (TypeUtils.MatchInterface(inputType, typeof(IAsset), out _))
     {
       yield return new MenuItem(typeof(GetAsset<>).MakeGenericType(inputType));
     }
-
 
     if (inputType.IsEnum)
     {

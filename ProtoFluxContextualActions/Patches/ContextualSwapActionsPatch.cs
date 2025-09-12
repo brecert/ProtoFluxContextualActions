@@ -30,6 +30,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Operators;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Audio;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Slots;
 using ProtoFlux.Runtimes.Execution.Nodes.Enums;
+using ProtoFluxContextualActions.Tagging;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -702,6 +703,21 @@ internal static class ContextualSwapActionsPatch
       }
     }
 
+    if (Groups.ScreenPointGroup.Contains(nodeType))
+    {
+      foreach (var match in Groups.ScreenPointGroup)
+      {
+        yield return new MenuItem(match);
+      }
+    }
+
+    if (Groups.MousePositionGroup.Contains(nodeType))
+    {
+      foreach (var match in Groups.MousePositionGroup)
+      {
+        yield return new MenuItem(match);
+      }
+    }
 
     if (FindSlotGroup.Contains(nodeType))
     {
