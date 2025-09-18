@@ -771,7 +771,7 @@ internal static class ContextualSelectionActionsPatch
     }
 
     // todo: playoneshot group
-    if (nodeType == typeof(PlayOneShot) || nodeType == typeof(PlayOneShotAndWait) && inputProxy.ElementName == "Speed")
+    if ((nodeType == typeof(PlayOneShot) || nodeType == typeof(PlayOneShotAndWait)) && inputProxy.ElementName == "Speed")
     {
       yield return new MenuItem(typeof(RandomFloat));
     }
