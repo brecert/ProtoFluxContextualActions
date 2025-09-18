@@ -555,6 +555,11 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(GetSlot));
     }
 
+    if (TypeUtils.MatchInterface(outputType, typeof(IAssetProvider<>), out var assetProviderType))
+    {
+      yield return new MenuItem(typeof(GetAsset<>).MakeGenericType(assetProviderType.GenericTypeArguments[0]));
+    }
+
     if (outputType == typeof(int) && (
         nodeType == typeof(ImpulseDemultiplexer)
         || TypeUtils.MatchesType(typeof(IndexOfFirstValueMatch<>), nodeType)
