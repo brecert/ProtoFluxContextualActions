@@ -763,7 +763,7 @@ internal static class ContextualSelectionActionsPatch
     if (TypeUtils.MatchesType(typeof(ValueMul<>), nodeType))
     {
       var atan2Type = TryGetPsuedoGenericForType(inputProxy.World, "Atan2_", nodeType.GenericTypeArguments[0]);
-      var nodeHasAtan2Connection = inputProxy.Node.Target.NodeInstance.AllInputElements().Any(i => i.Source?.OwnerNode.GetType() == atan2Type);
+      var nodeHasAtan2Connection = inputProxy.Node.Target.NodeInstance.AllInputElements().Any(i => i.Source is IOutput source && source.OwnerNode.GetType() == atan2Type);
       if (nodeHasAtan2Connection)
       {
         yield return new MenuItem(typeof(RadToDeg), overload: true);
