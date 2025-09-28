@@ -31,8 +31,6 @@ public class ProtoFluxContextualActions : ResoniteMod
 
   private static readonly Dictionary<string, ModConfigurationKey<bool>> patchCategoryKeys = [];
 
-  private static IEnumerable<string> Categories => patchCategoryKeys.Keys;
-
   static ProtoFluxContextualActions()
   {
     DebugFunc(() => $"Static Initializing {nameof(ProtoFluxContextualActions)}...");
@@ -73,7 +71,9 @@ public class ProtoFluxContextualActions : ResoniteMod
     HotReloader.RegisterForHotReload(this);
 #endif
 
-    Config = GetConfiguration();
+    Config = GetConfiguration()!;
+    Config.OnThisConfigurationChanged += OnConfigChanged;
+
     PatchCategories();
     harmony.PatchAllUncategorized(ModAssembly);
   }
@@ -94,7 +94,7 @@ public class ProtoFluxContextualActions : ResoniteMod
 
   private static void UnpatchCategories()
   {
-    foreach (var category in Categories)
+    foreach (var category in patchCategoryKeys.Keys)
     {
       harmony.UnpatchCategory(ModAssembly, category);
     }
@@ -102,24 +102,29 @@ public class ProtoFluxContextualActions : ResoniteMod
 
   private static void PatchCategories()
   {
-    foreach (var category in Categories)
+    foreach (var (category, key) in patchCategoryKeys)
     {
-      harmony.PatchCategory(ModAssembly, category);
+      if (key.Value)
+      {
+        harmony.PatchCategory(ModAssembly, category);
+      }
     }
   }
 
   private static void OnConfigChanged(ConfigurationChangedEvent change)
   {
     var category = change.Key.Name;
-    if (patchCategoryKeys.TryGetValue(category, out var key))
+    if (change.Key is ModConfigurationKey<bool> key && patchCategoryKeys.ContainsKey(category))
     {
-      if (key.Value)
+      if (change.Config.GetValue(key))
       {
-        harmony.UnpatchCategory(category);
+        DebugFunc(() => $"Patching {category}...");
+        harmony.PatchCategory(category);
       }
       else
       {
-        harmony.PatchCategory(category);
+        DebugFunc(() => $"Unpatching {category}...");
+        harmony.UnpatchCategory(category);
       }
     }
   }
