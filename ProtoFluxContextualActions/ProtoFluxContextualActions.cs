@@ -27,9 +27,11 @@ public class ProtoFluxContextualActions : ResoniteMod
 
   private static readonly Harmony harmony = new(HarmonyId);
 
-  private static ModConfiguration? config;
+  internal static ModConfiguration? Config;
 
   private static readonly Dictionary<string, ModConfigurationKey<bool>> patchCategoryKeys = [];
+
+  private static IEnumerable<string> Categories => patchCategoryKeys.Keys;
 
   static ProtoFluxContextualActions()
   {
@@ -37,25 +39,26 @@ public class ProtoFluxContextualActions : ResoniteMod
 
     var types = AccessTools.GetTypesFromAssembly(ModAssembly);
 
-    var categoryKeys = types
-      .Select(t => (patchCategory: t.GetCustomAttribute<HarmonyPatchCategory>(), tweakCategory: t.GetCustomAttribute<TweakCategoryAttribute>()))
-      .Where(t => t.patchCategory != null && t.tweakCategory != null)
-      .Select(t => new ModConfigurationKey<bool>(t.patchCategory!.info.category, t.tweakCategory!.Description, computeDefault: () => t.tweakCategory.DefaultValue));
-
-    foreach (var key in categoryKeys)
+    foreach (var type in types)
     {
-      DebugFunc(() => $"Registering patch category {key.Name}...");
-      patchCategoryKeys[key.Name] = key;
+      var patchCategory = type.GetCustomAttribute<HarmonyPatchCategory>();
+      var tweakCategory = type.GetCustomAttribute<TweakCategoryAttribute>();
+      if (patchCategory != null && tweakCategory != null)
+      {
+        ModConfigurationKey<bool> key = new(
+          name: patchCategory.info.category,
+          description: tweakCategory.Description,
+          computeDefault: () => tweakCategory.DefaultValue
+        );
+
+        DebugFunc(() => $"Registering patch category {key.Name}...");
+        patchCategoryKeys[key.Name] = key;
+      }
     }
   }
 
   public override void DefineConfiguration(ModConfigurationDefinitionBuilder builder)
   {
-    if (builder is null)
-    {
-      throw new ArgumentNullException(nameof(builder), "builder is null.");
-    }
-
     foreach (var key in patchCategoryKeys.Values)
     {
       DebugFunc(() => $"Adding configuration key for {key.Name}...");
@@ -66,71 +69,58 @@ public class ProtoFluxContextualActions : ResoniteMod
 
   public override void OnEngineInit()
   {
-    config = GetConfiguration()!; // todo: tired, fix
-    config.OnThisConfigurationChanged += OnConfigChanged;
-
-    InitCategories();
-
 #if DEBUG
     HotReloader.RegisterForHotReload(this);
 #endif
-  }
 
-  public static void InitCategories()
-  {
-    foreach (var (category, key) in patchCategoryKeys)
-    {
-      UpdatePatch(category, config!.GetValue(key));
-    }
+    Config = GetConfiguration();
+    PatchCategories();
+    harmony.PatchAllUncategorized(ModAssembly);
   }
 
 
 #if DEBUG
   static void BeforeHotReload()
   {
-    foreach (var category in patchCategoryKeys.Keys)
-    {
-      UpdatePatch(category, false);
-    }
+    harmony.UnpatchAll(HarmonyId);
   }
 
   static void OnHotReload(ResoniteMod modInstance)
   {
-    foreach (var (category, key) in patchCategoryKeys)
-    {
-      UpdatePatch(category, true);
-    }
+    PatchCategories();
+    harmony.PatchAllUncategorized(ModAssembly);
   }
 #endif
 
-  private static void UpdatePatch(string category, bool enabled)
+  private static void UnpatchCategories()
   {
-    try
+    foreach (var category in Categories)
     {
-
-      if (enabled)
-      {
-        DebugFunc(() => $"Patching {category}...");
-        harmony.PatchCategory(category);
-      }
-      else
-      {
-        DebugFunc(() => $"Unpatching {category}...");
-        // harmony.UnpatchCategory(category);
-        harmony.UnpatchAll(harmony.Id);
-      }
+      harmony.UnpatchCategory(ModAssembly, category);
     }
-    catch (Exception e)
+  }
+
+  private static void PatchCategories()
+  {
+    foreach (var category in Categories)
     {
-      Error(e);
+      harmony.PatchCategory(ModAssembly, category);
     }
   }
 
   private static void OnConfigChanged(ConfigurationChangedEvent change)
   {
-    if (change.Key is ModConfigurationKey<bool> key)
+    var category = change.Key.Name;
+    if (patchCategoryKeys.TryGetValue(category, out var key))
     {
-      UpdatePatch(key.Name, change.Config.GetValue(key));
+      if (key.Value)
+      {
+        harmony.UnpatchCategory(category);
+      }
+      else
+      {
+        harmony.PatchCategory(category);
+      }
     }
   }
 }
