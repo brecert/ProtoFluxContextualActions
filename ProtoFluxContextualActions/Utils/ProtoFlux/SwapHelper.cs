@@ -158,7 +158,7 @@ public static class SwapHelper
 
   internal static Dictionary<(Type, Type), (string FromName, string ToName)[]> InputMap = new() {
     {(typeof(For), typeof(RangeLoopInt)), [("Count", "End")]},
-    {(typeof(ValueNegate<>), typeof(ValuePlusMinus<>)), [("Offset", "N")]},
+    {(typeof(ValueNegate<>), typeof(ValuePlusMinus<>)), [("N", "Offset")]},
     {(typeof(FindChildByName), typeof(FindChildByTag)), [("Name", "Tag")]},
   };
 
