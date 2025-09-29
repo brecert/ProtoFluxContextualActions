@@ -104,7 +104,7 @@ public class ProtoFluxContextualActions : ResoniteMod
   {
     foreach (var (category, key) in patchCategoryKeys)
     {
-      if (key.Value)
+      if (Config?.GetValue(key) ?? true) // enable if fail?
       {
         harmony.PatchCategory(ModAssembly, category);
       }
