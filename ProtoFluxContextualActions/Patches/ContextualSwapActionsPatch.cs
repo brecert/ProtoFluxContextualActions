@@ -13,6 +13,7 @@ using ProtoFlux.Core;
 using System.Linq;
 using FrooxEngine.Undo;
 using ProtoFlux.Runtimes.Execution.Nodes;
+using ProtoFlux.Runtimes.Execution.Nodes.Actions;
 using ProtoFlux.Runtimes.Execution.Nodes.Math.Easing;
 using ProtoFlux.Runtimes.Execution.Nodes.Operators;
 using ProtoFlux.Runtimes.Execution.Nodes.Math;
@@ -323,6 +324,15 @@ internal static class ContextualSwapActionsPatch
   static readonly HashSet<Type> ArithmeticNegateGroup = [
     typeof(ValueNegate<>),
     typeof(ValuePlusMinus<>),
+  ];
+
+  static readonly HashSet<Type> ArithmeticOneGroup = [
+    typeof(ValueInc<>),
+    typeof(ValueDec<>),
+    typeof(ValueIncrement<>),
+    typeof(ValueDecrement<>),
+    typeof(ValueIncrement<,>),
+    typeof(ValueDecrement<,>),
   ];
 
   static readonly HashSet<Type> ComparisonBinaryOperatorGroup = [
@@ -1057,6 +1067,23 @@ internal static class ContextualSwapActionsPatch
         if (coder.Property<bool>("SupportsAddSub").Value)
         {
           yield return new(typeof(ValuePlusMinus<>).MakeGenericType(opType));
+        }
+      }
+
+      if (ArithmeticOneGroup.Contains(genericType))
+      {
+        var opCount = nodeType.GenericTypeArguments.Length;
+        var opType = nodeType.GenericTypeArguments[opCount - 1];
+        var coder = Traverse.Create(typeof(Coder<>).MakeGenericType(opType));
+
+        // in theory, this check shouldn't be needed
+        // in practice, https://github.com/Yellow-Dog-Man/Resonite-Issues/issues/3319
+        if (coder.Property<bool>("SupportsAddSub").Value)
+        {
+          yield return new(typeof(ValueInc<>).MakeGenericType(opType));
+          yield return new(typeof(ValueDec<>).MakeGenericType(opType));
+          yield return new(typeof(ValueIncrement<>).MakeGenericType(opType));
+          yield return new(typeof(ValueDecrement<>).MakeGenericType(opType));
         }
       }
 
