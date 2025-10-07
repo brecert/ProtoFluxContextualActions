@@ -9,7 +9,7 @@
 		<RepositoryUrl>https://github.com/brecert/ProtoFluxContextualActions</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>Resonite,Mod,ResoniteModLoader,Tweaks,ProtoFlux</PackageTags>
-		<Version>0.0.11.2</Version>
+		<Version>0.0.12.0</Version>
 		<PackageReadmeFile>../README.md</PackageReadmeFile>
 	</PropertyGroup>
 
