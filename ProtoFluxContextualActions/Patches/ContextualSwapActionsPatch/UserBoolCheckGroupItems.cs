@@ -1,0 +1,25 @@
+using System;
+using System.Collections.Generic;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users;
+using ProtoFluxContextualActions.Tagging;
+
+namespace ProtoFluxContextualActions.Patches;
+
+static partial class ContextualSwapActionsPatch
+{
+  static readonly HashSet<Type> UserBoolCheckGroup = [
+    typeof(IsLocalUser),
+    typeof(IsUserHost),
+  ];
+
+  internal static IEnumerable<MenuItem> UserBoolCheckGroupItems(Type nodeType)
+  {
+    if (UserBoolCheckGroup.Contains(nodeType))
+    {
+      foreach (var match in UserBoolCheckGroup)
+      {
+        yield return new MenuItem(match);
+      }
+    }
+  }
+}

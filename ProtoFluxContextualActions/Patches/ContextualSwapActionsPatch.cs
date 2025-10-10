@@ -12,32 +12,18 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Transform;
 using ProtoFlux.Core;
 using System.Linq;
 using FrooxEngine.Undo;
-using ProtoFlux.Runtimes.Execution.Nodes;
-using ProtoFlux.Runtimes.Execution.Nodes.Actions;
-using ProtoFlux.Runtimes.Execution.Nodes.Math.Easing;
-using ProtoFlux.Runtimes.Execution.Nodes.Operators;
-using ProtoFlux.Runtimes.Execution.Nodes.Math;
-using ProtoFlux.Runtimes.Execution.Nodes.TimeAndDate;
 using System.Collections;
 using ProtoFlux.Runtimes.Execution;
-using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Variables;
 using ProtoFluxContextualActions.Extensions;
 using ProtoFluxContextualActions.Utils;
 using ProtoFluxContextualActions.Utils.ProtoFlux;
-using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users;
-using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users.Roots;
-using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Time;
-using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Operators;
-using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Audio;
-using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Slots;
-using ProtoFlux.Runtimes.Execution.Nodes.Enums;
 using ProtoFluxContextualActions.Tagging;
 
 namespace ProtoFluxContextualActions.Patches;
 
 [HarmonyPatch(typeof(ProtoFluxTool), nameof(ProtoFluxTool.OnSecondaryPress))]
 [HarmonyPatchCategory("ProtoFluxTool Contextual Swap Actions"), TweakCategory("Adds 'Contextual Swapping Actions' to the ProtoFlux Tool. Double pressing secondary pointing at a node with protoflux tool will be open a context menu of actions to swap the node for another node.", defaultValue: true)] // unstable, disable by default
-internal static class ContextualSwapActionsPatch
+internal static partial class ContextualSwapActionsPatch
 {
   // TODO: This can be replaced in the future with flags or a combination of the three automatically.
   //       progress has already been made.
@@ -246,227 +232,22 @@ internal static class ContextualSwapActionsPatch
     };
   }
 
-  static readonly HashSet<Type> GetDirectionGroup = [
-    typeof(GetForward),
-    typeof(GetBackward),
-    typeof(GetUp),
-    typeof(GetDown),
-    typeof(GetLeft),
-    typeof(GetRight)
-  ];
 
-  // todo: async
-  static readonly HashSet<Type> ForLoopGroup = [
-    typeof(For),
-    typeof(RangeLoopInt),
-  ];
-
-  static readonly HashSet<Type> NullCoalesceGroup = [
-    typeof(NullCoalesce<>),
-    typeof(MultiNullCoalesce<>),
-  ];
-
-  static readonly HashSet<Type> PlayOneShotGroup = [
-    typeof(PlayOneShot),
-    typeof(PlayOneShotAndWait),
-  ];
-
-
-  static readonly BiDictionary<Type, Type> MultiInputMappingGroup = new()
-  {
-    {typeof(ValueAdd<>), typeof(ValueAddMulti<>)},
-    {typeof(ValueSub<>), typeof(ValueSubMulti<>)},
-    {typeof(ValueMul<>), typeof(ValueMulMulti<>)},
-    {typeof(ValueDiv<>), typeof(ValueDivMulti<>)},
-    {typeof(ValueMin<>), typeof(ValueMinMulti<>)},
-    {typeof(ValueMax<>), typeof(ValueMaxMulti<>)},
-  };
-
-  static readonly HashSet<Type> MinMaxGroup = [
-    typeof(ValueMin<>),
-    typeof(ValueMax<>),
-  ];
-
-  static readonly HashSet<Type> MinMaxMultiGroup = [
-    typeof(ValueMinMulti<>),
-    typeof(ValueMaxMulti<>),
-  ];
-
-  static readonly HashSet<Type> TimespanInstanceGroup = [
-    typeof(TimeSpanFromDays),
-    typeof(TimeSpanFromHours),
-    typeof(TimeSpanFromMilliseconds),
-    typeof(TimeSpanFromMinutes),
-    typeof(TimeSpanFromSeconds),
-    typeof(TimeSpanFromTicks),
-  ];
-
-  static readonly HashSet<Type> ArithmeticBinaryOperatorGroup = [
-    typeof(ValueAdd<>),
-    typeof(ValueSub<>),
-    typeof(ValueMul<>),
-    typeof(ValueDiv<>),
-    typeof(ValueMod<>),
-  ];
-
-  static readonly HashSet<Type> ArithmeticMultiOperatorGroup = [
-    typeof(ValueAddMulti<>),
-    typeof(ValueSubMulti<>),
-    typeof(ValueMulMulti<>),
-    typeof(ValueDivMulti<>),
-  ];
-
-  static readonly HashSet<Type> ArithmeticRepeatGroup = [
-    typeof(ValueMod<>),
-    typeof(ValueRepeat<>),
-  ];
-
-  static readonly HashSet<Type> ArithmeticNegateGroup = [
-    typeof(ValueNegate<>),
-    typeof(ValuePlusMinus<>),
-  ];
-
-  static readonly HashSet<Type> ArithmeticOneGroup = [
-    typeof(ValueInc<>),
-    typeof(ValueDec<>),
-    typeof(ValueIncrement<>),
-    typeof(ValueDecrement<>),
-    typeof(ValueIncrement<,>),
-    typeof(ValueDecrement<,>),
-  ];
-
-  static readonly HashSet<Type> ComparisonBinaryOperatorGroup = [
-    typeof(ValueLessThan<>),
-    typeof(ValueLessOrEqual<>),
-    typeof(ValueGreaterThan<>),
-    typeof(ValueGreaterOrEqual<>),
-    typeof(ValueEquals<>),
-    typeof(ValueNotEquals<>),
-  ];
-
-  static readonly HashSet<Type> ValueRelayGroup = [
-    typeof(ValueRelay<>),
-    typeof(ContinuouslyChangingValueRelay<>)
-  ];
-
-  static readonly HashSet<Type> ObjectRelayGroup = [
-    typeof(ObjectRelay<>),
-    typeof(ContinuouslyChangingObjectRelay<>)
-  ];
-
-  static readonly HashSet<Type> SlotMetaGroup = [
-    typeof(GetSlotName),
-    typeof(GetTag),
-  ];
-
-  static readonly HashSet<Type> FindSlotGroup = [
-    typeof(FindChildByName),
-    typeof(FindChildByTag),
-  ];
-
-  static readonly HashSet<Type> SetSlotTranformGlobalOperationGroup = [
-    typeof(SetGlobalPosition),
-    typeof(SetGlobalPositionRotation),
-    typeof(SetGlobalRotation),
-    typeof(SetGlobalScale),
-    typeof(SetGlobalTransform),
-  ];
-
-  static readonly HashSet<Type> SetSlotTranformLocalOperationGroup = [
-    typeof(SetLocalPosition),
-    typeof(SetLocalPositionRotation),
-    typeof(SetLocalRotation),
-    typeof(SetLocalScale),
-    typeof(SetLocalTransform),
-  ];
-
-  public static readonly HashSet<Type> DeltaTimeGroup = [
-    typeof(DeltaTime),
-    typeof(SmoothDeltaTime),
-    typeof(InvertedDeltaTime),
-    typeof(InvertedSmoothDeltaTime),
-  ];
-
-  public static readonly HashSet<Type> DeltaTimeOperationGroup = [
-    typeof(MulDeltaTime<>),
-    typeof(DivDeltaTime<>),
-  ];
-
-  static readonly HashSet<Type> UserBoolCheck = [
-    typeof(IsLocalUser),
-    typeof(IsUserHost),
-  ];
-
-  static readonly HashSet<Type> UserInfoGroup = [
-    typeof(UserVR_Active),
-    typeof(UserFPS),
-    typeof(UserTime),
-    typeof(UserVoiceMode),
-    typeof(UserHeadOutputDevice),
-    typeof(UserActiveViewTargettingController),
-    typeof(UserPrimaryHand),
-  ];
-
-  static readonly HashSet<Type> UserRootSlotGroup = [
-    typeof(HeadSlot),
-    typeof(HandSlot),
-    typeof(ControllerSlot),
-  ];
-
-  static readonly HashSet<Type> UserRootPositionGroup = [
-    typeof(HeadPosition),
-    typeof(HipsPosition),
-    typeof(LeftHandPosition),
-    typeof(RightHandPosition),
-    typeof(FeetPosition),
-  ];
-
-  static readonly HashSet<Type> UserRootRotationGroup = [
-    typeof(HeadRotation),
-    typeof(HipsRotation),
-    typeof(LeftHandRotation),
-    typeof(RightHandRotation),
-    typeof(FeetRotation),
-  ];
-
-  static readonly HashSet<Type> UserRootHeadRotationGroup = [
-    typeof(HeadRotation),
-    typeof(HeadFacingRotation),
-    typeof(HeadFacingDirection),
-  ];
-
-  static readonly HashSet<Type> SetUserRootPositionGroup = [
-    typeof(SetHeadPosition),
-    typeof(SetHipsPosition),
-    typeof(SetFeetPosition),
-  ];
-
-  static readonly HashSet<Type> SetUserRootRotationGroup = [
-    typeof(SetHeadRotation),
-    typeof(SetHipsRotation),
-    typeof(SetFeetRotation),
-  ];
-
-  static readonly HashSet<Type> SetUserRootHeadRotationGroup = [
-    typeof(SetHeadRotation),
-    typeof(SetHeadFacingRotation),
-    typeof(SetHeadFacingDirection),
-  ];
-
+  // We know they exist, why..
   static readonly BiDictionary<Type, Type> GetUserRootSwapGroup =
-    UserRootPositionGroup.Zip(UserRootRotationGroup).ToBiDictionary();
+    Groups.UserRootPositionGroup.Zip(Groups.UserRootRotationGroup).ToBiDictionary();
 
   static readonly BiDictionary<Type, Type> UserRootPositionSwapGroup =
-    UserRootPositionGroup.Zip(SetUserRootPositionGroup).ToBiDictionary();
+    Groups.UserRootPositionGroup.Zip(Groups.SetUserRootPositionGroup).ToBiDictionary();
 
   static readonly BiDictionary<Type, Type> UserRootRotationSwapGroup =
-    UserRootRotationGroup.Zip(SetUserRootRotationGroup).ToBiDictionary();
+    Groups.UserRootRotationGroup.Zip(Groups.SetUserRootRotationGroup).ToBiDictionary();
 
   static readonly BiDictionary<Type, Type> SetUserRootSwapGroup =
-    SetUserRootPositionGroup.Zip(SetUserRootRotationGroup).ToBiDictionary();
+    Groups.SetUserRootPositionGroup.Zip(Groups.SetUserRootRotationGroup).ToBiDictionary();
 
-  static readonly BiDictionary<Type, Type> HeadRotationSwapGroup =
-    UserRootHeadRotationGroup.Zip(SetUserRootHeadRotationGroup).ToBiDictionary();
+  static readonly BiDictionary<Type, Type> UserRootHeadRotationSwapGroup =
+    Groups.UserRootHeadRotationGroup.Zip(Groups.SetUserRootHeadRotationGroup).ToBiDictionary();
 
   static readonly BiDictionary<Type, Type> GetGlobalLocalEquivilents = new()
   {
@@ -474,29 +255,7 @@ internal static class ContextualSwapActionsPatch
   };
 
   static readonly BiDictionary<Type, Type> SetGlobalLocalEquivilents =
-    SetSlotTranformGlobalOperationGroup.Zip(SetSlotTranformLocalOperationGroup).ToBiDictionary();
-
-  static readonly BiDictionary<Type, Type> EnumToNumberGroup = NodeUtils.EnumToNumberTypeMap.Values.Zip(NodeUtils.TryEnumToNumberTypeMap.Values).ToBiDictionary();
-  static readonly BiDictionary<Type, Type> NumberToEnumGroup = NodeUtils.NumberToEnumTypeMap.Values.Zip(NodeUtils.TryNumberToEnumTypeMap.Values).ToBiDictionary();
-  static readonly HashSet<Type> EnumShiftGroup = [
-    typeof(NextValue<>),
-    typeof(PreviousValue<>),
-    typeof(ShiftEnum<>),
-  ];
-
-  static readonly HashSet<Type> VariableStoreNodesGroup = [
-    typeof(LocalValue<>),
-    typeof(LocalObject<>),
-    typeof(StoredValue<>),
-    typeof(StoredObject<>),
-    typeof(DataModelUserRefStore),
-    typeof(DataModelTypeStore),
-    typeof(DataModelObjectAssetRefStore<>),
-    typeof(DataModelObjectAssetRefStore<>),
-    typeof(DataModelValueFieldStore<>),
-    typeof(DataModelObjectRefStore<>),
-    typeof(DataModelObjectFieldStore<>),
-  ];
+    Groups.SetSlotTranformGlobalOperationGroup.Zip(Groups.SetSlotTranformLocalOperationGroup).ToBiDictionary();
 
   private static Type GetIVariableValueType(Type type)
   {
@@ -557,593 +316,90 @@ internal static class ContextualSwapActionsPatch
 
     var approximatelyGroup = approximatelyNodes.AsEnumerable().Concat(approximatelyNotNodes.AsEnumerable()).ToDictionary(a => a.First, a => a.Second);
 
-    if (GetDirectionGroup.Contains(nodeType))
+    IEnumerable<MenuItem> menuItemsA = [
+      .. GetDirectionGroupItems(nodeType),
+      .. ForLoopGroupItems(nodeType),
+      .. EasingOfSameKindFloatItems(nodeType),
+      .. EasingOfSameKindDoubleItems(nodeType),
+      .. TimespanInstanceGroupItems(nodeType),
+      .. SetSlotTranformGlobalOperationGroupItems(nodeType),
+      .. SetSlotTranformLocalOperationGroupItems(nodeType),
+      .. UserInfoGroupItems(nodeType),
+      .. DeltaTimeGroupItems(nodeType),
+      .. UserBoolCheckGroupItems(nodeType),
+      .. PlayOneShotGroupItems(nodeType),
+      .. ScreenPointGroupItems(nodeType),
+      .. MousePositionGroupItems(nodeType),
+      .. FindSlotGroupItems(nodeType),
+      .. SlotMetaGroupItems(nodeType),
+      .. UserRootSlotGroupItems(nodeType),
+      .. UserRootPositionGroupItems(nodeType),
+      .. UserRootRotationGroupItems(nodeType),
+      .. SetUserRootPositionGroupItems(nodeType),
+      .. SetUserRootRotationGroupItems(nodeType),
+      .. UserRootHeadRotationGroupItems(nodeType),
+      .. SetUserRootHeadRotationGroupItems(nodeType),
+    ];
+
+    foreach (var menuItem in menuItemsA)
     {
-      foreach (var match in GetDirectionGroup)
-      {
-        yield return new MenuItem(match);
-      }
+      yield return menuItem;
     }
 
-    if (ForLoopGroup.Contains(nodeType))
     {
-      foreach (var match in ForLoopGroup)
-      {
-        yield return new MenuItem(match, connectionTransferType: ConnectionTransferType.ByMappingsLossy);
-      }
-    }
+      if (TryGetSwap(GetUserRootSwapGroup, nodeType, out Type match)) yield return new(match);
+      if (TryGetSwap(UserRootPositionSwapGroup, nodeType, out match)) yield return new(match);
+      if (TryGetSwap(UserRootRotationSwapGroup, nodeType, out match)) yield return new(match);
+      if (TryGetSwap(SetUserRootSwapGroup, nodeType, out match)) yield return new(match);
+      if (TryGetSwap(UserRootHeadRotationSwapGroup, nodeType, out match)) yield return new(match);
 
-    if (EasingGroups.ContainsNodeFloat(nodeType))
-    {
-      foreach (var match in EasingGroups.GetEasingOfSameKindFloat(nodeType))
-      {
-        yield return new MenuItem(match);
-      }
-    }
-
-    if (EasingGroups.ContainsNodeDouble(nodeType))
-    {
-      foreach (var match in EasingGroups.GetEasingOfSameKindDouble(nodeType))
-      {
-        yield return new MenuItem(match);
-      }
-    }
-
-    if (TimespanInstanceGroup.Contains(nodeType))
-    {
-      foreach (var match in TimespanInstanceGroup)
-      {
-        yield return new MenuItem(match);
-      }
-    }
-
-    if (SetSlotTranformGlobalOperationGroup.Contains(nodeType))
-    {
-      foreach (var match in SetSlotTranformGlobalOperationGroup)
-      {
-        yield return new MenuItem(match);
-      }
-    }
-
-    if (SetSlotTranformLocalOperationGroup.Contains(nodeType))
-    {
-      foreach (var match in SetSlotTranformLocalOperationGroup)
-      {
-        yield return new MenuItem(match);
-      }
-    }
-
-
-    if (UserInfoGroup.Contains(nodeType))
-    {
-      foreach (var match in UserInfoGroup)
-      {
-        yield return new MenuItem(match);
-      }
-    }
-
-    if (DeltaTimeGroup.Contains(nodeType))
-    {
-      foreach (var match in DeltaTimeGroup)
-      {
-        yield return new MenuItem(match);
-      }
-    }
-
-    if (UserBoolCheck.Contains(nodeType))
-    {
-      foreach (var match in UserBoolCheck)
-      {
-        yield return new MenuItem(match);
-      }
-    }
-
-    if (PlayOneShotGroup.Contains(nodeType))
-    {
-      foreach (var match in PlayOneShotGroup)
-      {
-        yield return new MenuItem(match);
-      }
-    }
-
-    if (Groups.ScreenPointGroup.Contains(nodeType))
-    {
-      foreach (var match in Groups.ScreenPointGroup)
-      {
-        yield return new MenuItem(match);
-      }
-    }
-
-    if (Groups.MousePositionGroup.Contains(nodeType))
-    {
-      foreach (var match in Groups.MousePositionGroup)
-      {
-        yield return new MenuItem(match);
-      }
-    }
-
-    if (FindSlotGroup.Contains(nodeType))
-    {
-      foreach (var match in FindSlotGroup)
-      {
-        yield return new MenuItem(match);
-      }
-    }
-
-    if (SlotMetaGroup.Contains(nodeType))
-    {
-      foreach (var match in SlotMetaGroup)
-      {
-        yield return new MenuItem(match);
-      }
-    }
-
-    #region User Root
-    {
-      if (UserRootSlotGroup.Contains(nodeType))
-      {
-        foreach (var match in UserRootSlotGroup)
-        {
-          yield return new MenuItem(match);
-        }
-      }
-
-      if (UserRootPositionGroup.Contains(nodeType))
-      {
-        foreach (var match in UserRootPositionGroup)
-        {
-          yield return new MenuItem(match);
-        }
-      }
-
-      if (UserRootRotationGroup.Contains(nodeType))
-      {
-        foreach (var match in UserRootRotationGroup)
-        {
-          yield return new MenuItem(match);
-        }
-      }
-
-      if (SetUserRootPositionGroup.Contains(nodeType))
-      {
-        foreach (var match in SetUserRootPositionGroup)
-        {
-          yield return new MenuItem(match);
-        }
-      }
-
-      if (SetUserRootRotationGroup.Contains(nodeType))
-      {
-        foreach (var match in SetUserRootRotationGroup)
-        {
-          yield return new MenuItem(match);
-        }
-      }
-
-      if (UserRootHeadRotationGroup.Contains(nodeType))
-      {
-        foreach (var match in UserRootHeadRotationGroup)
-        {
-          yield return new MenuItem(match);
-        }
-      }
-
-      if (SetUserRootHeadRotationGroup.Contains(nodeType))
-      {
-        foreach (var match in SetUserRootHeadRotationGroup)
-        {
-          yield return new MenuItem(match);
-        }
-      }
-
-      {
-        if (TryGetSwap(GetUserRootSwapGroup, nodeType, out Type match)) yield return new(match);
-        if (TryGetSwap(UserRootPositionSwapGroup, nodeType, out match)) yield return new(match);
-        if (TryGetSwap(UserRootRotationSwapGroup, nodeType, out match)) yield return new(match);
-        if (TryGetSwap(SetUserRootSwapGroup, nodeType, out match)) yield return new(match);
-        if (TryGetSwap(HeadRotationSwapGroup, nodeType, out match)) yield return new(match);
-      }
-    }
-    #endregion
-
-    {
-      if (TryGetSwap(SetGlobalLocalEquivilents, nodeType, out var match)) yield return new(match);
+      if (TryGetSwap(SetGlobalLocalEquivilents, nodeType, out match)) yield return new(match);
       if (TryGetSwap(GetGlobalLocalEquivilents, nodeType, out match)) yield return new(match, connectionTransferType: ConnectionTransferType.ByIndexLossy);
     }
 
+    // TODO: iterate over these and yield their results.
+    IEnumerable<MenuItem> menuItemsB = [
+      .. BinaryOperationsGroupItems(nodeType, binaryOperationsGroup),
+      .. BinaryOperationsMultiGroupItems(nodeType, binaryOperationsMultiGroup),
+      .. BinaryOperationsMultiSwapMapItems(nodeType, binaryOperationsMultiSwapMap),
+      .. NumericLogGroupItems(nodeType, numericLogGroup),
+      .. ApproximatelyGroupItems(nodeType, approximatelyNodes, approximatelyNotNodes, approximatelyGroup),
+      .. AverageGroupItems(nodeType, avgGroup),
+      .. VariableStoreNodesGroupItems(nodeType),
+      .. ValueRelayGroupItems(nodeType),
+      .. ObjectRelayGroupItems(nodeType),
+      .. ComparisonBinaryOperatorGroupItems(nodeType),
+      .. DeltaTimeOperationGroupItems(nodeType),
+      .. EnumShiftGroupItems(nodeType),
+      .. NullCoalesceGroupItems(nodeType),
+      .. MinMaxGroupItems(nodeType, avgGroup),
+      .. MinMaxMultiGroupItems(nodeType, avgGroup),
+      .. ArithmeticBinaryOperatorGroupItems(nodeType),
+      .. ArithmeticMultiOperatorGroupItems(nodeType),
+      .. ArithmeticRepeatGroupItems(nodeType),
+      .. ArithmeticNegateGroupItems(nodeType),
+      .. ArithmeticOneGroupItems(nodeType),
+      .. EnumToNumberGroupItems(nodeType),
+      .. NumberToEnumGroupItems(nodeType),
+      .. MultiInputMappingGroupItems(nodeType),
+      .. ApproximatelyNodesGroupItems(nodeType, approximatelyNodes, approximatelyNotNodes),
+    ];
+
+    foreach (var menuItem in menuItemsB)
     {
-      if (binaryOperationsGroup.TryGetValue(nodeType, out var genericTypes))
-      {
-        var matchingNodes = binaryOperationsGroup.Where(a => genericTypes.SequenceEqual(a.Value)).Select(a => a.Key);
-        foreach (var match in matchingNodes)
-        {
-          yield return new MenuItem(match);
-        }
-      }
-    }
-
-    {
-      if (binaryOperationsMultiGroup.TryGetValue(nodeType, out var genericTypes))
-      {
-        var matchingNodes = binaryOperationsMultiGroup.Where(a => genericTypes.SequenceEqual(a.Value)).Select(a => a.Key);
-        foreach (var match in matchingNodes)
-        {
-          yield return new MenuItem(
-            node: match,
-            name: FormatMultiName(match),
-            connectionTransferType: ConnectionTransferType.ByIndexLossy
-          );
-        }
-      }
-    }
-
-    {
-      if (binaryOperationsMultiSwapMap.TryGetFirst(nodeType, out var matched))
-      {
-        yield return new MenuItem(
-          node: matched,
-          connectionTransferType: ConnectionTransferType.ByIndexLossy
-        );
-      }
-      else if (binaryOperationsMultiSwapMap.TryGetSecond(nodeType, out matched))
-      {
-        yield return new MenuItem(
-          node: matched,
-          name: FormatMultiName(matched),
-          connectionTransferType: ConnectionTransferType.ByIndexLossy
-        );
-      }
-    }
-
-    {
-      if (numericLogGroup.TryGetValue(nodeType, out var genericTypes))
-      {
-        var matchingNodes = numericLogGroup.Where(a => genericTypes.SequenceEqual(a.Value)).Select(a => a.Key);
-        foreach (var match in matchingNodes)
-        {
-          yield return new MenuItem(match);
-        }
-      }
-    }
-
-    {
-      if (approximatelyGroup.TryGetValue(nodeType, out var typeArgument))
-      {
-        var matchingNodes = approximatelyGroup.Where(a => a.Value == typeArgument).Select(a => a.Key);
-        foreach (var match in matchingNodes)
-        {
-          yield return new MenuItem(match);
-        }
-
-        // todo: invert so nodeType.IsApproxamatelyNotNode()
-        if (approximatelyNodes.ContainsFirst(nodeType))
-        {
-          yield return new MenuItem(typeof(ValueEquals<>).MakeGenericType(typeArgument));
-        }
-        else if (approximatelyNotNodes.ContainsFirst(nodeType))
-        {
-          yield return new MenuItem(typeof(ValueNotEquals<>).MakeGenericType(typeArgument));
-        }
-      }
-    }
-
-    {
-      if (avgGroup.TryGetValue(nodeType, out var genericTypes))
-      {
-        var matchingNodes = avgGroup.Where(a => genericTypes.SequenceEqual(a.Value)).Select(a => a.Key);
-        foreach (var match in matchingNodes)
-        {
-          yield return new MenuItem(
-            node: match,
-            name: match.GetNiceTypeName().Contains("Multi_") ? FormatMultiName(match) : null,
-            connectionTransferType: ConnectionTransferType.ByIndexLossy
-          );
-        }
-        if (nodeType.GetNiceTypeName().Contains("Multi_"))
-        {
-          foreach (var match in MinMaxMultiGroup)
-          {
-            yield return new MenuItem(
-              node: match.MakeGenericType([.. genericTypes]),
-              name: FormatMultiName(match),
-              connectionTransferType: ConnectionTransferType.ByIndexLossy
-            );
-          }
-        }
-        else
-        {
-          foreach (var match in MinMaxGroup)
-          {
-            yield return new MenuItem(
-              node: match.MakeGenericType([.. genericTypes]),
-              connectionTransferType: ConnectionTransferType.ByIndexLossy
-            );
-          }
-        }
-      }
-    }
-
-    if (VariableStoreNodesGroup.Any(t => nodeType.IsGenericType ? t == nodeType.GetGenericTypeDefinition() : t == nodeType))
-    {
-      var storageType = GetIVariableValueType(nodeType);
-      yield return new MenuItem(NodeUtils.ProtoFluxBindingMapping[ProtoFluxHelper.GetLocalNode(storageType).GetGenericTypeDefinition()].MakeGenericType(storageType));
-      yield return new MenuItem(NodeUtils.ProtoFluxBindingMapping[ProtoFluxHelper.GetStoreNode(storageType).GetGenericTypeDefinition()].MakeGenericType(storageType));
-
-      var dataModelStore = ProtoFluxHelper.GetDataModelStoreNode(storageType);
-      if (dataModelStore.IsGenericType)
-      {
-        yield return new MenuItem(NodeUtils.ProtoFluxBindingMapping[dataModelStore.GetGenericTypeDefinition()].MakeGenericType(dataModelStore.GenericTypeArguments));
-      }
-      else
-      {
-        yield return new MenuItem(NodeUtils.ProtoFluxBindingMapping[dataModelStore]);
-      }
-    }
-
-    #region  Generics Handling
-    if (nodeType.TryGetGenericTypeDefinition(out var genericType))
-    {
-      if (ValueRelayGroup.Contains(genericType))
-      {
-        foreach (var match in ValueRelayGroup)
-        {
-          yield return new MenuItem(match.MakeGenericType(nodeType.GenericTypeArguments[0]));
-        }
-      }
-
-      if (ObjectRelayGroup.Contains(genericType))
-      {
-        foreach (var match in ObjectRelayGroup)
-        {
-          yield return new MenuItem(match.MakeGenericType(nodeType.GenericTypeArguments[0]));
-        }
-      }
-
-      if (ComparisonBinaryOperatorGroup.Contains(genericType))
-      {
-        foreach (var match in ComparisonBinaryOperatorGroup)
-        {
-          yield return new MenuItem(match.MakeGenericType(nodeType.GenericTypeArguments[0]));
-        }
-      }
-
-      if (DeltaTimeOperationGroup.Contains(genericType))
-      {
-        foreach (var match in DeltaTimeOperationGroup)
-        {
-          yield return new MenuItem(match.MakeGenericType(nodeType.GenericTypeArguments[0]));
-        }
-      }
-
-      if (EnumShiftGroup.Contains(genericType))
-      {
-        foreach (var match in EnumShiftGroup)
-        {
-          yield return new MenuItem(match.MakeGenericType(nodeType.GenericTypeArguments[0]), name: match.GetNiceName());
-        }
-      }
-
-      if (NullCoalesceGroup.Contains(genericType))
-      {
-        foreach (var match in NullCoalesceGroup)
-        {
-          yield return new MenuItem(match.MakeGenericType(nodeType.GenericTypeArguments[0]), name: match == typeof(MultiNullCoalesce<>) ? FormatMultiName(nodeType) : null);
-        }
-      }
-
-      {
-        if (MinMaxGroup.Contains(genericType))
-        {
-          var innerType = nodeType.GenericTypeArguments[0];
-          foreach (var match in MinMaxGroup)
-          {
-            yield return new MenuItem(match.MakeGenericType(innerType));
-          }
-
-          var matchingNodes = avgGroup
-            .Where(a => a.Value.FirstOrDefault() == innerType)
-            .Select(a => a.Key)
-            .Where(a => !a.GetNiceTypeName().Contains("Multi_"));
-
-          foreach (var match in matchingNodes)
-          {
-            yield return new MenuItem(
-              node: match,
-              connectionTransferType: ConnectionTransferType.ByIndexLossy
-            );
-          }
-        }
-
-        if (MinMaxMultiGroup.Contains(genericType))
-        {
-          var innerType = nodeType.GenericTypeArguments[0];
-          foreach (var match in MinMaxMultiGroup)
-          {
-            yield return new MenuItem(match.MakeGenericType(innerType));
-          }
-
-          var matchingNodes = avgGroup
-            .Where(a => a.Value.FirstOrDefault() == innerType)
-            .Select(a => a.Key)
-            .Where(a => a.GetNiceTypeName().Contains("Multi_"));
-
-          foreach (var match in matchingNodes)
-          {
-            yield return new MenuItem(
-              node: match,
-              name: FormatMultiName(match),
-              connectionTransferType: ConnectionTransferType.ByIndexLossy
-            );
-          }
-        }
-      }
-
-      if (ArithmeticBinaryOperatorGroup.Contains(genericType))
-      {
-        var opType = nodeType.GenericTypeArguments[0];
-        var coder = Traverse.Create(typeof(Coder<>).MakeGenericType(opType));
-
-        if (coder.Property<bool>("SupportsAddSub").Value)
-        {
-          yield return new MenuItem(typeof(ValueAdd<>).MakeGenericType(opType));
-          yield return new MenuItem(typeof(ValueSub<>).MakeGenericType(opType));
-        }
-
-        if (coder.Property<bool>("SupportsMul").Value)
-        {
-          yield return new MenuItem(typeof(ValueMul<>).MakeGenericType(opType));
-        }
-
-        if (coder.Property<bool>("SupportsDiv").Value)
-        {
-          yield return new MenuItem(typeof(ValueDiv<>).MakeGenericType(opType));
-        }
-
-        if (coder.Property<bool>("SupportsMod").Value)
-        {
-          yield return new MenuItem(typeof(ValueMod<>).MakeGenericType(opType));
-        }
-      }
-
-      if (ArithmeticMultiOperatorGroup.Contains(genericType))
-      {
-        var opType = nodeType.GenericTypeArguments[0];
-        var coder = Traverse.Create(typeof(Coder<>).MakeGenericType(opType));
-
-        static MenuItem MultiMenuItem(Type nodeType) => new(
-          node: nodeType,
-          name: nodeType.GetNiceTypeName(),
-          connectionTransferType: ConnectionTransferType.ByIndexLossy
-        );
-
-        if (coder.Property<bool>("SupportsAddSub").Value)
-        {
-          yield return MultiMenuItem(typeof(ValueAddMulti<>).MakeGenericType(opType));
-          yield return MultiMenuItem(typeof(ValueSubMulti<>).MakeGenericType(opType));
-        }
-
-        if (coder.Property<bool>("SupportsMul").Value)
-        {
-          yield return MultiMenuItem(typeof(ValueMulMulti<>).MakeGenericType(opType));
-        }
-
-        if (coder.Property<bool>("SupportsDiv").Value)
-        {
-          yield return MultiMenuItem(typeof(ValueDivMulti<>).MakeGenericType(opType));
-        }
-      }
-
-      if (ArithmeticRepeatGroup.Contains(genericType))
-      {
-        var opType = nodeType.GenericTypeArguments[0];
-        var coder = Traverse.Create(typeof(Coder<>).MakeGenericType(opType));
-
-        static MenuItem RepeatItem(Type nodeType) => new(
-          node: nodeType,
-          connectionTransferType: ConnectionTransferType.ByIndexLossy
-        );
-
-        if (coder.Property<bool>("SupportsRepeat").Value)
-        {
-          yield return RepeatItem(typeof(ValueRepeat<>).MakeGenericType(opType));
-        }
-
-        if (coder.Property<bool>("SupportsMod").Value)
-        {
-          yield return RepeatItem(typeof(ValueMod<>).MakeGenericType(opType));
-        }
-      }
-
-      if (ArithmeticNegateGroup.Contains(genericType))
-      {
-        var opType = nodeType.GenericTypeArguments[0];
-        var coder = Traverse.Create(typeof(Coder<>).MakeGenericType(opType));
-
-        if (coder.Property<bool>("SupportsNegate").Value)
-        {
-          yield return new(typeof(ValueNegate<>).MakeGenericType(opType));
-        }
-
-        if (coder.Property<bool>("SupportsAddSub").Value)
-        {
-          yield return new(typeof(ValuePlusMinus<>).MakeGenericType(opType));
-        }
-      }
-
-      if (ArithmeticOneGroup.Contains(genericType))
-      {
-        var opCount = nodeType.GenericTypeArguments.Length;
-        var opType = nodeType.GenericTypeArguments[opCount - 1];
-        var coder = Traverse.Create(typeof(Coder<>).MakeGenericType(opType));
-
-        // in theory, this check shouldn't be needed
-        // in practice, https://github.com/Yellow-Dog-Man/Resonite-Issues/issues/3319
-        if (coder.Property<bool>("SupportsAddSub").Value)
-        {
-          yield return new(typeof(ValueInc<>).MakeGenericType(opType));
-          yield return new(typeof(ValueDec<>).MakeGenericType(opType));
-          yield return new(typeof(ValueIncrement<>).MakeGenericType(opType));
-          yield return new(typeof(ValueDecrement<>).MakeGenericType(opType));
-        }
-      }
-
-      {
-        if (TryGetSwap(EnumToNumberGroup, genericType, out var match))
-        {
-          var enumType = nodeType.GenericTypeArguments[0];
-          yield return new MenuItem(match.MakeGenericType(enumType));
-        }
-      }
-
-      {
-        if (TryGetSwap(NumberToEnumGroup, genericType, out var match))
-        {
-          var enumType = nodeType.GenericTypeArguments[0];
-          yield return new MenuItem(match.MakeGenericType(enumType));
-        }
-      }
-
-      {
-        if (MultiInputMappingGroup.TryGetSecond(genericType, out var mapped))
-        {
-          var binopType = nodeType.GenericTypeArguments[0];
-          yield return new MenuItem(
-            node: mapped.MakeGenericType(binopType),
-            name: mapped.GetNiceTypeName(),
-            connectionTransferType: ConnectionTransferType.ByIndexLossy
-          );
-        }
-        else if (MultiInputMappingGroup.TryGetFirst(genericType, out mapped))
-        {
-          var binopType = nodeType.GenericTypeArguments[0];
-          yield return new MenuItem(mapped.MakeGenericType(binopType), connectionTransferType: ConnectionTransferType.ByIndexLossy);
-        }
-      }
-
-      {
-        if (genericType == typeof(ValueEquals<>) && approximatelyNodes.TryGetFirst(nodeType.GenericTypeArguments[0], out var first))
-        {
-          yield return new MenuItem(first);
-        }
-        else if (genericType == typeof(ValueNotEquals<>) && approximatelyNotNodes.TryGetFirst(nodeType.GenericTypeArguments[0], out first))
-        {
-          yield return new MenuItem(first);
-        }
-      }
+      yield return menuItem;
     }
   }
 
-  private static string FormatMultiName(Type match)
+  #region Utils
+  internal static string FormatMultiName(Type match)
   {
     return $"{NodeMetadataHelper.GetMetadata(match).Name} (Multi)";
   }
 
-  private static bool TryGetSwap(BiDictionary<Type, Type> swaps, Type nodeType, out Type match) =>
+  internal static bool TryGetSwap(BiDictionary<Type, Type> swaps, Type nodeType, out Type match) =>
     swaps.TryGetSecond(nodeType, out match) || swaps.TryGetFirst(nodeType, out match);
 
-  #endregion
-
-  #region Utils
 
   class ArrayComparer<T> : EqualityComparer<T[]>
   {
@@ -1189,23 +445,5 @@ internal static class ContextualSwapActionsPatch
   [HarmonyPatch(typeof(ProtoFluxNode), "ClearGroupAndInstance")]
   [MethodImpl(MethodImplOptions.NoInlining)]
   internal static void ClearGroupAndInstance(this ProtoFluxNode instance) => throw new NotImplementedException();
-
   #endregion
-
-  // [HarmonyReversePatch]
-  // [HarmonyPatch(typeof(ProtoFluxNode), "ReverseMapElements")]
-  // [MethodImpl(MethodImplOptions.NoInlining)]
-  // internal static void ReverseMapElements(ProtoFluxNode instance, Dictionary<INode, ProtoFluxNode> nodeMapping, bool undoable) => throw new NotImplementedException();
 }
-
-// todo: optimization pass with static dictionary
-// var nodesWithGenericArguments = new Dictionary<Type[], List<Type>>(binaryOperations.Count, new ArrayComparer<Type>());
-// foreach (var (psuedoGenericNode, types) in binaryOperations) nodesWithGenericArguments.Add(types, psuedoGenericNode);
-
-// if (nodesWithGenericArguments.TryGetValue(genericTypes, out var matchingNodes))
-// {
-//   foreach (var match in matchingNodes)
-//   {
-//     yield return new MenuItem(match);
-//   }
-// }
