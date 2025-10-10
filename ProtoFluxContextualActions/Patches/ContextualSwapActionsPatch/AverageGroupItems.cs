@@ -8,11 +8,11 @@ namespace ProtoFluxContextualActions.Patches;
 
 static partial class ContextualSwapActionsPatch
 {
-  internal static IEnumerable<MenuItem> AverageGroupItems(Type nodeType, Dictionary<Type, IEnumerable<Type>> avgGroup)
+  internal static IEnumerable<MenuItem> AverageGroupItems(ContextualContext context)
   {
-    if (avgGroup.TryGetValue(nodeType, out var genericTypes))
+    if (AvgGroup.TryGetValue(context.NodeType, out var genericTypes))
     {
-      var matchingNodes = avgGroup.Where(a => genericTypes.SequenceEqual(a.Value)).Select(a => a.Key);
+      var matchingNodes = AvgGroup.Where(a => genericTypes.SequenceEqual(a.Value)).Select(a => a.Key);
       foreach (var match in matchingNodes)
       {
         yield return new MenuItem(
@@ -21,7 +21,7 @@ static partial class ContextualSwapActionsPatch
           connectionTransferType: ConnectionTransferType.ByIndexLossy
         );
       }
-      if (nodeType.GetNiceTypeName().Contains("Multi_"))
+      if (context.NodeType.GetNiceTypeName().Contains("Multi_"))
       {
         foreach (var match in MinMaxMultiGroup)
         {

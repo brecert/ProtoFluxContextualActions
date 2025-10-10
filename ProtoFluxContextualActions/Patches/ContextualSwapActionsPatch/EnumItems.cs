@@ -22,31 +22,31 @@ static partial class ContextualSwapActionsPatch
   static readonly BiDictionary<Type, Type> NumberToEnumGroup =
     NodeUtils.NumberToEnumTypeMap.Values.Zip(NodeUtils.TryNumberToEnumTypeMap.Values).ToBiDictionary();
 
-  internal static IEnumerable<MenuItem> EnumShiftGroupItems(Type nodeType)
+  internal static IEnumerable<MenuItem> EnumShiftGroupItems(ContextualContext context)
   {
-    if (TypeUtils.TryGetGenericTypeDefinition(nodeType, out var genericType) && EnumShiftGroup.Contains(genericType))
+    if (TypeUtils.TryGetGenericTypeDefinition(context.NodeType, out var genericType) && EnumShiftGroup.Contains(genericType))
     {
       foreach (var match in EnumShiftGroup)
       {
-        yield return new MenuItem(match.MakeGenericType(nodeType.GenericTypeArguments[0]), name: match.GetNiceName());
+        yield return new MenuItem(match.MakeGenericType(context.NodeType.GenericTypeArguments[0]), name: match.GetNiceName());
       }
     }
   }
 
-  internal static IEnumerable<MenuItem> NumberToEnumGroupItems(Type nodeType)
+  internal static IEnumerable<MenuItem> NumberToEnumGroupItems(ContextualContext context)
   {
-    if (TypeUtils.TryGetGenericTypeDefinition(nodeType, out var genericType) && TryGetSwap(NumberToEnumGroup, genericType, out var match))
+    if (TypeUtils.TryGetGenericTypeDefinition(context.NodeType, out var genericType) && TryGetSwap(NumberToEnumGroup, genericType, out var match))
     {
-      var enumType = nodeType.GenericTypeArguments[0];
+      var enumType = context.NodeType.GenericTypeArguments[0];
       yield return new MenuItem(match.MakeGenericType(enumType));
     }
   }
 
-  internal static IEnumerable<MenuItem> EnumToNumberGroupItems(Type nodeType)
+  internal static IEnumerable<MenuItem> EnumToNumberGroupItems(ContextualContext context)
   {
-    if (TypeUtils.TryGetGenericTypeDefinition(nodeType, out var genericType) && TryGetSwap(EnumToNumberGroup, genericType, out var match))
+    if (TypeUtils.TryGetGenericTypeDefinition(context.NodeType, out var genericType) && TryGetSwap(EnumToNumberGroup, genericType, out var match))
     {
-      var enumType = nodeType.GenericTypeArguments[0];
+      var enumType = context.NodeType.GenericTypeArguments[0];
       yield return new(match.MakeGenericType(enumType));
     }
   }

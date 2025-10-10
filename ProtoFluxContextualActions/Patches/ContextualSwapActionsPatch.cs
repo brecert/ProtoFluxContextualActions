@@ -56,6 +56,8 @@ internal static partial class ContextualSwapActionsPatch
     internal readonly string DisplayName => name ?? NodeMetadataHelper.GetMetadata(node).Name ?? node.GetNiceTypeName();
   }
 
+  internal record ContextualContext(Type NodeType, World World);
+
   // additional data we store for the protoflux tool
   internal class ProtoFluxToolData
   {
@@ -266,11 +268,20 @@ internal static partial class ContextualSwapActionsPatch
     throw new Exception($"Unable to find IVariable node for type '{type}'");
   }
 
+  static Dictionary<Type, Type[]>? BinaryOperationsGroup = null;
+  static Dictionary<Type, Type[]>? BinaryOperationsMultiGroup = null;
+  static BiDictionary<Type, Type>? BinaryOperationsMultiSwapMap = null;
+  static Dictionary<Type, Type[]>? NumericLogGroup = null;
+  private static Dictionary<Type, IEnumerable<Type>>? AvgGroup = null;
+  private static BiDictionary<Type, Type>? ApproximatelyNodes = null;
+  private static BiDictionary<Type, Type>? ApproximatelyNotNodes = null;
+  private static Dictionary<Type, Type>? ApproximatelyGroup = null;
+
   internal static IEnumerable<MenuItem> GetMenuItems(ProtoFluxTool __instance, ProtoFluxNode nodeComponent)
   {
     var node = nodeComponent.NodeInstance;
     var nodeType = node.GetType();
-    var componentType = nodeComponent.GetType();
+    var context = new ContextualContext(nodeType, __instance.World);
 
     IEnumerable<IEnumerable<(Type Node, IEnumerable<Type> Types)>> binaryOperations =
     [
@@ -294,43 +305,43 @@ internal static partial class ContextualSwapActionsPatch
 
     // todo: cache per-world?
     // realistically with current resonite it doesn't matter and only needs to be done once.
-    var binaryOperationsGroup =
+    BinaryOperationsGroup ??=
       binaryOperations
         .SelectMany(a => a)
         .ToDictionary((a) => NodeUtils.ProtoFluxBindingMapping[a.Node], (a) => a.Types.ToArray());
 
-    var binaryOperationsMultiGroup =
+    BinaryOperationsMultiGroup ??=
       binaryOperationsMulti
         .SelectMany(a => a)
         .ToDictionary((a) => NodeUtils.ProtoFluxBindingMapping[a.Node], (a) => a.Types.ToArray());
 
-    var binaryOperationsMultiSwapMap =
-      binaryOperationsGroup.Keys
-        .Zip(binaryOperationsMultiGroup.Keys)
+    BinaryOperationsMultiSwapMap ??=
+      BinaryOperationsGroup.Keys
+        .Zip(BinaryOperationsMultiGroup.Keys)
         .ToBiDictionary();
 
-    var numericLogGroup =
+    NumericLogGroup =
       MapPsuedoGenericsToGenericTypes(__instance.World, "Log_")
         .Concat(MapPsuedoGenericsToGenericTypes(__instance.World, "Log10_"))
         .Concat(MapPsuedoGenericsToGenericTypes(__instance.World, "LogN_"))
         .ToDictionary((a) => NodeUtils.ProtoFluxBindingMapping[a.Node], (a) => a.Types.ToArray());
 
-    var avgGroup =
+    AvgGroup =
       MapPsuedoGenericsToGenericTypes(__instance.World, "Avg_")
         .Concat(MapPsuedoGenericsToGenericTypes(__instance.World, "AvgMulti_"))
         .ToDictionary((a) => NodeUtils.ProtoFluxBindingMapping[a.Node], (a) => a.Types);
 
-    var approximatelyNodes =
+    ApproximatelyNodes =
       MapPsuedoGenericsToGenericTypes(__instance.World, "Approximately_")
         .ToBiDictionary(t => NodeUtils.ProtoFluxBindingMapping[t.Node], t => t.Types.First());
 
-    var approximatelyNotNodes =
+    ApproximatelyNotNodes =
       MapPsuedoGenericsToGenericTypes(__instance.World, "ApproximatelyNot_")
         .ToBiDictionary(t => NodeUtils.ProtoFluxBindingMapping[t.Node], t => t.Types.First());
 
-    var approximatelyGroup =
-      approximatelyNodes.AsEnumerable()
-        .Concat(approximatelyNotNodes.AsEnumerable())
+    ApproximatelyGroup =
+      ApproximatelyNodes.AsEnumerable()
+        .Concat(ApproximatelyNotNodes.AsEnumerable())
         .ToDictionary(a => a.First, a => a.Second);
 
     if (TryGetSwap(GetUserRootSwapGroup, nodeType, out Type match)) yield return new(match);
@@ -343,52 +354,52 @@ internal static partial class ContextualSwapActionsPatch
     if (TryGetSwap(GetGlobalLocalEquivilents, nodeType, out match)) yield return new(match, connectionTransferType: ConnectionTransferType.ByIndexLossy);
 
     IEnumerable<MenuItem> menuItems = [
-      .. GetDirectionGroupItems(nodeType),
-      .. ForLoopGroupItems(nodeType),
-      .. EasingOfSameKindFloatItems(nodeType),
-      .. EasingOfSameKindDoubleItems(nodeType),
-      .. TimespanInstanceGroupItems(nodeType),
-      .. SetSlotTranformGlobalOperationGroupItems(nodeType),
-      .. SetSlotTranformLocalOperationGroupItems(nodeType),
-      .. UserInfoGroupItems(nodeType),
-      .. DeltaTimeGroupItems(nodeType),
-      .. UserBoolCheckGroupItems(nodeType),
-      .. PlayOneShotGroupItems(nodeType),
-      .. ScreenPointGroupItems(nodeType),
-      .. MousePositionGroupItems(nodeType),
-      .. FindSlotGroupItems(nodeType),
-      .. SlotMetaGroupItems(nodeType),
-      .. UserRootSlotGroupItems(nodeType),
-      .. UserRootPositionGroupItems(nodeType),
-      .. UserRootRotationGroupItems(nodeType),
-      .. SetUserRootPositionGroupItems(nodeType),
-      .. SetUserRootRotationGroupItems(nodeType),
-      .. UserRootHeadRotationGroupItems(nodeType),
-      .. SetUserRootHeadRotationGroupItems(nodeType),
-      .. BinaryOperationsGroupItems(nodeType, binaryOperationsGroup),
-      .. BinaryOperationsMultiGroupItems(nodeType, binaryOperationsMultiGroup),
-      .. BinaryOperationsMultiSwapMapItems(nodeType, binaryOperationsMultiSwapMap),
-      .. NumericLogGroupItems(nodeType, numericLogGroup),
-      .. ApproximatelyGroupItems(nodeType, approximatelyNodes, approximatelyNotNodes, approximatelyGroup),
-      .. AverageGroupItems(nodeType, avgGroup),
-      .. VariableStoreNodesGroupItems(nodeType),
-      .. ValueRelayGroupItems(nodeType),
-      .. ObjectRelayGroupItems(nodeType),
-      .. ComparisonBinaryOperatorGroupItems(nodeType),
-      .. DeltaTimeOperationGroupItems(nodeType),
-      .. EnumShiftGroupItems(nodeType),
-      .. NullCoalesceGroupItems(nodeType),
-      .. MinMaxGroupItems(nodeType, avgGroup),
-      .. MinMaxMultiGroupItems(nodeType, avgGroup),
-      .. ArithmeticBinaryOperatorGroupItems(nodeType),
-      .. ArithmeticMultiOperatorGroupItems(nodeType),
-      .. ArithmeticRepeatGroupItems(nodeType),
-      .. ArithmeticNegateGroupItems(nodeType),
-      .. ArithmeticOneGroupItems(nodeType),
-      .. EnumToNumberGroupItems(nodeType),
-      .. NumberToEnumGroupItems(nodeType),
-      .. MultiInputMappingGroupItems(nodeType),
-      .. ApproximatelyNodesGroupItems(nodeType, approximatelyNodes, approximatelyNotNodes),
+      .. GetDirectionGroupItems(context),
+      .. ForLoopGroupItems(context),
+      .. EasingOfSameKindFloatItems(context),
+      .. EasingOfSameKindDoubleItems(context),
+      .. TimespanInstanceGroupItems(context),
+      .. SetSlotTranformGlobalOperationGroupItems(context),
+      .. SetSlotTranformLocalOperationGroupItems(context),
+      .. UserInfoGroupItems(context),
+      .. DeltaTimeGroupItems(context),
+      .. UserBoolCheckGroupItems(context),
+      .. PlayOneShotGroupItems(context),
+      .. ScreenPointGroupItems(context),
+      .. MousePositionGroupItems(context),
+      .. FindSlotGroupItems(context),
+      .. SlotMetaGroupItems(context),
+      .. UserRootSlotGroupItems(context),
+      .. UserRootPositionGroupItems(context),
+      .. UserRootRotationGroupItems(context),
+      .. SetUserRootPositionGroupItems(context),
+      .. SetUserRootRotationGroupItems(context),
+      .. UserRootHeadRotationGroupItems(context),
+      .. SetUserRootHeadRotationGroupItems(context),
+      .. BinaryOperationsGroupItems(context),
+      .. BinaryOperationsMultiGroupItems(context),
+      .. BinaryOperationsMultiSwapMapItems(context),
+      .. NumericLogGroupItems(context),
+      .. ApproximatelyGroupItems(context),
+      .. AverageGroupItems(context),
+      .. VariableStoreNodesGroupItems(context),
+      .. ValueRelayGroupItems(context),
+      .. ObjectRelayGroupItems(context),
+      .. ComparisonBinaryOperatorGroupItems(context),
+      .. DeltaTimeOperationGroupItems(context),
+      .. EnumShiftGroupItems(context),
+      .. NullCoalesceGroupItems(context),
+      .. MinMaxGroupItems(context),
+      .. MinMaxMultiGroupItems(context),
+      .. ArithmeticBinaryOperatorGroupItems(context),
+      .. ArithmeticMultiOperatorGroupItems(context),
+      .. ArithmeticRepeatGroupItems(context),
+      .. ArithmeticNegateGroupItems(context),
+      .. ArithmeticOneGroupItems(context),
+      .. EnumToNumberGroupItems(context),
+      .. NumberToEnumGroupItems(context),
+      .. MultiInputMappingGroupItems(context),
+      .. ApproximatelyNodesGroupItems(context),
     ];
 
     foreach (var menuItem in menuItems)

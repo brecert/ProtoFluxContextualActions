@@ -12,9 +12,9 @@ static partial class ContextualSwapActionsPatch
     typeof(IsUserHost),
   ];
 
-  internal static IEnumerable<MenuItem> UserBoolCheckGroupItems(Type nodeType)
+  internal static IEnumerable<MenuItem> UserBoolCheckGroupItems(ContextualContext context)
   {
-    if (UserBoolCheckGroup.Contains(nodeType))
+    if (UserBoolCheckGroup.Contains(context.NodeType))
     {
       foreach (var match in UserBoolCheckGroup)
       {

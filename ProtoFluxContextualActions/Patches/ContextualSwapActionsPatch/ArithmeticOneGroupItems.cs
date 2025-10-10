@@ -20,12 +20,12 @@ static partial class ContextualSwapActionsPatch
     typeof(ValueDecrement<,>),
   ];
 
-  internal static IEnumerable<MenuItem> ArithmeticOneGroupItems(Type nodeType)
+  internal static IEnumerable<MenuItem> ArithmeticOneGroupItems(ContextualContext context)
   {
-    if (TypeUtils.TryGetGenericTypeDefinition(nodeType, out var genericType) && ArithmeticOneGroup.Contains(genericType))
+    if (TypeUtils.TryGetGenericTypeDefinition(context.NodeType, out var genericType) && ArithmeticOneGroup.Contains(genericType))
     {
-      var opCount = nodeType.GenericTypeArguments.Length;
-      var opType = nodeType.GenericTypeArguments[opCount - 1];
+      var opCount = context.NodeType.GenericTypeArguments.Length;
+      var opType = context.NodeType.GenericTypeArguments[opCount - 1];
       var coder = Traverse.Create(typeof(Coder<>).MakeGenericType(opType));
 
       // in theory, this check shouldn't be needed

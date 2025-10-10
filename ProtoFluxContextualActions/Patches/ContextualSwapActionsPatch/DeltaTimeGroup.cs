@@ -13,9 +13,9 @@ static partial class ContextualSwapActionsPatch
     typeof(InvertedSmoothDeltaTime),
   ];
 
-  internal static IEnumerable<MenuItem> DeltaTimeGroupItems(Type nodeType)
+  internal static IEnumerable<MenuItem> DeltaTimeGroupItems(ContextualContext context)
   {
-    if (DeltaTimeGroup.Contains(nodeType))
+    if (DeltaTimeGroup.Contains(context.NodeType))
     {
       foreach (var match in DeltaTimeGroup)
       {

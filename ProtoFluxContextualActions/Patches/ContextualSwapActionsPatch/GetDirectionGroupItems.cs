@@ -15,9 +15,9 @@ static partial class ContextualSwapActionsPatch
     typeof(GetRight)
   ];
 
-  private static IEnumerable<MenuItem> GetDirectionGroupItems(Type nodeType)
+  private static IEnumerable<MenuItem> GetDirectionGroupItems(ContextualContext context)
   {
-    if (GetDirectionGroup.Contains(nodeType))
+    if (GetDirectionGroup.Contains(context.NodeType))
     {
       foreach (var match in GetDirectionGroup)
       {

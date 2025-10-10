@@ -11,9 +11,9 @@ static partial class ContextualSwapActionsPatch
     typeof(FindChildByTag),
   ];
 
-  internal static IEnumerable<MenuItem> FindSlotGroupItems(Type nodeType)
+  internal static IEnumerable<MenuItem> FindSlotGroupItems(ContextualContext context)
   {
-    if (FindSlotGroup.Contains(nodeType))
+    if (FindSlotGroup.Contains(context.NodeType))
     {
       foreach (var match in FindSlotGroup)
       {

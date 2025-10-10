@@ -15,11 +15,11 @@ static partial class ContextualSwapActionsPatch
     typeof(ValueRepeat<>),
   ];
 
-  internal static IEnumerable<MenuItem> ArithmeticRepeatGroupItems(Type nodeType)
+  internal static IEnumerable<MenuItem> ArithmeticRepeatGroupItems(ContextualContext context)
   {
-    if (TypeUtils.TryGetGenericTypeDefinition(nodeType, out var genericType) && ArithmeticRepeatGroup.Contains(genericType))
+    if (TypeUtils.TryGetGenericTypeDefinition(context.NodeType, out var genericType) && ArithmeticRepeatGroup.Contains(genericType))
     {
-      var opType = nodeType.GenericTypeArguments[0];
+      var opType = context.NodeType.GenericTypeArguments[0];
       var coder = Traverse.Create(typeof(Coder<>).MakeGenericType(opType));
 
       static MenuItem RepeatItem(Type nodeType) => new(

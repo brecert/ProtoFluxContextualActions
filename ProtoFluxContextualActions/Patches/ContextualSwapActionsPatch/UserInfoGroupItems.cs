@@ -16,9 +16,9 @@ static partial class ContextualSwapActionsPatch
     typeof(UserPrimaryHand),
   ];
 
-  internal static IEnumerable<MenuItem> UserInfoGroupItems(Type nodeType)
+  internal static IEnumerable<MenuItem> UserInfoGroupItems(ContextualContext context)
   {
-    if (UserInfoGroup.Contains(nodeType))
+    if (UserInfoGroup.Contains(context.NodeType))
     {
       foreach (var match in UserInfoGroup)
       {

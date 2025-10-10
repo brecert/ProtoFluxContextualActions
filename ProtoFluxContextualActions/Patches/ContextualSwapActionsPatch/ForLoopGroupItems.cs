@@ -12,9 +12,9 @@ static partial class ContextualSwapActionsPatch
     typeof(RangeLoopInt),
   ];
 
-  internal static IEnumerable<MenuItem> ForLoopGroupItems(Type nodeType)
+  internal static IEnumerable<MenuItem> ForLoopGroupItems(ContextualContext context)
   {
-    if (ForLoopGroup.Contains(nodeType))
+    if (ForLoopGroup.Contains(context.NodeType))
     {
       foreach (var match in ForLoopGroup)
       {

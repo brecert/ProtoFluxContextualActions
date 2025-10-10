@@ -12,13 +12,13 @@ static partial class ContextualSwapActionsPatch
     typeof(ContinuouslyChangingObjectRelay<>)
   ];
 
-  internal static IEnumerable<MenuItem> ObjectRelayGroupItems(Type nodeType)
+  internal static IEnumerable<MenuItem> ObjectRelayGroupItems(ContextualContext context)
   {
-    if (nodeType.TryGetGenericTypeDefinition(out var genericType) && ObjectRelayGroup.Contains(genericType))
+    if (context.NodeType.TryGetGenericTypeDefinition(out var genericType) && ObjectRelayGroup.Contains(genericType))
     {
       foreach (var match in ObjectRelayGroup)
       {
-        yield return new MenuItem(match.MakeGenericType(nodeType.GenericTypeArguments));
+        yield return new MenuItem(match.MakeGenericType(context.NodeType.GenericTypeArguments));
       }
     }
   }

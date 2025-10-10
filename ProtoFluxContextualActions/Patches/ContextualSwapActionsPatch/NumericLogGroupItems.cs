@@ -6,11 +6,11 @@ namespace ProtoFluxContextualActions.Patches;
 
 static partial class ContextualSwapActionsPatch
 {
-  internal static IEnumerable<MenuItem> NumericLogGroupItems(Type nodeType, Dictionary<Type, Type[]> numericLogGroup)
+  internal static IEnumerable<MenuItem> NumericLogGroupItems(ContextualContext context)
   {
-    if (numericLogGroup.TryGetValue(nodeType, out var genericTypes))
+    if (NumericLogGroup.TryGetValue(context.NodeType, out var genericTypes))
     {
-      var matchingNodes = numericLogGroup.Where(a => genericTypes.SequenceEqual(a.Value)).Select(a => a.Key);
+      var matchingNodes = NumericLogGroup.Where(a => genericTypes.SequenceEqual(a.Value)).Select(a => a.Key);
       foreach (var match in matchingNodes)
       {
         yield return new MenuItem(match);

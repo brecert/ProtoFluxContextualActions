@@ -15,17 +15,17 @@ static partial class ContextualSwapActionsPatch
     typeof(ValueMax<>),
   ];
 
-  internal static IEnumerable<MenuItem> MinMaxGroupItems(Type nodeType, Dictionary<Type, IEnumerable<Type>> avgGroup)
+  internal static IEnumerable<MenuItem> MinMaxGroupItems(ContextualContext context)
   {
-    if (TypeUtils.TryGetGenericTypeDefinition(nodeType, out var genericType) && MinMaxGroup.Contains(genericType))
+    if (TypeUtils.TryGetGenericTypeDefinition(context.NodeType, out var genericType) && MinMaxGroup.Contains(genericType))
     {
-      var innerType = nodeType.GenericTypeArguments[0];
+      var innerType = context.NodeType.GenericTypeArguments[0];
       foreach (var match in MinMaxGroup)
       {
         yield return new MenuItem(match.MakeGenericType(innerType));
       }
 
-      var matchingNodes = avgGroup
+      var matchingNodes = AvgGroup
         .Where(a => a.Value.FirstOrDefault() == innerType)
         .Select(a => a.Key)
         .Where(a => !a.GetNiceTypeName().Contains("Multi_"));

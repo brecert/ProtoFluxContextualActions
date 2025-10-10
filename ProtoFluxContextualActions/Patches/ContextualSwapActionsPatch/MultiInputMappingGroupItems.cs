@@ -20,13 +20,13 @@ static partial class ContextualSwapActionsPatch
     {typeof(ValueMax<>), typeof(ValueMaxMulti<>)},
   };
 
-  internal static IEnumerable<MenuItem> MultiInputMappingGroupItems(Type nodeType)
+  internal static IEnumerable<MenuItem> MultiInputMappingGroupItems(ContextualContext context)
   {
-    if (TypeUtils.TryGetGenericTypeDefinition(nodeType, out var genericType))
+    if (TypeUtils.TryGetGenericTypeDefinition(context.NodeType, out var genericType))
     {
       if (MultiInputMappingGroup.TryGetSecond(genericType, out var mapped))
       {
-        var binopType = nodeType.GenericTypeArguments[0];
+        var binopType = context.NodeType.GenericTypeArguments[0];
         yield return new MenuItem(
           node: mapped.MakeGenericType(binopType),
           name: mapped.GetNiceTypeName(),
@@ -35,7 +35,7 @@ static partial class ContextualSwapActionsPatch
       }
       else if (MultiInputMappingGroup.TryGetFirst(genericType, out mapped))
       {
-        var binopType = nodeType.GenericTypeArguments[0];
+        var binopType = context.NodeType.GenericTypeArguments[0];
         yield return new MenuItem(mapped.MakeGenericType(binopType), connectionTransferType: ConnectionTransferType.ByIndexLossy);
       }
     }

@@ -17,11 +17,11 @@ static partial class ContextualSwapActionsPatch
     typeof(ValueDivMulti<>),
   ];
 
-  internal static IEnumerable<MenuItem> ArithmeticMultiOperatorGroupItems(Type nodeType)
+  internal static IEnumerable<MenuItem> ArithmeticMultiOperatorGroupItems(ContextualContext context)
   {
-    if (TypeUtils.TryGetGenericTypeDefinition(nodeType, out var genericType) && ArithmeticMultiOperatorGroup.Contains(genericType))
+    if (TypeUtils.TryGetGenericTypeDefinition(context.NodeType, out var genericType) && ArithmeticMultiOperatorGroup.Contains(genericType))
     {
-      var opType = nodeType.GenericTypeArguments[0];
+      var opType = context.NodeType.GenericTypeArguments[0];
       var coder = Traverse.Create(typeof(Coder<>).MakeGenericType(opType));
 
       static MenuItem MultiMenuItem(Type nodeType) => new(

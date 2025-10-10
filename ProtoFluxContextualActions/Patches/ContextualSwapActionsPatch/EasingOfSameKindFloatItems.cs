@@ -6,11 +6,11 @@ namespace ProtoFluxContextualActions.Patches;
 
 static partial class ContextualSwapActionsPatch
 {
-  internal static IEnumerable<MenuItem> EasingOfSameKindFloatItems(Type nodeType)
+  internal static IEnumerable<MenuItem> EasingOfSameKindFloatItems(ContextualContext context)
   {
-    if (EasingGroups.ContainsNodeFloat(nodeType))
+    if (EasingGroups.ContainsNodeFloat(context.NodeType))
     {
-      foreach (var match in EasingGroups.GetEasingOfSameKindFloat(nodeType))
+      foreach (var match in EasingGroups.GetEasingOfSameKindFloat(context.NodeType))
       {
         yield return new MenuItem(match);
       }

@@ -15,9 +15,9 @@ static partial class ContextualSwapActionsPatch
     typeof(TimeSpanFromTicks),
   ];
 
-  internal static IEnumerable<MenuItem> TimespanInstanceGroupItems(Type nodeType)
+  internal static IEnumerable<MenuItem> TimespanInstanceGroupItems(ContextualContext context)
   {
-    if (TimespanInstanceGroup.Contains(nodeType))
+    if (TimespanInstanceGroup.Contains(context.NodeType))
     {
       foreach (var match in TimespanInstanceGroup)
       {

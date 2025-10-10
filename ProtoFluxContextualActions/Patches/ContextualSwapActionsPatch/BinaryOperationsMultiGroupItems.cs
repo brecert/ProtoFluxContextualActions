@@ -7,11 +7,11 @@ namespace ProtoFluxContextualActions.Patches;
 
 static partial class ContextualSwapActionsPatch
 {
-  internal static IEnumerable<MenuItem> BinaryOperationsMultiGroupItems(Type nodeType, Dictionary<Type, Type[]> binaryOperationsMultiGroup)
+  internal static IEnumerable<MenuItem> BinaryOperationsMultiGroupItems(ContextualContext context)
   {
-    if (binaryOperationsMultiGroup.TryGetValue(nodeType, out var genericTypes))
+    if (BinaryOperationsMultiGroup.TryGetValue(context.NodeType, out var genericTypes))
     {
-      var matchingNodes = binaryOperationsMultiGroup.Where(a => genericTypes.SequenceEqual(a.Value)).Select(a => a.Key);
+      var matchingNodes = BinaryOperationsMultiGroup.Where(a => genericTypes.SequenceEqual(a.Value)).Select(a => a.Key);
       foreach (var match in matchingNodes)
       {
         yield return new MenuItem(

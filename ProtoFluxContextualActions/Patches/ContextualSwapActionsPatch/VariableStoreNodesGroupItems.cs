@@ -24,11 +24,11 @@ static partial class ContextualSwapActionsPatch
     typeof(DataModelObjectFieldStore<>),
   ];
 
-  internal static IEnumerable<MenuItem> VariableStoreNodesGroupItems(Type nodeType)
+  internal static IEnumerable<MenuItem> VariableStoreNodesGroupItems(ContextualContext context)
   {
-    if (VariableStoreNodesGroup.Any(t => nodeType.IsGenericType ? t == nodeType.GetGenericTypeDefinition() : t == nodeType))
+    if (VariableStoreNodesGroup.Any(t => context.NodeType.IsGenericType ? t == context.NodeType.GetGenericTypeDefinition() : t == context.NodeType))
     {
-      var storageType = GetIVariableValueType(nodeType);
+      var storageType = GetIVariableValueType(context.NodeType);
       yield return new MenuItem(NodeUtils.ProtoFluxBindingMapping[ProtoFluxHelper.GetLocalNode(storageType).GetGenericTypeDefinition()].MakeGenericType(storageType));
       yield return new MenuItem(NodeUtils.ProtoFluxBindingMapping[ProtoFluxHelper.GetStoreNode(storageType).GetGenericTypeDefinition()].MakeGenericType(storageType));
 

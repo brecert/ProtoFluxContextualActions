@@ -7,9 +7,9 @@ namespace ProtoFluxContextualActions.Patches;
 
 static partial class ContextualSwapActionsPatch
 {
-  internal static IEnumerable<MenuItem> SetSlotTranformGlobalOperationGroupItems(Type nodeType)
+  internal static IEnumerable<MenuItem> SetSlotTranformGlobalOperationGroupItems(ContextualContext context)
   {
-    if (Groups.SetSlotTranformGlobalOperationGroup.Contains(nodeType))
+    if (Groups.SetSlotTranformGlobalOperationGroup.Contains(context.NodeType))
     {
       foreach (var match in Groups.SetSlotTranformGlobalOperationGroup)
       {

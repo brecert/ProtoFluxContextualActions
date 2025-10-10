@@ -11,9 +11,9 @@ static partial class ContextualSwapActionsPatch
     typeof(GetTag),
   ];
 
-  internal static IEnumerable<MenuItem> SlotMetaGroupItems(Type nodeType)
+  internal static IEnumerable<MenuItem> SlotMetaGroupItems(ContextualContext context)
   {
-    if (SlotMetaGroup.Contains(nodeType))
+    if (SlotMetaGroup.Contains(context.NodeType))
     {
       foreach (var match in SlotMetaGroup)
       {

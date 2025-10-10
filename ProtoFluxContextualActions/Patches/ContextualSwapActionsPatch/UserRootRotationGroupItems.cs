@@ -8,9 +8,9 @@ namespace ProtoFluxContextualActions.Patches;
 
 static partial class ContextualSwapActionsPatch
 {
-  internal static IEnumerable<MenuItem> UserRootRotationGroupItems(Type nodeType)
+  internal static IEnumerable<MenuItem> UserRootRotationGroupItems(ContextualContext context)
   {
-    if (Groups.UserRootRotationGroup.Contains(nodeType))
+    if (Groups.UserRootRotationGroup.Contains(context.NodeType))
     {
       foreach (var match in Groups.UserRootRotationGroup)
       {

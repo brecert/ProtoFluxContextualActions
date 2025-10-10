@@ -17,11 +17,11 @@ static partial class ContextualSwapActionsPatch
     typeof(ValueMod<>),
   ];
 
-  internal static IEnumerable<MenuItem> ArithmeticBinaryOperatorGroupItems(Type nodeType)
+  internal static IEnumerable<MenuItem> ArithmeticBinaryOperatorGroupItems(ContextualContext context)
   {
-    if (TypeUtils.TryGetGenericTypeDefinition(nodeType, out var genericType) && ArithmeticBinaryOperatorGroup.Contains(genericType))
+    if (TypeUtils.TryGetGenericTypeDefinition(context.NodeType, out var genericType) && ArithmeticBinaryOperatorGroup.Contains(genericType))
     {
-      var opType = nodeType.GenericTypeArguments[0];
+      var opType = context.NodeType.GenericTypeArguments[0];
       var coder = Traverse.Create(typeof(Coder<>).MakeGenericType(opType));
 
       if (coder.Property<bool>("SupportsAddSub").Value)

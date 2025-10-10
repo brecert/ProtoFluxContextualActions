@@ -12,13 +12,13 @@ static partial class ContextualSwapActionsPatch
     typeof(DivDeltaTime<>),
   ];
 
-  internal static IEnumerable<MenuItem> DeltaTimeOperationGroupItems(Type nodeType)
+  internal static IEnumerable<MenuItem> DeltaTimeOperationGroupItems(ContextualContext context)
   {
-    if (nodeType.TryGetGenericTypeDefinition(out var genericType) && DeltaTimeOperationGroup.Contains(genericType))
+    if (context.NodeType.TryGetGenericTypeDefinition(out var genericType) && DeltaTimeOperationGroup.Contains(genericType))
     {
       foreach (var match in DeltaTimeOperationGroup)
       {
-        yield return new MenuItem(match.MakeGenericType(nodeType.GenericTypeArguments));
+        yield return new MenuItem(match.MakeGenericType(context.NodeType.GenericTypeArguments));
       }
     }
   }

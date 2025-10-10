@@ -12,9 +12,9 @@ static partial class ContextualSwapActionsPatch
     typeof(ControllerSlot),
   ];
 
-  internal static IEnumerable<MenuItem> UserRootSlotGroupItems(Type nodeType)
+  internal static IEnumerable<MenuItem> UserRootSlotGroupItems(ContextualContext context)
   {
-    if (UserRootSlotGroup.Contains(nodeType))
+    if (UserRootSlotGroup.Contains(context.NodeType))
     {
       foreach (var match in UserRootSlotGroup)
       {

@@ -15,11 +15,11 @@ static partial class ContextualSwapActionsPatch
   ];
 
 
-  internal static IEnumerable<MenuItem> ArithmeticNegateGroupItems(Type nodeType)
+  internal static IEnumerable<MenuItem> ArithmeticNegateGroupItems(ContextualContext context)
   {
-    if (TypeUtils.TryGetGenericTypeDefinition(nodeType, out var genericType) && ArithmeticNegateGroup.Contains(genericType))
+    if (TypeUtils.TryGetGenericTypeDefinition(context.NodeType, out var genericType) && ArithmeticNegateGroup.Contains(genericType))
     {
-      var opType = nodeType.GenericTypeArguments[0];
+      var opType = context.NodeType.GenericTypeArguments[0];
       var coder = Traverse.Create(typeof(Coder<>).MakeGenericType(opType));
 
       if (coder.Property<bool>("SupportsNegate").Value)

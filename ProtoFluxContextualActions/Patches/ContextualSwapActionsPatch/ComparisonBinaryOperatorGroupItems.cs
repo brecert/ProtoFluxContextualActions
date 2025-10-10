@@ -17,13 +17,13 @@ static partial class ContextualSwapActionsPatch
     typeof(ValueNotEquals<>),
   ];
 
-  internal static IEnumerable<MenuItem> ComparisonBinaryOperatorGroupItems(Type nodeType)
+  internal static IEnumerable<MenuItem> ComparisonBinaryOperatorGroupItems(ContextualContext context)
   {
-    if (nodeType.TryGetGenericTypeDefinition(out var genericType) && ComparisonBinaryOperatorGroup.Contains(genericType))
+    if (context.NodeType.TryGetGenericTypeDefinition(out var genericType) && ComparisonBinaryOperatorGroup.Contains(genericType))
     {
       foreach (var match in ComparisonBinaryOperatorGroup)
       {
-        yield return new MenuItem(match.MakeGenericType(nodeType.GenericTypeArguments));
+        yield return new MenuItem(match.MakeGenericType(context.NodeType.GenericTypeArguments));
       }
     }
   }

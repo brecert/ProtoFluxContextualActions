@@ -5,16 +5,16 @@ namespace ProtoFluxContextualActions.Patches;
 
 static partial class ContextualSwapActionsPatch
 {
-  internal static IEnumerable<MenuItem> BinaryOperationsMultiSwapMapItems(Type nodeType, BiDictionary<Type, Type> binaryOperationsMultiSwapMap)
+  internal static IEnumerable<MenuItem> BinaryOperationsMultiSwapMapItems(ContextualContext context)
   {
-    if (binaryOperationsMultiSwapMap.TryGetFirst(nodeType, out var matched))
+    if (BinaryOperationsMultiSwapMap.TryGetFirst(context.NodeType, out var matched))
     {
       yield return new MenuItem(
         node: matched,
         connectionTransferType: ConnectionTransferType.ByIndexLossy
       );
     }
-    else if (binaryOperationsMultiSwapMap.TryGetSecond(nodeType, out matched))
+    else if (BinaryOperationsMultiSwapMap.TryGetSecond(context.NodeType, out matched))
     {
       yield return new MenuItem(
         node: matched,

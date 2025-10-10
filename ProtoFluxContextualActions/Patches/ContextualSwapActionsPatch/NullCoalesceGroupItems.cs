@@ -12,13 +12,13 @@ static partial class ContextualSwapActionsPatch
     typeof(MultiNullCoalesce<>),
   ];
 
-  internal static IEnumerable<MenuItem> NullCoalesceGroupItems(Type nodeType)
+  internal static IEnumerable<MenuItem> NullCoalesceGroupItems(ContextualContext context)
   {
-    if (TypeUtils.TryGetGenericTypeDefinition(nodeType, out var genericType) && NullCoalesceGroup.Contains(genericType))
+    if (TypeUtils.TryGetGenericTypeDefinition(context.NodeType, out var genericType) && NullCoalesceGroup.Contains(genericType))
     {
       foreach (var match in NullCoalesceGroup)
       {
-        yield return new MenuItem(match.MakeGenericType(nodeType.GenericTypeArguments[0]), name: match == typeof(MultiNullCoalesce<>) ? FormatMultiName(nodeType) : null);
+        yield return new MenuItem(match.MakeGenericType(context.NodeType.GenericTypeArguments[0]), name: match == typeof(MultiNullCoalesce<>) ? FormatMultiName(context.NodeType) : null);
       }
     }
   }

@@ -11,9 +11,9 @@ static partial class ContextualSwapActionsPatch
     typeof(PlayOneShotAndWait),
   ];
 
-  internal static IEnumerable<MenuItem> PlayOneShotGroupItems(Type nodeType)
+  internal static IEnumerable<MenuItem> PlayOneShotGroupItems(ContextualContext context)
   {
-    if (PlayOneShotGroup.Contains(nodeType))
+    if (PlayOneShotGroup.Contains(context.NodeType))
     {
       foreach (var match in PlayOneShotGroup)
       {
