@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using Elements.Core;
 using FrooxEngine.ProtoFlux;
+using ProtoFlux.Runtimes.Execution;
 using ProtoFlux.Runtimes.Execution.Nodes;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Variables;
+using ProtoFluxContextualActions.Utils;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -42,5 +44,14 @@ static partial class ContextualSwapActionsPatch
         yield return new MenuItem(NodeUtils.ProtoFluxBindingMapping[dataModelStore]);
       }
     }
+  }
+
+  private static Type GetIVariableValueType(Type type)
+  {
+    if (TypeUtils.MatchInterface(type, typeof(IVariable<,>), out var varType))
+    {
+      return varType.GenericTypeArguments[1];
+    }
+    throw new Exception($"Unable to find IVariable node for type '{type}'");
   }
 }

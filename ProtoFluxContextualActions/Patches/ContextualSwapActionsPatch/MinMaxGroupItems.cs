@@ -17,6 +17,9 @@ static partial class ContextualSwapActionsPatch
 
   internal static IEnumerable<MenuItem> MinMaxGroupItems(ContextualContext context)
   {
+    var psuedoGenericTypes = context.World.GetPsuedoGenericTypesForWorld();
+    var avgGroup = psuedoGenericTypes.AvgGroup().ToDictionary();
+
     if (TypeUtils.TryGetGenericTypeDefinition(context.NodeType, out var genericType) && MinMaxGroup.Contains(genericType))
     {
       var innerType = context.NodeType.GenericTypeArguments[0];
@@ -25,7 +28,7 @@ static partial class ContextualSwapActionsPatch
         yield return new MenuItem(match.MakeGenericType(innerType));
       }
 
-      var matchingNodes = AvgGroup
+      var matchingNodes = avgGroup
         .Where(a => a.Value.FirstOrDefault() == innerType)
         .Select(a => a.Key)
         .Where(a => !a.GetNiceTypeName().Contains("Multi_"));

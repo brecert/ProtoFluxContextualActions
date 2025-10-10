@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Elements.Core;
 using ProtoFlux.Core;
+using ProtoFluxContextualActions.Utils;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -10,9 +11,12 @@ static partial class ContextualSwapActionsPatch
 {
   internal static IEnumerable<MenuItem> AverageGroupItems(ContextualContext context)
   {
-    if (AvgGroup.TryGetValue(context.NodeType, out var genericTypes))
+    var psuedoGenericTypes = context.World.GetPsuedoGenericTypesForWorld();
+    var avgGroup = psuedoGenericTypes.AvgGroup().ToDictionary();
+
+    if (avgGroup.TryGetValue(context.NodeType, out var genericTypes))
     {
-      var matchingNodes = AvgGroup.Where(a => genericTypes.SequenceEqual(a.Value)).Select(a => a.Key);
+      var matchingNodes = avgGroup.Where(a => genericTypes.SequenceEqual(a.Value)).Select(a => a.Key);
       foreach (var match in matchingNodes)
       {
         yield return new MenuItem(
@@ -44,5 +48,4 @@ static partial class ContextualSwapActionsPatch
       }
     }
   }
-
 }
