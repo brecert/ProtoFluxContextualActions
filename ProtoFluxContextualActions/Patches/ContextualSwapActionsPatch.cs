@@ -272,7 +272,8 @@ internal static partial class ContextualSwapActionsPatch
     var nodeType = node.GetType();
     var componentType = nodeComponent.GetType();
 
-    IEnumerable<IEnumerable<(Type Node, IEnumerable<Type> Types)>> binaryOperations = [
+    IEnumerable<IEnumerable<(Type Node, IEnumerable<Type> Types)>> binaryOperations =
+    [
       [.. MapPsuedoGenericsToGenericTypes(__instance.World, "AND_")],
       [.. MapPsuedoGenericsToGenericTypes(__instance.World, "OR_")],
       [.. MapPsuedoGenericsToGenericTypes(__instance.World, "NAND_")],
@@ -281,7 +282,8 @@ internal static partial class ContextualSwapActionsPatch
       [.. MapPsuedoGenericsToGenericTypes(__instance.World, "XOR_")]
     ];
 
-    IEnumerable<IEnumerable<(Type Node, IEnumerable<Type> Types)>> binaryOperationsMulti = [
+    IEnumerable<IEnumerable<(Type Node, IEnumerable<Type> Types)>> binaryOperationsMulti =
+    [
       [.. MapPsuedoGenericsToGenericTypes(__instance.World, "AND_Multi_")],
       [.. MapPsuedoGenericsToGenericTypes(__instance.World, "OR_Multi_")],
       [.. MapPsuedoGenericsToGenericTypes(__instance.World, "NAND_Multi_")],
@@ -292,31 +294,55 @@ internal static partial class ContextualSwapActionsPatch
 
     // todo: cache per-world?
     // realistically with current resonite it doesn't matter and only needs to be done once.
-    var binaryOperationsGroup = binaryOperations
+    var binaryOperationsGroup =
+      binaryOperations
         .SelectMany(a => a)
         .ToDictionary((a) => NodeUtils.ProtoFluxBindingMapping[a.Node], (a) => a.Types.ToArray());
 
-    var binaryOperationsMultiGroup = binaryOperationsMulti
+    var binaryOperationsMultiGroup =
+      binaryOperationsMulti
         .SelectMany(a => a)
         .ToDictionary((a) => NodeUtils.ProtoFluxBindingMapping[a.Node], (a) => a.Types.ToArray());
 
-    var binaryOperationsMultiSwapMap = binaryOperationsGroup.Keys.Zip(binaryOperationsMultiGroup.Keys).ToBiDictionary();
+    var binaryOperationsMultiSwapMap =
+      binaryOperationsGroup.Keys
+        .Zip(binaryOperationsMultiGroup.Keys)
+        .ToBiDictionary();
 
-    var numericLogGroup = MapPsuedoGenericsToGenericTypes(__instance.World, "Log_")
-      .Concat(MapPsuedoGenericsToGenericTypes(__instance.World, "Log10_"))
-      .Concat(MapPsuedoGenericsToGenericTypes(__instance.World, "LogN_"))
-      .ToDictionary((a) => NodeUtils.ProtoFluxBindingMapping[a.Node], (a) => a.Types.ToArray());
+    var numericLogGroup =
+      MapPsuedoGenericsToGenericTypes(__instance.World, "Log_")
+        .Concat(MapPsuedoGenericsToGenericTypes(__instance.World, "Log10_"))
+        .Concat(MapPsuedoGenericsToGenericTypes(__instance.World, "LogN_"))
+        .ToDictionary((a) => NodeUtils.ProtoFluxBindingMapping[a.Node], (a) => a.Types.ToArray());
 
-    var avgGroup = MapPsuedoGenericsToGenericTypes(__instance.World, "Avg_")
-      .Concat(MapPsuedoGenericsToGenericTypes(__instance.World, "AvgMulti_"))
-      .ToDictionary((a) => NodeUtils.ProtoFluxBindingMapping[a.Node], (a) => a.Types);
+    var avgGroup =
+      MapPsuedoGenericsToGenericTypes(__instance.World, "Avg_")
+        .Concat(MapPsuedoGenericsToGenericTypes(__instance.World, "AvgMulti_"))
+        .ToDictionary((a) => NodeUtils.ProtoFluxBindingMapping[a.Node], (a) => a.Types);
 
-    var approximatelyNodes = MapPsuedoGenericsToGenericTypes(__instance.World, "Approximately_").ToBiDictionary(t => NodeUtils.ProtoFluxBindingMapping[t.Node], t => t.Types.First());
-    var approximatelyNotNodes = MapPsuedoGenericsToGenericTypes(__instance.World, "ApproximatelyNot_").ToBiDictionary(t => NodeUtils.ProtoFluxBindingMapping[t.Node], t => t.Types.First());
+    var approximatelyNodes =
+      MapPsuedoGenericsToGenericTypes(__instance.World, "Approximately_")
+        .ToBiDictionary(t => NodeUtils.ProtoFluxBindingMapping[t.Node], t => t.Types.First());
 
-    var approximatelyGroup = approximatelyNodes.AsEnumerable().Concat(approximatelyNotNodes.AsEnumerable()).ToDictionary(a => a.First, a => a.Second);
+    var approximatelyNotNodes =
+      MapPsuedoGenericsToGenericTypes(__instance.World, "ApproximatelyNot_")
+        .ToBiDictionary(t => NodeUtils.ProtoFluxBindingMapping[t.Node], t => t.Types.First());
 
-    IEnumerable<MenuItem> menuItemsA = [
+    var approximatelyGroup =
+      approximatelyNodes.AsEnumerable()
+        .Concat(approximatelyNotNodes.AsEnumerable())
+        .ToDictionary(a => a.First, a => a.Second);
+
+    if (TryGetSwap(GetUserRootSwapGroup, nodeType, out Type match)) yield return new(match);
+    if (TryGetSwap(UserRootPositionSwapGroup, nodeType, out match)) yield return new(match);
+    if (TryGetSwap(UserRootRotationSwapGroup, nodeType, out match)) yield return new(match);
+    if (TryGetSwap(SetUserRootSwapGroup, nodeType, out match)) yield return new(match);
+    if (TryGetSwap(UserRootHeadRotationSwapGroup, nodeType, out match)) yield return new(match);
+
+    if (TryGetSwap(SetGlobalLocalEquivilents, nodeType, out match)) yield return new(match);
+    if (TryGetSwap(GetGlobalLocalEquivilents, nodeType, out match)) yield return new(match, connectionTransferType: ConnectionTransferType.ByIndexLossy);
+
+    IEnumerable<MenuItem> menuItems = [
       .. GetDirectionGroupItems(nodeType),
       .. ForLoopGroupItems(nodeType),
       .. EasingOfSameKindFloatItems(nodeType),
@@ -339,26 +365,6 @@ internal static partial class ContextualSwapActionsPatch
       .. SetUserRootRotationGroupItems(nodeType),
       .. UserRootHeadRotationGroupItems(nodeType),
       .. SetUserRootHeadRotationGroupItems(nodeType),
-    ];
-
-    foreach (var menuItem in menuItemsA)
-    {
-      yield return menuItem;
-    }
-
-    {
-      if (TryGetSwap(GetUserRootSwapGroup, nodeType, out Type match)) yield return new(match);
-      if (TryGetSwap(UserRootPositionSwapGroup, nodeType, out match)) yield return new(match);
-      if (TryGetSwap(UserRootRotationSwapGroup, nodeType, out match)) yield return new(match);
-      if (TryGetSwap(SetUserRootSwapGroup, nodeType, out match)) yield return new(match);
-      if (TryGetSwap(UserRootHeadRotationSwapGroup, nodeType, out match)) yield return new(match);
-
-      if (TryGetSwap(SetGlobalLocalEquivilents, nodeType, out match)) yield return new(match);
-      if (TryGetSwap(GetGlobalLocalEquivilents, nodeType, out match)) yield return new(match, connectionTransferType: ConnectionTransferType.ByIndexLossy);
-    }
-
-    // TODO: iterate over these and yield their results.
-    IEnumerable<MenuItem> menuItemsB = [
       .. BinaryOperationsGroupItems(nodeType, binaryOperationsGroup),
       .. BinaryOperationsMultiGroupItems(nodeType, binaryOperationsMultiGroup),
       .. BinaryOperationsMultiSwapMapItems(nodeType, binaryOperationsMultiSwapMap),
@@ -385,30 +391,18 @@ internal static partial class ContextualSwapActionsPatch
       .. ApproximatelyNodesGroupItems(nodeType, approximatelyNodes, approximatelyNotNodes),
     ];
 
-    foreach (var menuItem in menuItemsB)
+    foreach (var menuItem in menuItems)
     {
       yield return menuItem;
     }
   }
 
   #region Utils
-  internal static string FormatMultiName(Type match)
-  {
-    return $"{NodeMetadataHelper.GetMetadata(match).Name} (Multi)";
-  }
+  internal static string FormatMultiName(Type match) =>
+    $"{NodeMetadataHelper.GetMetadata(match).Name} (Multi)";
 
   internal static bool TryGetSwap(BiDictionary<Type, Type> swaps, Type nodeType, out Type match) =>
     swaps.TryGetSecond(nodeType, out match) || swaps.TryGetFirst(nodeType, out match);
-
-
-  class ArrayComparer<T> : EqualityComparer<T[]>
-  {
-    public override bool Equals(T[]? x, T[]? y) =>
-      StructuralComparisons.StructuralEqualityComparer.Equals(x, y);
-
-    public override int GetHashCode(T[] obj) =>
-      StructuralComparisons.StructuralEqualityComparer.GetHashCode(obj);
-  }
 
   [HarmonyReversePatch]
   [HarmonyPatch(typeof(ProtoFluxTool), "CleanupDraggedWire")]
