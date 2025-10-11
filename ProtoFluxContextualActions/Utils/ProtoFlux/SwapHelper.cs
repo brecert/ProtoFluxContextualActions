@@ -8,6 +8,7 @@ using ProtoFluxContextualActions.Extensions;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Slots;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Variables;
 
 namespace ProtoFluxContextualActions.Utils.ProtoFlux;
 
@@ -112,6 +113,11 @@ public static class SwapHelper
   internal static Dictionary<(Type, Type), (string FromName, string ToName)[]> OutputMap = new() {
     {(typeof(For), typeof(RangeLoopInt)), [("Iteration", "Current")]},
     {(typeof(ValueNegate<>), typeof(ValuePlusMinus<>)), [("*", "Minus")]},
+    {(typeof(SampleValueSpatialVariable<>), typeof(SampleMinMaxSpatialVariable<>)), [("*", "Max")]},
+    {(typeof(SampleNumericSpatialVariable<>), typeof(SampleMinMaxSpatialVariable<>)), [("*", "Max")]},
+    {(typeof(SampleValueSpatialVariable<>), typeof(SampleSpatialVariablePartialDerivative<>)), [("*", "X")]},
+    {(typeof(SampleNumericSpatialVariable<>), typeof(SampleSpatialVariablePartialDerivative<>)), [("*", "X")]},
+    {(typeof(SampleMinMaxSpatialVariable<>), typeof(SampleSpatialVariablePartialDerivative<>)), [("Max", "X")]},
   };
 
   internal static bool TryGetOutputMap((Type, Type) typeTuple, [MaybeNullWhen(false)] out (string FromName, string ToName)[] elementMap) =>

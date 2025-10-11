@@ -285,6 +285,7 @@ internal static partial class ContextualSwapActionsPatch
       .. ApproximatelyNodesGroupItems(context),
       .. GrabbableValuePropertyGroupItems(context),
       .. SinCosSwapGroup(context),
+      .. SampleSpatialVariableGroupItems(context),
     ];
 
     foreach (var menuItem in menuItems)
