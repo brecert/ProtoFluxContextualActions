@@ -283,6 +283,7 @@ internal static partial class ContextualSwapActionsPatch
       .. NumberToEnumGroupItems(context),
       .. MultiInputMappingGroupItems(context),
       .. ApproximatelyNodesGroupItems(context),
+      .. GrabbableValuePropertyGroupItems(context),
     ];
 
     foreach (var menuItem in menuItems)

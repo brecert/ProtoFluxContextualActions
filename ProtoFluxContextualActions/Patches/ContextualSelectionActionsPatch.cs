@@ -556,6 +556,15 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(GetSlot));
     }
 
+    if (typeof(IGrabbable).IsAssignableFrom(outputType))
+    {
+      yield return new MenuItem(typeof(IsGrabbableGrabbed));
+      yield return new MenuItem(typeof(IsGrabbableScalable));
+      yield return new MenuItem(typeof(IsGrabbableReceivable));
+      yield return new MenuItem(typeof(GrabbablePriority));
+      yield return new MenuItem(typeof(GrabbableGrabber));
+    }
+
     if (TypeUtils.MatchInterface(outputType, typeof(IAssetProvider<>), out var assetProviderType))
     {
       yield return new MenuItem(typeof(GetAsset<>).MakeGenericType(assetProviderType.GenericTypeArguments[0]));
