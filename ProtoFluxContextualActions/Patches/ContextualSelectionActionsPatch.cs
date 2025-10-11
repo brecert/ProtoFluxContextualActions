@@ -50,6 +50,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.Math.Random;
 using ProtoFluxContextualActions.Tagging;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Mouse;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users.LocalScreen;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Interaction.Tools;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -699,6 +700,12 @@ internal static class ContextualSelectionActionsPatch
     else if (inputType == typeof(Type))
     {
       yield return new MenuItem(typeof(GetType));
+    }
+
+    else if (inputType == typeof(Chirality))
+    {
+      yield return new MenuItem(typeof(BodyNodeChirality));
+      yield return new MenuItem(typeof(ToolEquippingSide));
     }
 
     else if (TypeUtils.MatchInterface(inputType, typeof(IQuantity<>), out var quantityType))
