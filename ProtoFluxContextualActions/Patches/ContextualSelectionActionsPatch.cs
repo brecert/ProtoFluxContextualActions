@@ -713,6 +713,12 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(GrabberBodyNode));
     }
 
+    else if (inputType == typeof(Grabber))
+    {
+      yield return new MenuItem(typeof(GetUserGrabber));
+      yield return new MenuItem(typeof(GrabbableGrabber));
+    }
+
     else if (TypeUtils.MatchInterface(inputType, typeof(IQuantity<>), out var quantityType))
     {
       var baseType = quantityType.GenericTypeArguments[0];
