@@ -56,4 +56,7 @@ class PsuedoGenericTypes(World world)
   public PsuedoGenerics NOR_Multi { get => field ??= MapTypes("NOR_Multi_"); }
   public PsuedoGenerics XNOR_Multi { get => field ??= MapTypes("XNOR_Multi_"); }
   public PsuedoGenerics XOR_Multi { get => field ??= MapTypes("XOR_Multi_"); }
+
+  public PsuedoGenerics Sin { get => field ??= MapTypes("Sin_"); }
+  public PsuedoGenerics Cos { get => field ??= MapTypes("Cos_"); }
 }
