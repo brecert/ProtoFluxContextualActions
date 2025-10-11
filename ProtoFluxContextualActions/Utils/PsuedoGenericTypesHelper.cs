@@ -42,4 +42,22 @@ static class PsuedoGenericTypesHelper
       .. psuedoGenerics.Avg,
       .. psuedoGenerics.AvgMulti,
     ];
+
+  public static PsuedoGenerics PackingNodes(this PsuedoGenericTypes psuedoGenerics) =>
+    [
+      .. psuedoGenerics.Pack,
+      .. psuedoGenerics.FromEuler,
+      .. psuedoGenerics.PackRows,
+      .. psuedoGenerics.PackColumns,
+      .. psuedoGenerics.ComposeTRS,
+    ];
+
+  public static PsuedoGenerics UnpackingNodes(this PsuedoGenericTypes psuedoGenerics) =>
+    [
+      .. psuedoGenerics.Unpack,
+      .. psuedoGenerics.EulerAngles,
+      .. psuedoGenerics.UnpackRows,
+      .. psuedoGenerics.UnpackColumns,
+      // .. psuedoGenerics.ComposeTRS,
+    ];
 }

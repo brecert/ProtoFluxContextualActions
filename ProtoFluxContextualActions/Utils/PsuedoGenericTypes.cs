@@ -34,9 +34,6 @@ class PsuedoGenericTypes(World world)
   public PsuedoGenerics Ceil { get => field ??= MapTypes("Ceil_"); }
   public PsuedoGenerics CeilToInt { get => field ??= MapTypes("CeilToInt_"); }
   public PsuedoGenerics Clamp01 { get => field ??= MapTypes("Clamp01_"); }
-  public PsuedoGenerics Compose_Rotation { get => field ??= MapTypes("Compose_Rotation_"); }
-  public PsuedoGenerics Compose_ScaleRotation { get => field ??= MapTypes("Compose_ScaleRotation_"); }
-  public PsuedoGenerics ComposeTRS { get => field ??= MapTypes("ComposeTRS_"); }
 
   public PsuedoGenerics Log { get => field ??= MapTypes("Log_"); }
   public PsuedoGenerics Log10 { get => field ??= MapTypes("Log10_"); }
@@ -59,4 +56,19 @@ class PsuedoGenericTypes(World world)
 
   public PsuedoGenerics Sin { get => field ??= MapTypes("Sin_"); }
   public PsuedoGenerics Cos { get => field ??= MapTypes("Cos_"); }
+
+
+  public PsuedoGenerics Unpack { get => field ??= MapTypes("Unpack_"); }
+  public PsuedoGenerics EulerAngles { get => field ??= MapTypes("EulerAngles_"); }
+  public PsuedoGenerics UnpackRows { get => field ??= MapTypes("UnpackRows_"); }
+  public PsuedoGenerics UnpackColumns { get => field ??= MapTypes("UnpackColumns_"); }
+
+  public PsuedoGenerics Pack { get => field ??= MapTypes("Pack_"); }
+  public PsuedoGenerics FromEuler { get => field ??= MapTypes("FromEuler_"); }
+  public PsuedoGenerics PackRows { get => field ??= MapTypes("PackRows_"); }
+  public PsuedoGenerics PackColumns { get => field ??= MapTypes("PackColumns_"); }
+  public PsuedoGenerics ComposeTRS { get => field ??= MapTypes("ComposeTRS_"); }
+  // public PsuedoGenerics Compose_Rotation { get => field ??= MapTypes("Compose_Rotation_"); }
+  // public PsuedoGenerics Compose_ScaleRotation { get => field ??= MapTypes("Compose_ScaleRotation_"); }
+
 }

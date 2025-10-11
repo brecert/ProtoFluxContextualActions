@@ -51,6 +51,7 @@ using ProtoFluxContextualActions.Tagging;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Mouse;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users.LocalScreen;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Interaction.Tools;
+using ProtoFlux.Runtimes.Execution.Nodes.Math.SphericalHarmonics;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -97,7 +98,7 @@ internal static class ContextualSelectionActionsPatch
             {
               foreach (var item in items)
               {
-                AddMenuItem(__instance, menu, inputProxy.InputType.Value.GetTypeColor(), item, n =>
+                AddMenuItem(__instance, menu, inputProxy.InputType.Value.GetTypeColor(), item, addedNode =>
                 {
                   if (item.overload)
                   {
@@ -106,13 +107,16 @@ internal static class ContextualSelectionActionsPatch
                       // this is dumb
                       // TODO: investigate why it's needed to avoid the one or two update disconnect issue
                       await new Updates(1);
-                      var output = n.GetOutput(0); // TODO: specify
+                      var output = addedNode.GetOutput(0); // TODO: specify
                       elementProxy.Node.Target.TryConnectInput(inputProxy.NodeInput.Target, output, allowExplicitCast: false, undoable: true);
                     });
                   }
                   else
                   {
-                    var output = n.NodeOutputs.First(o => typeof(INodeOutput<>).MakeGenericType(inputProxy.InputType).IsAssignableFrom(o.GetType()));
+                    var output = addedNode.NodeOutputs
+                      .FirstOrDefault(o => typeof(INodeOutput<>).MakeGenericType(inputProxy.InputType).IsAssignableFrom(o.GetType()))
+                      ?? throw new Exception($"Could not find matching output of type '{inputProxy.InputType}' in '{addedNode}'");
+
                     elementProxy.Node.Target.TryConnectInput(inputProxy.NodeInput.Target, output, allowExplicitCast: false, undoable: true);
                   }
                 });
@@ -123,16 +127,19 @@ internal static class ContextualSelectionActionsPatch
             {
               foreach (var item in items)
               {
-                AddMenuItem(__instance, menu, outputProxy.OutputType.Value.GetTypeColor(), item, n =>
+                AddMenuItem(__instance, menu, outputProxy.OutputType.Value.GetTypeColor(), item, addedNode =>
                 {
                   if (item.overload) throw new Exception("Overloading with ProtoFluxOutputProxy is not supported");
-                  var input = n.NodeInputs.First(i => i.TargetType.IsGenericType && (outputProxy.OutputType.Value.IsAssignableFrom(i.TargetType.GenericTypeArguments[0]) || ProtoFlux.Core.TypeHelper.CanImplicitlyConvertTo(outputProxy.OutputType, i.TargetType.GenericTypeArguments[0])));
+                  var input = addedNode.NodeInputs
+                    .FirstOrDefault(i => i.TargetType.IsGenericType && (outputProxy.OutputType.Value.IsAssignableFrom(i.TargetType.GenericTypeArguments[0]) || ProtoFlux.Core.TypeHelper.CanImplicitlyConvertTo(outputProxy.OutputType, i.TargetType.GenericTypeArguments[0])))
+                    ?? throw new Exception($"Could not find matching input of type '{outputProxy.OutputType}' in '{addedNode}'");
+
                   __instance.StartTask(async () =>
                   {
                     // this is dumb
                     // TODO: investigate why it's needed for casting to work
                     await new Updates();
-                    n.TryConnectInput(input, outputProxy.NodeOutput.Target, allowExplicitCast: false, undoable: true);
+                    addedNode.TryConnectInput(input, outputProxy.NodeOutput.Target, allowExplicitCast: false, undoable: true);
                   });
                 });
               }
@@ -381,7 +388,7 @@ internal static class ContextualSelectionActionsPatch
   {
     var nodeType = outputProxy.Node.Target.NodeType;
 
-    if (TryGetUnpackNode(outputProxy.OutputType, out var unpackNodeTypes))
+    if (TryGetUnpackNode(outputProxy.World, outputProxy.OutputType, out var unpackNodeTypes))
     {
       foreach (var unpackNodeType in unpackNodeTypes)
       {
@@ -633,7 +640,7 @@ internal static class ContextualSelectionActionsPatch
     var query = new NodeQueryAcceleration(nodeInstance.Runtime.Group);
     var indirectlyConnectsToIterationNode = query.GetEvaluatingNodes(nodeInstance).Any(n => IsIterationNode(n.GetType()));
 
-    if (TryGetPackNode(inputType, out var packNodeTypes))
+    if (TryGetPackNode(inputProxy.World, inputType, out var packNodeTypes))
     {
       foreach (var packNodeType in packNodeTypes)
       {
@@ -814,55 +821,22 @@ internal static class ContextualSelectionActionsPatch
     }
   }
 
-  internal static readonly Dictionary<Type, Type[]> UnpackNodeMapping = new() {
-        // "core" IVector types
-        {typeof(bool2), [typeof(Unpack_Bool2)]},
-        {typeof(bool3), [typeof(Unpack_Bool3)]},
-        {typeof(bool4), [typeof(Unpack_Bool4)]},
+  internal static Dictionary<Type, List<Type>> UnpackNodeMapping(World world) =>
+    world.GetPsuedoGenericTypesForWorld()
+          .UnpackingNodes()
+          .Where(i => i.Types.Count() == 1)
+          .Select(i => (i.Node, Type: i.Types.First()))
+          .GroupBy(i => i.Type, i => i.Node)
+          .Select(i => (i.Key, (IEnumerable<Type>)i))
+          .Concat([
+            (typeof(SphericalHarmonicsL1<>),  [typeof(UnpackSH1<>)]),
+            (typeof(SphericalHarmonicsL2<>),  [typeof(UnpackSH2<>)]),
+            (typeof(SphericalHarmonicsL3<>),  [typeof(UnpackSH3<>)]),
+            (typeof(SphericalHarmonicsL4<>),  [typeof(UnpackSH4<>)]),
+          ])
+          .ToDictionary(i => i.Item1, i => i.Item2.ToList());
 
-        {typeof(int2), [typeof(Unpack_Int2)]},
-        {typeof(int3), [typeof(Unpack_Int3)]},
-        {typeof(int4), [typeof(Unpack_Int4)]},
-
-        {typeof(long2), [typeof(Unpack_Long2)]},
-        {typeof(long3), [typeof(Unpack_Long3)]},
-        {typeof(long4), [typeof(Unpack_Long4)]},
-
-        {typeof(uint2), [typeof(Unpack_Uint2)]},
-        {typeof(uint3), [typeof(Unpack_Uint3)]},
-        {typeof(uint4), [typeof(Unpack_Uint4)]},
-
-        {typeof(ulong2), [typeof(Unpack_Ulong2)]},
-        {typeof(ulong3), [typeof(Unpack_Ulong3)]},
-        {typeof(ulong4), [typeof(Unpack_Ulong4)]},
-
-        {typeof(float2), [typeof(Unpack_Float2)]},
-        {typeof(float3), [typeof(Unpack_Float3)]},
-        {typeof(float4), [typeof(Unpack_Float4)]},
-
-        {typeof(double2), [typeof(Unpack_Double2)]},
-        {typeof(double3), [typeof(Unpack_Double3)]},
-        {typeof(double4), [typeof(Unpack_Double4)]},
-
-        // quaternions
-        {typeof(floatQ), [typeof(Unpack_FloatQ), typeof(EulerAngles_floatQ)]},
-        {typeof(doubleQ), [typeof(Unpack_DoubleQ), typeof(EulerAngles_doubleQ)]},
-        
-        // colors
-        {typeof(color), [typeof(Unpack_Color)]},
-        {typeof(colorX), [typeof(Unpack_ColorX)]},
-
-        {typeof(float2x2),  [typeof(UnpackRows_Float2x2), typeof(UnpackColumns_Float2x2)]},
-        {typeof(float3x3),  [typeof(UnpackRows_Float3x3), typeof(UnpackColumns_Float3x3)]},
-        {typeof(float4x4),  [typeof(UnpackRows_Float4x4), typeof(UnpackColumns_Float4x4)]},
-        {typeof(double2x2),  [typeof(UnpackRows_Double2x2), typeof(UnpackColumns_Double2x2)]},
-        {typeof(double3x3),  [typeof(UnpackRows_Double3x3), typeof(UnpackColumns_Double3x3)]},
-        {typeof(double4x4),  [typeof(UnpackRows_Double4x4), typeof(UnpackColumns_Double4x4)]},
-        
-        // TODO: SH1<T>, SH2<T>, SH3<T>, SH4<T>
-    };
-
-  internal static bool TryGetUnpackNode(Type nodeType, [NotNullWhen(true)] out Type[]? value)
+  internal static bool TryGetUnpackNode(World world, Type nodeType, [NotNullWhen(true)] out List<Type>? value)
   {
     if (ReflectionHelper.IsNullable(nodeType) && Nullable.GetUnderlyingType(nodeType).IsUnmanaged() && Nullable.GetUnderlyingType(nodeType) is var underlyingType and not null)
     {
@@ -877,57 +851,36 @@ internal static class ContextualSelectionActionsPatch
         return false;
       }
     }
-    return UnpackNodeMapping.TryGetValue(nodeType, out value);
+    var mappings = UnpackNodeMapping(world);
+    if (TypeUtils.TryGetGenericTypeDefinition(nodeType, out var genericTypeDefinition) && mappings.TryGetValue(genericTypeDefinition, out var genericUnpackNodeTypes))
+    {
+      value = [.. genericUnpackNodeTypes.Select(t => t.MakeGenericType(nodeType.GenericTypeArguments))];
+      return true;
+    }
+    else
+    {
+      return mappings.TryGetValue(nodeType, out value);
+    }
   }
 
-  // TODO: make a faux "generic" type getter for things like Unpack_Float3, Or_Multi_Bool2, or Mul_FloatQ_Float3 that interacts in a generic way to avoid this in the future
-  internal static readonly Dictionary<Type, Type[]> PackNodeMapping = new() {
-        {typeof(bool2), [typeof(Pack_Bool2)]},
-        {typeof(bool3), [typeof(Pack_Bool3)]},
-        {typeof(bool4), [typeof(Pack_Bool4)]},
+  internal static Dictionary<Type, List<Type>> PackNodeMappings(World world) =>
+    world.GetPsuedoGenericTypesForWorld()
+          .PackingNodes()
+          .Where(i => i.Types.Count() == 1)
+          .Select(i => (i.Node, Type: i.Types.First()))
+          .GroupBy(i => i.Type, i => i.Node)
+          .Select(i => (i.Key, (IEnumerable<Type>)i))
+          .Concat([
+            (typeof(ZitaParameters), [typeof(ConstructZitaParameters)]),
+            (typeof(SphericalHarmonicsL1<>),  [typeof(PackSH1<>)]),
+            (typeof(SphericalHarmonicsL2<>),  [typeof(PackSH2<>)]),
+            (typeof(SphericalHarmonicsL3<>),  [typeof(PackSH3<>)]),
+            (typeof(SphericalHarmonicsL4<>),  [typeof(PackSH4<>)]),
+          ])
+          .ToDictionary(i => i.Item1, i => i.Item2.ToList());
 
-        {typeof(int2), [typeof(Pack_Int2)]},
-        {typeof(int3), [typeof(Pack_Int3)]},
-        {typeof(int4), [typeof(Pack_Int4)]},
 
-        {typeof(long2), [typeof(Pack_Long2)]},
-        {typeof(long3), [typeof(Pack_Long3)]},
-        {typeof(long4), [typeof(Pack_Long4)]},
-
-        {typeof(uint2), [typeof(Pack_Uint2)]},
-        {typeof(uint3), [typeof(Pack_Uint3)]},
-        {typeof(uint4), [typeof(Pack_Uint4)]},
-
-        {typeof(ulong2), [typeof(Pack_Ulong2)]},
-        {typeof(ulong3), [typeof(Pack_Ulong3)]},
-        {typeof(ulong4), [typeof(Pack_Ulong4)]},
-
-        {typeof(float2), [typeof(Pack_Float2)]},
-        {typeof(float3), [typeof(Pack_Float3)]},
-        {typeof(float4), [typeof(Pack_Float4)]},
-
-        {typeof(double2), [typeof(Pack_Double2)]},
-        {typeof(double3), [typeof(Pack_Double3)]},
-        {typeof(double4), [typeof(Pack_Double4)]},
-
-        {typeof(color), [typeof(Pack_Color)]},
-        {typeof(colorX), [typeof(Pack_ColorX)]},
-
-        // quaternions
-        {typeof(floatQ), [typeof(Pack_FloatQ), typeof(FromEuler_floatQ)]},
-        {typeof(doubleQ), [typeof(Pack_DoubleQ), typeof(FromEuler_doubleQ)]},
-
-        {typeof(float2x2),  [typeof(PackRows_Float2x2), typeof(PackColumns_Float2x2)]},
-        {typeof(float3x3),  [typeof(PackRows_Float3x3), typeof(PackColumns_Float3x3)]},
-        {typeof(float4x4),  [typeof(PackRows_Float4x4), typeof(PackColumns_Float4x4), typeof(ComposeTRS_Float4x4)]},
-        {typeof(double2x2),  [typeof(PackRows_Double2x2), typeof(PackColumns_Double2x2)]},
-        {typeof(double3x3),  [typeof(PackRows_Double3x3), typeof(PackColumns_Double3x3)]},
-        {typeof(double4x4),  [typeof(PackRows_Double4x4), typeof(PackColumns_Double4x4), typeof(ComposeTRS_Double4x4)]},
-
-        {typeof(ZitaParameters), [typeof(ConstructZitaParameters)]},
-    };
-
-  internal static bool TryGetPackNode(Type nodeType, [NotNullWhen(true)] out Type[]? value)
+  internal static bool TryGetPackNode(World world, Type nodeType, [NotNullWhen(true)] out List<Type>? value)
   {
     if (ReflectionHelper.IsNullable(nodeType) && Nullable.GetUnderlyingType(nodeType).IsUnmanaged() && Nullable.GetUnderlyingType(nodeType) is Type underlyingType)
     {
@@ -942,7 +895,17 @@ internal static class ContextualSelectionActionsPatch
         return false;
       }
     }
-    return PackNodeMapping.TryGetValue(nodeType, out value);
+
+    var mappings = PackNodeMappings(world);
+    if (TypeUtils.TryGetGenericTypeDefinition(nodeType, out var genericTypeDefinition) && mappings.TryGetValue(genericTypeDefinition, out var genericUnpackNodeType))
+    {
+      value = [.. genericUnpackNodeType.Select(t => t.MakeGenericType(nodeType.GenericTypeArguments))];
+      return true;
+    }
+    else
+    {
+      return mappings.TryGetValue(nodeType, out value);
+    }
   }
 
   internal static readonly Dictionary<Type, Type> InverseNodeMapping = new()
