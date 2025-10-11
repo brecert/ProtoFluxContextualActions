@@ -696,6 +696,11 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(FindCharacterControllerFromUser));
     }
 
+    else if (inputType == typeof(Type))
+    {
+      yield return new MenuItem(typeof(GetType));
+    }
+
     else if (TypeUtils.MatchInterface(inputType, typeof(IQuantity<>), out var quantityType))
     {
       var baseType = quantityType.GenericTypeArguments[0];
