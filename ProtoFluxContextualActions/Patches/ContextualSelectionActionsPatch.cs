@@ -708,6 +708,11 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(ToolEquippingSide));
     }
 
+    else if (inputType == typeof(BodyNode))
+    {
+      yield return new MenuItem(typeof(GrabberBodyNode));
+    }
+
     else if (TypeUtils.MatchInterface(inputType, typeof(IQuantity<>), out var quantityType))
     {
       var baseType = quantityType.GenericTypeArguments[0];
