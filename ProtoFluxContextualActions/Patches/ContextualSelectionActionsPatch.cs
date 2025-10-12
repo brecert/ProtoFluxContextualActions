@@ -52,6 +52,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Mouse;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users.LocalScreen;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Interaction.Tools;
 using ProtoFlux.Runtimes.Execution.Nodes.Math.SphericalHarmonics;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Keyboard;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -505,6 +506,11 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(IndexOfFirstObjectMatch<Type>));
       yield return new MenuItem(typeof(TypeColor));
       yield return new MenuItem(typeof(NiceTypeName));
+    }
+
+    if (outputType == typeof(Key))
+    {
+      yield return new MenuItem(typeof(KeyHeld));
     }
 
     if (outputType.IsEnum)
