@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using FrooxEngine;
+using ProtoFlux.Core;
+using ProtoFlux.Runtimes.Execution.Nodes.Math;
 using ProtoFluxContextualActions.Patches;
 
 namespace ProtoFluxContextualActions.Utils;
@@ -71,4 +73,21 @@ class PsuedoGenericTypes(World world)
   // public PsuedoGenerics Compose_Rotation { get => field ??= MapTypes("Compose_Rotation_"); }
   // public PsuedoGenerics Compose_ScaleRotation { get => field ??= MapTypes("Compose_ScaleRotation_"); }
 
+  public PsuedoGenerics PackTangentPoint
+  {
+    get => field ??= [
+      (typeof(PackTangentPointColor), [typeof(TangentPointColor)]),
+      (typeof(PackTangentPointColorX), [typeof(TangentPointColorX)]),
+      (typeof(PackTangentPointFloat), [typeof(TangentPointFloat)]),
+      (typeof(PackTangentPointFloat2), [typeof(TangentPointFloat2)]),
+      (typeof(PackTangentPointFloat3), [typeof(TangentPointFloat3)]),
+      (typeof(PackTangentPointFloat3), [typeof(TangentPointFloat4)]),
+      (typeof(PackTangentPointFloat3), [typeof(TangentPointFloat4)]),
+      (typeof(PackTangentPointDouble), [typeof(TangentPointDouble)]),
+      (typeof(PackTangentPointDouble2), [typeof(TangentPointDouble2)]),
+      (typeof(PackTangentPointDouble3), [typeof(TangentPointDouble3)]),
+      (typeof(PackTangentPointDouble3), [typeof(TangentPointDouble4)]),
+      (typeof(PackTangentPointDouble3), [typeof(TangentPointDouble4)]),
+    ];
+  }
 }

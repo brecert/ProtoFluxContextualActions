@@ -9,6 +9,7 @@ using ProtoFluxContextualActions.Attributes;
 namespace ProtoFluxContextualActions;
 
 using System.Collections.Generic;
+using global::ProtoFluxContextualActions.Utils;
 
 #if DEBUG
 using ResoniteHotReloadLib;
@@ -83,6 +84,7 @@ public class ProtoFluxContextualActions : ResoniteMod
   static void BeforeHotReload()
   {
     harmony.UnpatchAll(HarmonyId);
+    PsuedoGenericTypesHelper.WorldPsuedoGenericTypes.Clear();
   }
 
   static void OnHotReload(ResoniteMod modInstance)

@@ -50,6 +50,7 @@ static class PsuedoGenericTypesHelper
       .. psuedoGenerics.PackRows,
       .. psuedoGenerics.PackColumns,
       .. psuedoGenerics.ComposeTRS,
+      .. psuedoGenerics.PackTangentPoint,
     ];
 
   public static PsuedoGenerics UnpackingNodes(this PsuedoGenericTypes psuedoGenerics) =>
