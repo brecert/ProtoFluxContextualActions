@@ -53,6 +53,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users.LocalScreen;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Interaction.Tools;
 using ProtoFlux.Runtimes.Execution.Nodes.Math.SphericalHarmonics;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Keyboard;
+using ProtoFlux.Runtimes.Execution.Nodes.Math.Rects;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -835,6 +836,7 @@ internal static class ContextualSelectionActionsPatch
           .GroupBy(i => i.Type, i => i.Node)
           .Select(i => (i.Key, (IEnumerable<Type>)i))
           .Concat([
+            (typeof(Rect), [typeof(RectToXYWH), typeof(RectToMinMax), typeof(RectToPositionSize)]),
             (typeof(SphericalHarmonicsL1<>),  [typeof(UnpackSH1<>)]),
             (typeof(SphericalHarmonicsL2<>),  [typeof(UnpackSH2<>)]),
             (typeof(SphericalHarmonicsL3<>),  [typeof(UnpackSH3<>)]),
@@ -876,7 +878,8 @@ internal static class ContextualSelectionActionsPatch
           .Select(i => (i.Node, Type: i.Types.First()))
           .GroupBy(i => i.Type, i => i.Node)
           .Select(i => (i.Key, (IEnumerable<Type>)i))
-          .Concat([
+          .Concat([ 
+            (typeof(Rect), [typeof(RectFromXYWH), typeof(RectFromMinMax), typeof(RectFromPositionSize)]),
             (typeof(ZitaParameters), [typeof(ConstructZitaParameters)]),
             (typeof(SphericalHarmonicsL1<>),  [typeof(PackSH1<>)]),
             (typeof(SphericalHarmonicsL2<>),  [typeof(PackSH2<>)]),
