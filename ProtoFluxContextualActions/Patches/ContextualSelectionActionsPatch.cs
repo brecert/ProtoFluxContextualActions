@@ -514,6 +514,12 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(KeyHeld));
     }
 
+    if (outputType == typeof(object))
+    {
+      yield return new MenuItem(typeof(GetType));
+      yield return new MenuItem(typeof(ToString_object));
+    }
+
     if (outputType.IsEnum)
     {
       yield return new MenuItem(typeof(NextValue<>).MakeGenericType(outputType), name: typeof(NextValue<>).GetNiceName());
