@@ -54,6 +54,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Interaction.Tools;
 using ProtoFlux.Runtimes.Execution.Nodes.Math.SphericalHarmonics;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Keyboard;
 using ProtoFlux.Runtimes.Execution.Nodes.Math.Rects;
+using ProtoFlux.Runtimes.Execution.Nodes.Utility.Uris;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -746,6 +747,11 @@ internal static class ContextualSelectionActionsPatch
     {
       yield return new MenuItem(typeof(GetUserGrabber));
       yield return new MenuItem(typeof(GrabbableGrabber));
+    }
+
+    else if (inputType == typeof(Uri))
+    {
+      yield return new MenuItem(typeof(StringToAbsoluteURI));
     }
 
     else if (TypeUtils.MatchInterface(inputType, typeof(IQuantity<>), out var quantityType))
