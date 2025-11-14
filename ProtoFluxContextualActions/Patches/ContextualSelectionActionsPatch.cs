@@ -709,6 +709,7 @@ internal static class ContextualSelectionActionsPatch
     {
       yield return new MenuItem(typeof(RootSlot));
       yield return new MenuItem(typeof(LocalUserSlot));
+      yield return new MenuItem(typeof(LocalUserSpace));
     }
 
     else if (inputType == typeof(BoundingBox))
