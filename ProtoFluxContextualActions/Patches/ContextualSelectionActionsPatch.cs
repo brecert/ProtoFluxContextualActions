@@ -55,6 +55,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.Math.SphericalHarmonics;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Keyboard;
 using ProtoFlux.Runtimes.Execution.Nodes.Math.Rects;
 using ProtoFlux.Runtimes.Execution.Nodes.Utility.Uris;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Variables;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -600,6 +601,11 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(ValueMultiplex<dummy>), name: "Value Multiplex");
       yield return new MenuItem(typeof(ImpulseMultiplexer), name: "Impulse Multiplex");
       yield return new MenuItem(typeof(ValueDemultiplex<dummy>), name: "Value Demultiplex");
+    }
+
+    if (nodeType == typeof(DataModelBooleanToggle) && outputType == typeof(bool))
+    {
+      yield return new(typeof(FireOnLocalValueChange<bool>));
     }
 
     if (Groups.MousePositionGroup.Contains(nodeType))
