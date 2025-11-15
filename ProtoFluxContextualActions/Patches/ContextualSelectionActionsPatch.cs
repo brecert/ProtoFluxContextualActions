@@ -668,7 +668,12 @@ internal static class ContextualSelectionActionsPatch
       }
     }
 
-    if (inputType == typeof(User))
+    if (inputType == typeof(string))
+    {
+      yield return new MenuItem(typeof(FormatString));
+      yield return new MenuItem(typeof(ToString_object));
+    }
+    else if (inputType == typeof(User))
     {
       yield return new MenuItem(typeof(LocalUser));
       yield return new MenuItem(typeof(HostUser));
