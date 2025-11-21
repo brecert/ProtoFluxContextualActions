@@ -13,7 +13,7 @@ static partial class ContextualSwapActionsPatch
     var psuedoGenerics = context.World.GetPsuedoGenericTypesForWorld();
     var binaryOperationsMultiSwapMap =
       psuedoGenerics.BinaryOperations().Select(a => a.Node)
-        .Zip(psuedoGenerics.BinaryOperations().Select(a => a.Node))
+        .Zip(psuedoGenerics.BinaryOperationsMulti().Select(a => a.Node))
         .ToBiDictionary();
 
     if (binaryOperationsMultiSwapMap.TryGetFirst(context.NodeType, out var matched))
