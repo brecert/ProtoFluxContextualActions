@@ -287,7 +287,8 @@ internal static partial class ContextualSwapActionsPatch
       .. SinCosSwapGroup(context),
       .. SampleSpatialVariableGroupItems(context),
       .. KeyStateGroupItems(context),
-      .. ObjectComparisonBinaryOperatorGroupItems(context)
+      .. ObjectComparisonBinaryOperatorGroupItems(context),
+      .. FireOnBoolGroupItems(context),
     ];
 
     foreach (var menuItem in menuItems)
