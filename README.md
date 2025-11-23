@@ -11,7 +11,7 @@ There are currently a few patches.
 Adds 'Contextual Actions' to the ProtoFlux Tool. Pressing secondary while holding a protoflux tool will open a context menu of actions based on what wire you're dragging instead of always spawning an input/display node. Pressing secondary again will spawn out an input/display node like normal.
 
 ### Contextual Swap Actions
-Adds 'Contextual Swapping Actions' to the ProtoFlux Tool. Double pressing secondary pointing at a node with protoflux tool will be open a context menu of actions to swap the node for another node.
+Adds 'Contextual Swapping Actions' to the ProtoFlux Tool. Double pressing secondary pointing at a node with protoflux tool will open a context menu of actions to swap the node for another node.
 
 This is intended to be paired with Contextual Actions.
 For example a `ValueLessThan` may be wanted when dragging a `float` output wire, however that node will not appear in the context menu by default. Instead a `ValueEquals` should be selected first, then swapped for `ValueLessThan` using contextual swap actions.
