@@ -23,7 +23,7 @@ public readonly struct OperationElement(INode node, int elementIndex, int? eleme
   public readonly string DisplayName =>
     ElementListIndex is int listIndex
       ? $"{OwnerNode.GetOperationName(listIndex)}[{ElementIndex}]"
-      : OwnerNode.GetInputName(ElementIndex);
+      : OwnerNode.GetOperationName(ElementIndex);
 
 
   int IElementIndex.ElementIndex => ElementIndex;

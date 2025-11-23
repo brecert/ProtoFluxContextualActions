@@ -289,6 +289,7 @@ internal static partial class ContextualSwapActionsPatch
       .. KeyStateGroupItems(context),
       .. ObjectComparisonBinaryOperatorGroupItems(context),
       .. FireOnBoolGroupItems(context),
+      .. WriteGroupItems(context),
     ];
 
     foreach (var menuItem in menuItems)

@@ -58,16 +58,29 @@ public static class SwapHelper
     }
   }
 
+  internal static Dictionary<(Type, Type), (string FromName, string ToName)[]> ImpulseMap = new()
+  {
+    {(typeof(ValueWrite<>), typeof(ValueWriteLatch<>)), [("OnWritten", "OnSet")]},
+    {(typeof(ValueWrite<,>), typeof(ValueWriteLatch<,>)), [("OnWritten", "OnSet")]},
+    {(typeof(ObjectWrite<>), typeof(ObjectWriteLatch<>)), [("OnWritten", "OnSet")]},
+    {(typeof(ObjectWrite<,>), typeof(ObjectWriteLatch<,>)), [("OnWritten", "OnSet")]},
+
+  };
+
+  internal static bool TryGetImpulseMap((Type, Type) typeTuple, [MaybeNullWhen(false)] out (string FromName, string ToName)[] elementMap) =>
+    TryGetTypeTupleMapping(ImpulseMap, typeTuple, out elementMap);
 
   internal static void TransferImpulses(INode from, INode to, bool tryByIndex = false)
   {
+    var typeTuple = (from.GetType().GetGenericTypeDefinitionOrSameType(), to.GetType().GetGenericTypeDefinitionOrSameType());
+    TryGetImpulseMap(typeTuple, out var elementMap);
+    var remap = elementMap?.ToDictionary();
+
     foreach (var element in from.AllImpulseElements())
     {
-      var toImpulse = to.GetImpulseByName(element.DisplayName);
-      if (toImpulse.HasValue)
+      if (to.GetImpulseByName(remap?.GetValueOrDefault(element.DisplayName) ?? element.DisplayName) is ImpulseElement toImpulse)
       {
-        var impulse = toImpulse.Value;
-        impulse.Target = element.Target;
+        toImpulse.Target = element.Target;
       }
     }
 
@@ -84,6 +97,18 @@ public static class SwapHelper
     // }
   }
 
+  internal static Dictionary<(Type, Type), (string FromName, string ToName)[]> OperationMap = new()
+  {
+    {(typeof(ValueWrite<>), typeof(ValueWriteLatch<>)), [("*", "Set")]},
+    {(typeof(ValueWrite<,>), typeof(ValueWriteLatch<,>)), [("*", "Set")]},
+    {(typeof(ObjectWrite<>), typeof(ObjectWriteLatch<>)), [("*", "Set")]},
+    {(typeof(ObjectWrite<,>), typeof(ObjectWriteLatch<,>)), [("*", "Set")]},
+  };
+
+  internal static bool TryGetOperationMap((Type, Type) typeTuple, [MaybeNullWhen(false)] out (string FromName, string ToName)[] elementMap) =>
+    TryGetTypeTupleMapping(OperationMap, typeTuple, out elementMap);
+
+
   /// <summary>
   /// Transfers the impulse sources from one node to another.
   /// </summary>
@@ -98,7 +123,10 @@ public static class SwapHelper
     foreach (var element in impulsingFromElements)
     {
       var name = from.GetOperationName(element.Target.FindLinearOperationIndex());
-      element.Target = to.GetOperationByName(name);
+      if (to.GetOperationByName(name) is IOperation operation)
+      {
+        element.Target = operation;
+      }
     }
 
     if (tryByIndex)
@@ -106,6 +134,22 @@ public static class SwapHelper
       foreach (var source in impulsingFromElements)
       {
         source.Target = to.GetOperation(source.Target.FindLinearOperationIndex());
+      }
+    }
+
+    var typeTuple = (from.GetType().GetGenericTypeDefinitionOrSameType(), to.GetType().GetGenericTypeDefinitionOrSameType());
+    var outputs = to.AllImpulseElements().ToDictionary(o => o.DisplayName, o => o);
+    var hasOperationMap = TryGetOperationMap(typeTuple, out var operationMap);
+    var operationMapMapTable = operationMap?.ToDictionary();
+
+    foreach (var evaluatingElement in query.GetImpulsingElements(from))
+    {
+      if (evaluatingElement.TargetElement() is OperationElement outputElement)
+      {
+        if (hasOperationMap && (operationMapMapTable?.TryGetValue(outputElement.DisplayName, out var remappedName) ?? false))
+        {
+          evaluatingElement.Target = to.GetOperationByName(remappedName);
+        }
       }
     }
   }
@@ -162,10 +206,16 @@ public static class SwapHelper
     }
   }
 
+  // TODO: having all of these separate is error prone because a loss in visual symmetry
   internal static Dictionary<(Type, Type), (string FromName, string ToName)[]> InputMap = new() {
     {(typeof(For), typeof(RangeLoopInt)), [("Count", "End")]},
     {(typeof(ValueNegate<>), typeof(ValuePlusMinus<>)), [("N", "Offset")]},
     {(typeof(FindChildByName), typeof(FindChildByTag)), [("Name", "Tag")]},
+    {(typeof(ValueWrite<>), typeof(ValueWriteLatch<>)), [("Value", "SetValue")]},
+    {(typeof(ValueWrite<,>), typeof(ValueWriteLatch<,>)), [("Value", "SetValue")]},
+    {(typeof(ObjectWrite<>), typeof(ObjectWriteLatch<>)), [("Value", "SetValue")]},
+    {(typeof(ObjectWrite<,>), typeof(ObjectWriteLatch<,>)), [("Value", "SetValue")]},
+
   };
 
   internal static bool TryGetInput((Type, Type) typeTuple, [MaybeNullWhen(false)] out (string FromName, string ToName)[] elementMap) =>
@@ -249,7 +299,7 @@ public static class SwapHelper
 
     var results = TransferExternalReferences(oldNode, newNode, query, runtime, overload);
 
-    TransferInternalReferences(newNode, oldNode);
+    TransferInternalReferences(oldNode, newNode);
 
     TransferGlobals(oldNode, newNode, tryByIndex);
 
