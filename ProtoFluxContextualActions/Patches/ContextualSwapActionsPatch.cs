@@ -290,6 +290,7 @@ internal static partial class ContextualSwapActionsPatch
       .. ObjectComparisonBinaryOperatorGroupItems(context),
       .. FireOnBoolGroupItems(context),
       .. WriteGroupItems(context),
+      .. DynamicImpulseGroupItems(context),
     ];
 
     foreach (var menuItem in menuItems)
