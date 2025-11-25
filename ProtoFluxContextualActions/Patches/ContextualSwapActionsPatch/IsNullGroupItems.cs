@@ -9,19 +9,11 @@ namespace ProtoFluxContextualActions.Patches;
 
 static partial class ContextualSwapActionsPatch
 {
-  static readonly FrozenSet<Type> IsNullGroupItemsGroup = [
+  static readonly FrozenSet<Type> IsNullGroupItems = [
     typeof(IsNull<>),
     typeof(NotNull<>),
   ];
 
-  internal static IEnumerable<MenuItem> IsNullGroupItemsGroupItems(ContextualContext context)
-  {
-    if (TypeUtils.TryGetGenericTypeDefinition(context.NodeType, out var genericType) && IsNullGroupItemsGroup.Contains(genericType))
-    {
-      foreach (var match in IsNullGroupItemsGroup)
-      {
-        yield return new MenuItem(match.MakeGenericType(context.NodeType.GenericTypeArguments));
-      }
-    }
-  }
+  internal static IEnumerable<MenuItem> IsNullGroupItemsGroupItems(ContextualContext context) =>
+    MatchGenericTypes(IsNullGroupItems, context.NodeType);
 }

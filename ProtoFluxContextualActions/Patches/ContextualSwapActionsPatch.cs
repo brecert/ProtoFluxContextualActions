@@ -13,6 +13,7 @@ using FrooxEngine.Undo;
 using ProtoFlux.Runtimes.Execution;
 using ProtoFluxContextualActions.Extensions;
 using ProtoFluxContextualActions.Utils.ProtoFlux;
+using ProtoFluxContextualActions.Utils;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -303,6 +304,28 @@ internal static partial class ContextualSwapActionsPatch
   #region Utils
   internal static string FormatMultiName(Type match) =>
     $"{NodeMetadataHelper.GetMetadata(match).Name} (Multi)";
+
+  internal static IEnumerable<MenuItem> MatchNonGenericTypes(ISet<Type> types, Type type)
+  {
+    if (types.Contains(type))
+    {
+      foreach (var match in types)
+      {
+        yield return new MenuItem(match);
+      }
+    }
+  }
+
+  internal static IEnumerable<MenuItem> MatchGenericTypes(ISet<Type> types, Type type)
+  {
+    if (TypeUtils.TryGetGenericTypeDefinition(type, out var genericType) && types.Contains(genericType))
+    {
+      foreach (var match in types)
+      {
+        yield return new MenuItem(match.MakeGenericType(type.GenericTypeArguments));
+      }
+    }
+  }
 
   internal static bool TryGetSwap(BiDictionary<Type, Type> swaps, Type nodeType, out Type match) =>
     swaps.TryGetSecond(nodeType, out match) || swaps.TryGetFirst(nodeType, out match);
