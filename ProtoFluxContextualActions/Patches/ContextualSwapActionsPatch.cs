@@ -291,6 +291,7 @@ internal static partial class ContextualSwapActionsPatch
       .. FireOnBoolGroupItems(context),
       .. WriteGroupItems(context),
       .. DynamicImpulseGroupItems(context),
+      .. IsNullGroupItemsGroupItems(context)
     ];
 
     foreach (var menuItem in menuItems)
