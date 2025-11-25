@@ -157,7 +157,8 @@ internal static class ContextualSelectionActionsPatch
                 AddMenuItem(__instance, menu, item.node.GetTypeColor(), item, n =>
                 {
                   if (item.overload) throw new Exception("Overloading with ProtoFluxImpulseProxy is not supported");
-                  n.TryConnectImpulse(impulseProxy.NodeImpulse.Target, n.GetOperation(0), undoable: true);
+                  var operation = n.NodeOperationCount > 0 ? n.GetOperation(0) : n.GetOperationList(0).GetElement(0) as INodeOperation;
+                  n.TryConnectImpulse(impulseProxy.NodeImpulse.Target, operation, undoable: true);
                 });
               }
               break;
@@ -244,6 +245,7 @@ internal static class ContextualSelectionActionsPatch
     yield return new MenuItem(typeof(If));
     yield return new MenuItem(typeof(ValueWrite<dummy>));
     yield return new MenuItem(typeof(Sequence));
+    yield return new MenuItem(typeof(ImpulseDemultiplexer), name: "Impulse Demultiplex");
 
     if (IsIterationNode(nodeType))
     {
@@ -261,6 +263,11 @@ internal static class ContextualSelectionActionsPatch
     {
       yield return new MenuItem(typeof(AttachTexture2D));
       yield return new MenuItem(typeof(AttachSprite));
+    }
+
+    else if (nodeType == typeof(ImpulseDemultiplexer))
+    {
+      yield return new MenuItem(typeof(ImpulseMultiplexer), name: "Impulse Multiplex");
     }
 
     switch (impulseProxy.ImpulseType.Value)
@@ -902,7 +909,7 @@ internal static class ContextualSelectionActionsPatch
           .Select(i => (i.Node, Type: i.Types.First()))
           .GroupBy(i => i.Type, i => i.Node)
           .Select(i => (i.Key, (IEnumerable<Type>)i))
-          .Concat([ 
+          .Concat([
             (typeof(Rect), [typeof(RectFromXYWH), typeof(RectFromMinMax), typeof(RectFromPositionSize)]),
             (typeof(ZitaParameters), [typeof(ConstructZitaParameters)]),
             (typeof(SphericalHarmonicsL1<>),  [typeof(PackSH1<>)]),
