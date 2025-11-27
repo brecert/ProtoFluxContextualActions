@@ -21,22 +21,22 @@ static partial class ContextualSwapActionsPatch
 
   public static readonly FrozenSet<Type> DynamicImpulseValueGroup = [
     typeof(DynamicImpulseTriggerWithValue<>),
-    typeof(DynamicImpulseTriggerWithValue<>),
+    typeof(DynamicImpulseReceiverWithValue<>),
   ];
 
   public static readonly FrozenSet<Type> AsyncDynamicImpulseValueGroup = [
     typeof(AsyncDynamicImpulseTriggerWithValue<>),
-    typeof(AsyncDynamicImpulseTriggerWithValue<>),
+    typeof(AsyncDynamicImpulseReceiverWithValue<>),
   ];
 
   public static readonly FrozenSet<Type> DynamicImpulseObjectGroup = [
     typeof(DynamicImpulseTriggerWithObject<>),
-    typeof(DynamicImpulseTriggerWithObject<>),
+    typeof(DynamicImpulseReceiverWithObject<>),
   ];
 
   public static readonly FrozenSet<Type> AsyncDynamicImpulseObjectGroup = [
     typeof(AsyncDynamicImpulseTriggerWithObject<>),
-    typeof(AsyncDynamicImpulseTriggerWithObject<>),
+    typeof(AsyncDynamicImpulseReceiverWithObject<>),
   ];
 
   public static readonly IEnumerable<FrozenSet<Type>> ImpulseGroups = [
