@@ -12,16 +12,17 @@ static partial class ContextualSwapActionsPatch
   internal static IEnumerable<MenuItem> RepeatGroupItems(ContextualContext context)
   {
     var psuedoGenericTypes = context.World.GetPsuedoGenericTypesForWorld();
-    var binaryOperationsGroup = psuedoGenericTypes.Repeat01.ToDictionary();
+    var group = psuedoGenericTypes.Repeat01.ToDictionary();
 
-    if (context.NodeType.TryGetGenericTypeDefinition(out var genericTypeDefinition))
+    if (context.NodeType.TryGetGenericTypeDefinition(out var genericTypeDefinition) && genericTypeDefinition == typeof(ValueRepeat<>))
     {
-      if (binaryOperationsGroup.Where(o => o.Value.SequenceEqual(context.NodeType.GenericTypeArguments)).Select(i => i.Key).SingleOrDefault() is Type match)
+      var matchingNodes = group.Where(a => a.Value.SequenceEqual(context.NodeType.GenericTypeArguments)).Select(a => a.Key);
+      foreach (var match in matchingNodes)
       {
         yield return new(match, connectionTransferType: ConnectionTransferType.ByIndexLossy);
       }
     }
-    else if (binaryOperationsGroup.TryGetValue(context.NodeType, out var genericTypes))
+    else if (group.TryGetValue(context.NodeType, out var genericTypes))
     {
       yield return new(typeof(ValueRepeat<>).MakeGenericType([.. genericTypes]), connectionTransferType: ConnectionTransferType.ByIndexLossy);
     }
