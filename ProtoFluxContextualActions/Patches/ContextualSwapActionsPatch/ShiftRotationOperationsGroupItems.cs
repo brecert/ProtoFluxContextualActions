@@ -17,7 +17,7 @@ static partial class ContextualSwapActionsPatch
       var matchingNodes = group.Where(a => genericTypes.SequenceEqual(a.Value)).Select(a => a.Key);
       foreach (var match in matchingNodes)
       {
-        yield return new MenuItem(match);
+        yield return new MenuItem(match, connectionTransferType: ConnectionTransferType.ByIndexLossy);
       }
     }
   }
