@@ -79,6 +79,11 @@ class PsuedoGenericTypes(World world)
   // public PsuedoGenerics Compose_Rotation { get => field ??= MapTypes("Compose_Rotation_"); }
   // public PsuedoGenerics Compose_ScaleRotation { get => field ??= MapTypes("Compose_ScaleRotation_"); }
 
+  public PsuedoGenerics ShiftLeft { get => field ??= MapTypes("ShiftLeft_"); }
+  public PsuedoGenerics ShiftRight { get => field ??= MapTypes("ShiftRight_"); }
+  public PsuedoGenerics RotateLeft { get => field ??= MapTypes("RotateLeft_"); }
+  public PsuedoGenerics RotateRight { get => field ??= MapTypes("RotateRight_"); }
+
   public PsuedoGenerics All { get => field ??= MapTypes("All_"); }
   public PsuedoGenerics Any { get => field ??= MapTypes("Any_"); }
   public PsuedoGenerics None { get => field ??= MapTypes("None_"); }
