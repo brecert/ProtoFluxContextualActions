@@ -269,7 +269,6 @@ internal static partial class ContextualSwapActionsPatch
       .. VariableStoreNodesGroupItems(context),
       .. ValueRelayGroupItems(context),
       .. ObjectRelayGroupItems(context),
-      .. ValueComparisonBinaryOperatorGroupItems(context),
       .. DeltaTimeOperationGroupItems(context),
       .. EnumShiftGroupItems(context),
       .. NullCoalesceGroupItems(context),
@@ -288,11 +287,11 @@ internal static partial class ContextualSwapActionsPatch
       .. SinCosSwapGroup(context),
       .. SampleSpatialVariableGroupItems(context),
       .. KeyStateGroupItems(context),
-      .. ObjectComparisonBinaryOperatorGroupItems(context),
       .. FireOnBoolGroupItems(context),
       .. WriteGroupItems(context),
       .. DynamicImpulseGroupItems(context),
-      .. IsNullGroupItemsGroupItems(context)
+      .. IsNullGroupItemsGroupItems(context),
+      .. BinaryComparisonOperatorGroupItems(context)
     ];
 
     foreach (var menuItem in menuItems)

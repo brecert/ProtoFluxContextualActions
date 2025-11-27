@@ -56,6 +56,11 @@ class PsuedoGenericTypes(World world)
   public PsuedoGenerics XNOR_Multi { get => field ??= MapTypes("XNOR_Multi_"); }
   public PsuedoGenerics XOR_Multi { get => field ??= MapTypes("XOR_Multi_"); }
 
+  public PsuedoGenerics LessThan { get => field ??= MapTypes("LessThan_"); }
+  public PsuedoGenerics GreaterThan { get => field ??= MapTypes("GreaterThan_"); }
+  public PsuedoGenerics LessOrEqual { get => field ??= MapTypes("LessOrEqual_"); }
+  public PsuedoGenerics GreaterOrEqual { get => field ??= MapTypes("GreaterOrEqual_"); }
+
   public PsuedoGenerics Sin { get => field ??= MapTypes("Sin_"); }
   public PsuedoGenerics Cos { get => field ??= MapTypes("Cos_"); }
 

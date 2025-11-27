@@ -61,4 +61,12 @@ static class PsuedoGenericTypesHelper
       .. psuedoGenerics.UnpackColumns,
       // .. psuedoGenerics.ComposeTRS,
     ];
+
+  public static PsuedoGenerics ComparisonNodes(this PsuedoGenericTypes psuedoGenerics) =>
+    [
+      .. psuedoGenerics.LessThan,
+      .. psuedoGenerics.LessOrEqual,
+      .. psuedoGenerics.GreaterThan,
+      .. psuedoGenerics.GreaterOrEqual,
+    ];
 }

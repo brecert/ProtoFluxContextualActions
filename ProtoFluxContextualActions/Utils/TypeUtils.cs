@@ -1,11 +1,29 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using Elements.Core;
 
 namespace ProtoFluxContextualActions.Utils;
 
 static class TypeUtils
 {
+  public static Type? TryMakeGenericType(this Type type, params Type[] typeArguments)
+  {
+    try
+    {
+      var genericType = type.MakeGenericType(typeArguments);
+      if (genericType.IsValidGenericType(validForInstantiation: true))
+      {
+        return genericType;
+      }
+      return null;
+    }
+    catch
+    {
+      return null;
+    }
+  }
+
   public static bool TryGetGenericTypeDefinition(this Type type, [NotNullWhen(true)] out Type? genericTypeDefinition)
   {
     if (type.IsGenericType)
