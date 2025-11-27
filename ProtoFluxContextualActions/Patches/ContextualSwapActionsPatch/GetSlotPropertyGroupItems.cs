@@ -28,6 +28,6 @@ static partial class ContextualSwapActionsPatch
     [
       .. MatchNonGenericTypes(GetSlotPersistentGroup, context.NodeType),
       .. MatchNonGenericTypes(GetSlotActiveGroup, context.NodeType),
-      .. (IEnumerable<MenuItem>)(TryGetSwap(GetSlotActivePersistent, context.NodeType, out var match) ? [new(match)] : []),
+      .. (IEnumerable<MenuItem>)(TryGetSwap(GetSlotActivePersistent, context.NodeType, out var match) ? [new(match, connectionTransferType: ConnectionTransferType.ByIndexLossy)] : []),
     ];
 }
