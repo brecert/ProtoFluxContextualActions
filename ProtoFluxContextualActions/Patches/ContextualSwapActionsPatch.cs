@@ -295,6 +295,7 @@ internal static partial class ContextualSwapActionsPatch
       .. BooleanVectorToBoolOperationsGroupItems(context),
       .. ShiftRotationOperationsGroupItems(context),
       .. SlotChildGroupItems(context),
+      .. GetSlotActiveGroupItems(context),
     ];
 
     foreach (var menuItem in menuItems)
@@ -307,7 +308,7 @@ internal static partial class ContextualSwapActionsPatch
   internal static string FormatMultiName(Type match) =>
     $"{NodeMetadataHelper.GetMetadata(match).Name} (Multi)";
 
-  internal static IEnumerable<MenuItem> MatchNonGenericTypes(ISet<Type> types, Type type)
+  internal static IEnumerable<MenuItem> MatchNonGenericTypes(ICollection<Type> types, Type type)
   {
     if (types.Contains(type))
     {

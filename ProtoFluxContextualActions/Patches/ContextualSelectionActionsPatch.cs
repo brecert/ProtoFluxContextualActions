@@ -435,6 +435,7 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(GetChild));
       yield return new MenuItem(typeof(ChildrenCount));
       yield return new MenuItem(typeof(FindChildByTag)); // use tag here because it has less inputs which fits better when going to swap.
+      yield return new MenuItem(typeof(GetSlotActive));
       yield return new MenuItem(typeof(GetSlotName));
     }
 
@@ -558,9 +559,7 @@ internal static class ContextualSelectionActionsPatch
       yield return new(psuedoGenericTypes.All.First(n => n.Types.First() == outputType).Node);
       yield return new(psuedoGenericTypes.Any.First(n => n.Types.First() == outputType).Node);
       yield return new(psuedoGenericTypes.None.First(n => n.Types.First() == outputType).Node);
-      // yield return new(psuedoGenericTypes.XorElements.First(n => n.Types.First() == outputType).Node);
     }
-    
 
     if (outputType.IsEnum)
     {
