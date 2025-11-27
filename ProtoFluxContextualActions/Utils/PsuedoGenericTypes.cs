@@ -89,6 +89,8 @@ class PsuedoGenericTypes(World world)
   public PsuedoGenerics None { get => field ??= MapTypes("None_"); }
   public PsuedoGenerics XorElements { get => field ??= MapTypes("XorElements_"); }
 
+  public PsuedoGenerics Repeat01 { get => field ??= MapTypes("Repeat01_"); }
+
   public PsuedoGenerics PackTangentPoint
   {
     get => field ??= [
