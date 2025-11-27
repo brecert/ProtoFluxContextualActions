@@ -214,6 +214,7 @@ internal static class ContextualSelectionActionsPatch
     var target = _currentProxy?.Target;
 
     foreach (var item in GeneralNumericOperationMenuItems(target)) yield return item;
+    foreach (var item in GeneralObjectOperationMenuItems(target)) yield return item;
 
     if (target is ProtoFluxInputProxy inputProxy)
     {
@@ -388,6 +389,20 @@ internal static class ContextualSelectionActionsPatch
       }
     }
   }
+
+  internal static IEnumerable<MenuItem> GeneralObjectOperationMenuItems(ProtoFluxElementProxy? target)
+  {
+    if (target is ProtoFluxOutputProxy { OutputType.Value: var outputType } && !outputType.IsUnmanaged())
+    {
+      var coder = Traverse.Create(typeof(Coder<>).MakeGenericType(outputType));
+
+      if (coder.Property<bool>("SupportsComparison").Value)
+      {
+        yield return new MenuItem(typeof(ObjectEquals<>).MakeGenericType(outputType));
+      }
+    }
+  }
+
 
   #region Output Items
   /// <summary>
