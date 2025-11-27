@@ -48,6 +48,7 @@ class PsuedoGenericTypes(World world)
   public PsuedoGenerics NOR { get => field ??= MapTypes("NOR_"); }
   public PsuedoGenerics XNOR { get => field ??= MapTypes("XNOR_"); }
   public PsuedoGenerics XOR { get => field ??= MapTypes("XOR_"); }
+  public PsuedoGenerics NOT { get => field ??= MapTypes("NOT_"); }
 
   public PsuedoGenerics AND_Multi { get => field ??= MapTypes("AND_Multi_"); }
   public PsuedoGenerics OR_Multi { get => field ??= MapTypes("OR_Multi_"); }
@@ -77,6 +78,11 @@ class PsuedoGenericTypes(World world)
   public PsuedoGenerics ComposeTRS { get => field ??= MapTypes("ComposeTRS_"); }
   // public PsuedoGenerics Compose_Rotation { get => field ??= MapTypes("Compose_Rotation_"); }
   // public PsuedoGenerics Compose_ScaleRotation { get => field ??= MapTypes("Compose_ScaleRotation_"); }
+
+  public PsuedoGenerics All { get => field ??= MapTypes("All_"); }
+  public PsuedoGenerics Any { get => field ??= MapTypes("Any_"); }
+  public PsuedoGenerics None { get => field ??= MapTypes("None_"); }
+  public PsuedoGenerics XorElements { get => field ??= MapTypes("XorElements_"); }
 
   public PsuedoGenerics PackTangentPoint
   {

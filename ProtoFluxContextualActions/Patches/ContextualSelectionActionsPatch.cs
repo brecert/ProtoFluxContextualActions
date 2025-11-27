@@ -80,7 +80,10 @@ internal static class ContextualSelectionActionsPatch
   internal static bool Prefix(ProtoFluxTool __instance, SyncRef<ProtoFluxElementProxy> ____currentProxy)
   {
     var elementProxy = ____currentProxy.Target;
-    var items = MenuItems(__instance).Take(10).ToArray();
+    var items = MenuItems(__instance)
+      .Where(i => (i.binding ?? i.node).IsValidGenericType(validForInstantiation: true)) // this isn't great, we should instead catch errors before they propigate to here.
+      .Take(10)
+      .ToArray();
     // todo: pages / menu
 
     if (items.Length != 0)
@@ -412,7 +415,9 @@ internal static class ContextualSelectionActionsPatch
   /// <returns></returns>
   internal static IEnumerable<MenuItem> OutputMenuItems(ProtoFluxOutputProxy outputProxy)
   {
+    var world = outputProxy.World;
     var nodeType = outputProxy.Node.Target.NodeType;
+    var psuedoGenericTypes = world.GetPsuedoGenericTypesForWorld();
 
     if (TryGetUnpackNode(outputProxy.World, outputProxy.OutputType, out var unpackNodeTypes))
     {
@@ -437,9 +442,6 @@ internal static class ContextualSelectionActionsPatch
     {
       yield return new MenuItem(typeof(If));
       yield return new MenuItem(typeof(ValueConditional<int>)); // dummy type when // todo: convert to multi?
-      yield return new MenuItem(typeof(AND_Bool));
-      yield return new MenuItem(typeof(OR_Bool));
-      yield return new MenuItem(typeof(NOT_Bool));
     }
 
     else if (outputType == typeof(string))
@@ -543,6 +545,22 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(GetType));
       yield return new MenuItem(typeof(ToString_object));
     }
+
+    if (outputType == typeof(bool) || outputType == typeof(bool2) || outputType == typeof(bool3) || outputType == typeof(bool4))
+    {
+      yield return new(psuedoGenericTypes.AND.First(n => n.Types.First() == outputType).Node);
+      yield return new(psuedoGenericTypes.OR.First(n => n.Types.First() == outputType).Node);
+      yield return new(psuedoGenericTypes.NOT.First(n => n.Types.First() == outputType).Node);
+    }
+
+    if (outputType == typeof(bool2) || outputType == typeof(bool3) || outputType == typeof(bool4))
+    {
+      yield return new(psuedoGenericTypes.All.First(n => n.Types.First() == outputType).Node);
+      yield return new(psuedoGenericTypes.Any.First(n => n.Types.First() == outputType).Node);
+      yield return new(psuedoGenericTypes.None.First(n => n.Types.First() == outputType).Node);
+      // yield return new(psuedoGenericTypes.XorElements.First(n => n.Types.First() == outputType).Node);
+    }
+    
 
     if (outputType.IsEnum)
     {
