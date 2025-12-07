@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Frozen;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Mouse;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Playback;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Time;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Transform;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users.LocalScreen;
@@ -91,5 +92,32 @@ static class Groups
     typeof(SetLocalRotation),
     typeof(SetLocalScale),
     typeof(SetLocalTransform),
+  ];
+
+  public static readonly FrozenSet<Type> CommonPlaybackPropertyGroup = [
+    typeof(IsLooped),
+    typeof(Position),
+    typeof(NormalizedPosition),
+    typeof(Speed),
+    typeof(IsPlaying),
+  ];
+
+  public static readonly FrozenSet<Type> CommonSetPlaybackPropertyGroup = [
+    typeof(SetLoop),
+    typeof(SetPosition),
+    typeof(SetNormalizedPosition),
+    typeof(SetSpeed),
+  ];
+  
+  public static readonly FrozenSet<Type> CommonPlaybackActionsGroup = [
+    typeof(Play),
+    typeof(Pause),
+    typeof(Resume),
+    typeof(Stop),
+  ];
+
+  public static readonly FrozenSet<Type> PlaybackActionsGroup = [
+    ..CommonPlaybackActionsGroup,
+    typeof(Toggle),
   ];
 }
