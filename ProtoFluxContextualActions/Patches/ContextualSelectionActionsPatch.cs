@@ -3,59 +3,61 @@ using Elements.Core;
 using FrooxEngine;
 using FrooxEngine.ProtoFlux;
 
-using ProtoFluxContextualActions.Attributes;
-using static ProtoFluxContextualActions.Utils.PsuedoGenericUtils;
-using HarmonyLib;
 using System.Runtime.CompilerServices;
-using System.Collections.Generic;
 using System.Linq;
-using ProtoFlux.Core;
-using ProtoFlux.Runtimes.Execution.Nodes;
-using ProtoFlux.Runtimes.Execution.Nodes.Operators;
-using ProtoFlux.Runtimes.Execution.Nodes.Math.Quaternions;
-using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Transform;
-using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Slots;
-using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users;
-using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Async;
-using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Audio;
+using System.Diagnostics.CodeAnalysis;
+using System.Collections.Generic;
 using SharpPipe;
+using Renderite.Shared;
+using ProtoFlux.Runtimes.Execution.Nodes.Utility.Uris;
+using ProtoFlux.Runtimes.Execution.Nodes.Utility;
 using ProtoFlux.Runtimes.Execution.Nodes.TimeAndDate;
-using ProtoFlux.Runtimes.Execution.Nodes.Math;
 using ProtoFlux.Runtimes.Execution.Nodes.Strings.Characters;
 using ProtoFlux.Runtimes.Execution.Nodes.Strings;
 using ProtoFlux.Runtimes.Execution.Nodes.ParsingFormatting;
-using ProtoFlux.Runtimes.Execution.Nodes.Actions;
-using ProtoFluxContextualActions.Utils;
-using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.References;
-using FrooxEngine.ProtoFlux.CoreNodes;
-using ProtoFlux.Runtimes.Execution.Nodes.Math.Bounds;
-using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Worlds;
-using Elements.Quantity;
+using ProtoFlux.Runtimes.Execution.Nodes.Operators;
+using ProtoFlux.Runtimes.Execution.Nodes.Math.SphericalHarmonics;
+using ProtoFlux.Runtimes.Execution.Nodes.Math.Rects;
+using ProtoFlux.Runtimes.Execution.Nodes.Math.Random;
+using ProtoFlux.Runtimes.Execution.Nodes.Math.Quaternions;
 using ProtoFlux.Runtimes.Execution.Nodes.Math.Quantity;
-using ProtoFlux.Runtimes.Execution.Nodes.Utility;
-using System.Diagnostics.CodeAnalysis;
-using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Rendering;
-using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Assets;
+using ProtoFlux.Runtimes.Execution.Nodes.Math.Constants;
+using ProtoFlux.Runtimes.Execution.Nodes.Math.Bounds;
+using ProtoFlux.Runtimes.Execution.Nodes.Math;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Worlds;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Variables;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Utility;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users.Roots;
-using ProtoFluxContextualActions.Extensions;
-using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Physics;
-using Renderite.Shared;
-using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Avatar;
-using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Avatar.BodyNodes;
-using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Interaction;
-using ProtoFlux.Runtimes.Execution.Nodes.Enums;
-using ProtoFlux.Runtimes.Execution.Nodes.Math.Constants;
-using ProtoFlux.Runtimes.Execution.Nodes.Math.Random;
-using ProtoFluxContextualActions.Tagging;
-using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Mouse;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users.LocalScreen;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Transform;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Slots;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Rendering;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.References;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Physics;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Interaction.Tools;
-using ProtoFlux.Runtimes.Execution.Nodes.Math.SphericalHarmonics;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Interaction;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Mouse;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Keyboard;
-using ProtoFlux.Runtimes.Execution.Nodes.Math.Rects;
-using ProtoFlux.Runtimes.Execution.Nodes.Utility.Uris;
-using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Variables;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Avatar.BodyNodes;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Avatar;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Audio;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Async;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Assets;
+using ProtoFlux.Runtimes.Execution.Nodes.Enums;
+using ProtoFlux.Runtimes.Execution.Nodes.Actions;
+using ProtoFlux.Runtimes.Execution.Nodes;
+using ProtoFlux.Core;
+using HarmonyLib;
+using FrooxEngine.ProtoFlux.CoreNodes;
+using Elements.Quantity;
+
+using ProtoFluxContextualActions.Utils;
+using ProtoFluxContextualActions.Tagging;
+using ProtoFluxContextualActions.Extensions;
+using ProtoFluxContextualActions.Attributes;
+using static ProtoFluxContextualActions.Utils.PsuedoGenericUtils;
+using ProtoFlux.Runtimes.Execution.Nodes.Casts;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -64,7 +66,7 @@ namespace ProtoFluxContextualActions.Patches;
 internal static class ContextualSelectionActionsPatch
 {
 
-  internal readonly struct MenuItem(Type node, Type? binding = null, string? name = null, bool overload = false)
+  internal readonly struct MenuItem(Type node, Type? binding = null, string? name = null, bool overload = false, int? index = null)
   {
     internal readonly Type node = node;
 
@@ -72,14 +74,61 @@ internal static class ContextualSelectionActionsPatch
 
     internal readonly string? name = name;
 
+    internal readonly int? index = index;
+
     internal readonly bool overload = overload;
 
     internal readonly string DisplayName => name ?? NodeMetadataHelper.GetMetadata(node).Name ?? node.GetNiceTypeName();
   }
 
+  internal static bool OpenNodeList(ProtoFluxTool __instance, ProtoFluxElementProxy? elementProxy) {
+
+        if (elementProxy is ProtoFluxOutputProxy outputProxy)
+        {
+            var inputType = typeof(ProtoFlux.Core.IInput<>).MakeGenericType(outputProxy.OutputType);
+
+            var matchingFieldsOfType =
+                NodeUtils.ProtoFluxBindingMapping.Values
+                    .Where(n => !typeof(DataModelAsyncMethodProxy<>).IsAssignableFrom(n) && !typeof(DataModelMethodProxy<>).IsAssignableFrom(n))
+                    .Where(n => !n.IsGenericTypeDefinition)
+                    .SelectMany(nodeType => nodeType.GetFields())
+                    .Where(f => inputType.IsAssignableFrom(f.FieldType));
+
+            var items = matchingFieldsOfType
+                .Select(field => (
+                    field: field,
+                    item: new MenuItem(
+                        node: field.DeclaringType,
+                        index: field.DeclaringType.GetFields()
+                            .Where(f => typeof(ProtoFlux.Core.IInput).IsAssignableFrom(f.FieldType))
+                            .Index()
+                            .First(a => a.Item.Name == field.Name)
+                            .Index
+                        ))
+                );
+
+            var testItems = items?.Select(item => new MenuHelper.NodeMenuItem(
+                item.item.DisplayName,
+                item.field.Name,
+                item.item.node.GetNiceFullName(),
+                1 / ((float)item.item.index + 1),
+                OnSpawnNode(__instance, item.item, node => ConnectFromOutputProxy(__instance, node, outputProxy, item.item))
+            )).ToList();
+
+            var menuSlot = __instance.LocalUserSpace.AddSlot(persistent: false);
+            MenuHelper.BuildMenu(menuSlot, testItems, out var textField);
+            textField.Editor.Target.LocalEditingFinished += (_) => menuSlot.Destroy();
+            textField.World.LocalUser.Focus(textField.Editor.Target);
+        }
+    return true;
+  }
+
   internal static bool Prefix(ProtoFluxTool __instance, SyncRef<ProtoFluxElementProxy> ____currentProxy)
   {
     var elementProxy = ____currentProxy.Target;
+
+    return OpenNodeList(__instance, elementProxy);
+
     var items = MenuItems(__instance)
       .Where(i => (i.binding ?? i.node).IsValidGenericType(validForInstantiation: true)) // this isn't great, we should instead catch errors before they propigate to here.
       .Take(10)
@@ -189,6 +238,55 @@ internal static class ContextualSelectionActionsPatch
     return true;
   }
 
+    private static void ConnectFromOperationProxy(ProtoFluxNode node, ProtoFluxOperationProxy operationProxy, MenuItem item)
+    {
+        if (item.overload) throw new Exception("Overloading with ProtoFluxOperationProxy is not supported");
+        node.TryConnectImpulse(node.GetImpulse(0), operationProxy.NodeOperation.Target, undoable: true);
+    }
+
+    private static void ConnectFromImpulseProxy(ProtoFluxNode node, ProtoFluxImpulseProxy impulseProxy, MenuItem item)
+    {
+        if (item.overload) throw new Exception("Overloading with ProtoFluxImpulseProxy is not supported");
+        node.TryConnectImpulse(impulseProxy.NodeImpulse.Target, node.GetOperation(0), undoable: true);
+    }
+
+    private static void ConnectFromOutputProxy(ProtoFluxTool __instance, ProtoFluxNode node, ProtoFluxOutputProxy outputProxy, MenuItem item)
+    {
+        if (item.overload) throw new Exception("Overloading with ProtoFluxOutputProxy is not supported");
+        var input = item.index.HasValue
+            ? node.AllInputs.ElementAtOrDefault(item.index.Value)
+            : node.NodeInputs.First(i => i.TargetType.IsGenericType && (outputProxy.OutputType.Value.IsAssignableFrom(i.TargetType.GenericTypeArguments[0]) || ProtoFlux.Core.TypeHelper.CanImplicitlyConvertTo(outputProxy.OutputType, i.TargetType.GenericTypeArguments[0])));
+        __instance.StartTask(async () =>
+        {
+            // this is dumb
+            // TODO: investigate why it's needed for casting to work
+            await new Updates();
+            node.TryConnectInput(input, outputProxy.NodeOutput.Target, allowExplicitCast: false, undoable: true);
+        });
+    }
+
+    private static void ConnectFromInputProxy(ProtoFluxTool __instance, ProtoFluxNode node, ProtoFluxInputProxy inputProxy, MenuItem item)
+    {
+        if (item.overload)
+        {
+            __instance.StartTask(async () =>
+            {
+                // this is dumb
+                // TODO: investigate why it's needed to avoid the one or two update disconnect issue
+                await new Updates(1);
+                var output = node.GetOutput(0); // TODO: specify
+                inputProxy.Node.Target.TryConnectInput(inputProxy.NodeInput.Target, output, allowExplicitCast: false, undoable: true);
+            });
+        }
+        else
+        {
+            var output = node.NodeOutputs.First(o => typeof(INodeOutput<>).MakeGenericType(inputProxy.InputType).IsAssignableFrom(o.GetType()));
+            inputProxy.Node.Target.TryConnectInput(inputProxy.NodeInput.Target, output, allowExplicitCast: false, undoable: true);
+        }
+    }
+
+
+
   private static void AddMenuItem(ProtoFluxTool __instance, ContextMenu menu, colorX color, MenuItem item, Action<ProtoFluxNode> setup)
   {
     var nodeMetadata = NodeMetadataHelper.GetMetadata(item.node);
@@ -206,6 +304,34 @@ internal static class ContextualSelectionActionsPatch
       });
     };
   }
+
+    // private static void AddMenuItem(ProtoFluxTool __instance, ContextMenu menu, colorX color, MenuItem item, Action<ProtoFluxNode> setup)
+    // {
+    //     var label = (LocaleString)item.DisplayName;
+    //     var menuItem = menu.AddItem(in label, (Uri?)null, color);
+    //     menuItem.Button.LocalPressed += OnSpawnNode(__instance, item, setup);
+    // }
+
+    private static ButtonEventHandler OnSpawnNode(ProtoFluxTool __instance, MenuItem item, Action<ProtoFluxNode> setup)
+    {
+        return (button, data) =>
+        {
+            var nodeBinding = item.binding ?? (item.node.TryGetGenericTypeDefinition(out var genericTypeDefinition)
+                ? (typeof(ValueCast<,>).IsAssignableFrom(genericTypeDefinition)
+                    ? ProtoFluxHelper.GetBindingForNode(NodeUtils.ProtoFluxBindingMapping.Values.First((k) => item.node.IsAssignableFrom(k)))
+                    : ProtoFluxHelper.GetBindingForNode(item.node))
+                : ProtoFluxHelper.GetBindingForNode(item.node));
+
+            __instance.SpawnNode(nodeBinding, n =>
+            {
+                n.EnsureElementsInDynamicLists();
+                setup(n);
+                __instance.LocalUser.CloseContextMenu(__instance);
+                CleanupDraggedWire(__instance);
+            });
+        };
+    }
+
 
   // note: if we can build up a graph then we can egraph reduce to make matches like this easier to spot automatically rather than needing to check each one manually
   // todo: detect add + 1 and offer to convert to inc?
