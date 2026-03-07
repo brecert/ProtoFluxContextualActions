@@ -81,7 +81,18 @@ internal static class ContextualSelectionActionsPatch
     internal readonly string DisplayName => name ?? NodeMetadataHelper.GetMetadata(node).Name ?? node.GetNiceTypeName();
   }
 
+  [HarmonyPrefix]
+  [HarmonyPatch(typeof(ProtoFluxTool), nameof(ProtoFluxTool.OnPrimaryRelease))]
+  internal static bool OnPrimaryReleasePatch(ProtoFluxTool __instance, SyncRef<ProtoFluxElementProxy> ____currentProxy,  IProtoFluxElementProxy ____lastProxy) {
+    if(____currentProxy.Target != null && ____lastProxy == null) {
+      OpenNodeList(__instance, ____currentProxy.Target);
+      return false;
+    }
+    return true;
+  }
+
   internal static bool OpenNodeList(ProtoFluxTool __instance, ProtoFluxElementProxy? elementProxy) {
+
 
         if (elementProxy is ProtoFluxOutputProxy outputProxy)
         {
@@ -126,8 +137,6 @@ internal static class ContextualSelectionActionsPatch
   internal static bool Prefix(ProtoFluxTool __instance, SyncRef<ProtoFluxElementProxy> ____currentProxy)
   {
     var elementProxy = ____currentProxy.Target;
-
-    return OpenNodeList(__instance, elementProxy);
 
     var items = MenuItems(__instance)
       .Where(i => (i.binding ?? i.node).IsValidGenericType(validForInstantiation: true)) // this isn't great, we should instead catch errors before they propigate to here.
