@@ -10,6 +10,7 @@ static partial class ContextualSwapActionsPatch
   static readonly HashSet<Type> FireOnBoolGroup = [
     typeof(FireOnTrue),
     typeof(FireOnFalse),
+    typeof(FireOnValueChange<bool>),
   ];
 
   internal static IEnumerable<MenuItem> FireOnBoolGroupItems(ContextualContext context)
