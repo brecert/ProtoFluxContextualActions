@@ -93,6 +93,9 @@ class PsuedoGenericTypes(World world)
 
   public PsuedoGenerics Repeat01 { get => field ??= MapTypes("Repeat01_"); }
 
+  public PsuedoGenerics Normalized { get => field ??= MapTypes("Normalized_"); }
+  public PsuedoGenerics Magnitude { get => field ??= MapTypes("Magnitude_"); }
+
   public PsuedoGenerics PackTangentPoint
   {
     get => field ??= [

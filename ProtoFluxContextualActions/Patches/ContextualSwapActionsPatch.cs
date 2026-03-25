@@ -52,7 +52,7 @@ internal static partial class ContextualSwapActionsPatch
     internal readonly string DisplayName => name ?? NodeMetadataHelper.GetMetadata(node).Name ?? node.GetNiceTypeName();
   }
 
-  internal record ContextualContext(Type NodeType, World World);
+  internal record ContextualContext(Type NodeType, World World, ProtoFluxElementProxy? proxy);
 
   // additional data we store for the protoflux tool
   internal class ProtoFluxToolData
@@ -84,7 +84,7 @@ internal static partial class ContextualSwapActionsPatch
         {
           if (data.SecondsSinceLastSecondaryPress() < DoublePressTime && data.lastSecondaryPressNode != null && !data.lastSecondaryPressNode.IsRemoved && data.lastSecondaryPressNode == hitNode)
           {
-            CreateMenu(__instance, hitNode);
+            CreateMenu(__instance, hitNode, null);
             data.lastSecondaryPressNode = null;
             data.lastSecondaryPressNode = null;
             data.lastSpawnNodeType = null;
@@ -110,11 +110,11 @@ internal static partial class ContextualSwapActionsPatch
     return true;
   }
 
-  private static void CreateMenu(ProtoFluxTool __instance, ProtoFluxNode hitNode)
+  private static void CreateMenu(ProtoFluxTool __instance, ProtoFluxNode hitNode, ProtoFluxElementProxy? proxy)
   {
     __instance.StartTask(async () =>
     {
-      var items = GetMenuItems(__instance, hitNode).Where(m => m.node != hitNode.NodeType).Take(10).ToArray();
+      var items = GetMenuItems(__instance, hitNode, proxy).Where(m => m.node != hitNode.NodeType).Take(10).ToArray();
 
       var query = new NodeQueryAcceleration(hitNode.NodeInstance.Runtime.Group);
 
@@ -130,23 +130,28 @@ internal static partial class ContextualSwapActionsPatch
         {
           AddMenuItem(__instance, menu, colorX.White, menuItem, () =>
           {
-            try
-            {
-              SwapHitForNode(__instance, hitNode, menuItem);
-            }
-            finally
-            {
-              // if there's somehow an error I do not want evil dangling references that world crash silently.
-              if (hitNode != null && !hitNode.IsRemoved)
-              {
-                hitNode.UndoableDestroy();
-              }
-            }
+            OnSwapNode(__instance, hitNode, menuItem);
           });
         }
       }
     });
   }
+
+  internal static void OnSwapNode(ProtoFluxTool __instance, ProtoFluxNode hitNode, MenuItem menuItem)
+	{
+		try
+    {
+      SwapHitForNode(__instance, hitNode, menuItem);
+    }
+    finally
+    {
+      // if there's somehow an error I do not want evil dangling references that world crash silently.
+      if (hitNode != null && !hitNode.IsRemoved)
+      {
+        hitNode.UndoableDestroy();
+      }
+    }
+	}
 
   private static void SwapHitForNode(ProtoFluxTool __instance, ProtoFluxNode hitNode, MenuItem menuItem)
   {
@@ -229,11 +234,11 @@ internal static partial class ContextualSwapActionsPatch
     };
   }
 
-  internal static IEnumerable<MenuItem> GetMenuItems(ProtoFluxTool __instance, ProtoFluxNode nodeComponent)
+  internal static IEnumerable<MenuItem> GetMenuItems(ProtoFluxTool __instance, ProtoFluxNode nodeComponent, ProtoFluxElementProxy? proxy)
   {
     var node = nodeComponent.NodeInstance;
     var nodeType = node.GetType();
-    var context = new ContextualContext(nodeType, __instance.World);
+    var context = new ContextualContext(nodeType, __instance.World, proxy);
 
     IEnumerable<MenuItem> menuItems = [
       .. UserRootSwapGroups(nodeType),
