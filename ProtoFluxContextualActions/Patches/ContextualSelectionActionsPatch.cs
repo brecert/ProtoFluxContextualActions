@@ -93,6 +93,8 @@ internal static class ContextualSelectionActionsPatch
   internal static bool Prefix(ProtoFluxTool __instance, SyncRef<ProtoFluxElementProxy> ____currentProxy)
   {
     var elementProxy = ____currentProxy.Target;
+    if (elementProxy == null) return true;
+    
     var selectionItems = MenuItems(elementProxy);
     bool hasSwaps = false;
     ProtoFluxNode? swapRoot = null;
