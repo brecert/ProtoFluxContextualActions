@@ -60,6 +60,7 @@ using ProtoFluxContextualActions.NewScripts;
 using System.Text.RegularExpressions;
 using ProtoFlux.Runtimes.Execution;
 using FrooxEngine.Undo;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Controllers;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -176,6 +177,12 @@ internal static class ContextualSelectionActionsPatch
     }
     else
     {
+      if (item.onNodeSpawn != null)
+      {
+        bool doConnect = item.onNodeSpawn(addedNode, elementProxy, tool);
+
+        if (!doConnect) return;
+      }
       var output = addedNode.NodeOutputs
       .FirstOrDefault(o => typeof(INodeOutput<>).MakeGenericType(inputProxy.InputType).IsAssignableFrom(o.GetType()))
       ?? throw new Exception($"Could not find matching output of type '{inputProxy.InputType}' in '{addedNode}'");
@@ -280,6 +287,11 @@ internal static class ContextualSelectionActionsPatch
 
     yield return new MenuItem(typeof(DynamicImpulseTrigger));
     yield return new MenuItem(typeof(StartAsyncTask), group: "Async");
+    yield return new MenuItem(typeof(AsyncFor), group: "Async");
+    yield return new MenuItem(typeof(AsyncSequence), group: "Async");
+    yield return new MenuItem(typeof(DelayUpdates), group: "Async");
+    yield return new MenuItem(typeof(DelaySecondsFloat), group: "Async");
+    yield return new MenuItem(typeof(AsyncDynamicImpulseTrigger), group: "Async");
 
     if (IsIterationNode(nodeType))
     {
@@ -305,18 +317,6 @@ internal static class ContextualSelectionActionsPatch
     else if (nodeType == typeof(ImpulseDemultiplexer))
     {
       yield return new MenuItem(typeof(ImpulseMultiplexer), name: "Impulse Multiplex");
-    }
-
-    switch (impulseProxy.ImpulseType.Value)
-    {
-      case ImpulseType.AsyncCall:
-      case ImpulseType.AsyncResumption:
-        yield return new MenuItem(typeof(AsyncFor), group: "Async");
-        yield return new MenuItem(typeof(AsyncSequence), group: "Async");
-        yield return new MenuItem(typeof(DelayUpdates), group: "Async");
-        yield return new MenuItem(typeof(DelaySecondsFloat), group: "Async");
-        yield return new MenuItem(typeof(AsyncDynamicImpulseTrigger), group: "Async");
-        break;
     }
   }
 
@@ -391,11 +391,14 @@ internal static class ContextualSelectionActionsPatch
           {
             yield return new MenuItem(typeof(ValueAdd<>).MakeGenericType(outputType));
             yield return new MenuItem(typeof(ValueSub<>).MakeGenericType(outputType));
+            yield return new MenuItem(typeof(ValueInc<>).MakeGenericType(outputType));
+            yield return new MenuItem(typeof(ValueDec<>).MakeGenericType(outputType));
           }
 
           if (coder.Property<bool>("SupportsMul").Value)
           {
             yield return new MenuItem(typeof(ValueMul<>).MakeGenericType(outputType));
+            yield return new MenuItem(typeof(ValueSquare<>).MakeGenericType(outputType));
           }
 
           if (coder.Property<bool>("SupportsDiv").Value)
@@ -418,15 +421,15 @@ internal static class ContextualSelectionActionsPatch
             yield return new MenuItem(typeof(ValueAbs<>).MakeGenericType(outputType));
           }
 
-          if (coder.Property<bool>("SupportsComparison").Value)
+          /*if (coder.Property<bool>("SupportsComparison").Value)
           {
             // yield return new MenuItem(typeof(ValueLessThan<>).MakeGenericType(outputType));
             // yield return new MenuItem(typeof(ValueLessOrEqual<>).MakeGenericType(outputType));
             // yield return new MenuItem(typeof(ValueGreaterThan<>).MakeGenericType(outputType));
             // yield return new MenuItem(typeof(ValueGreaterOrEqual<>).MakeGenericType(outputType));
-            yield return new MenuItem(typeof(ValueEquals<>).MakeGenericType(outputType));
+            // yield return new MenuItem(typeof(ValueEquals<>).MakeGenericType(outputType));
             // yield return new MenuItem(typeof(ValueNotEquals<>).MakeGenericType(outputType));
-          }
+          }*/
         }
 
 
@@ -451,17 +454,50 @@ internal static class ContextualSelectionActionsPatch
 
   internal static IEnumerable<MenuItem> GeneralObjectOperationMenuItems(ProtoFluxElementProxy? target)
   {
-    if (target is ProtoFluxOutputProxy { OutputType.Value: var outputType } && !outputType.IsUnmanaged())
-    {
-      var coder = Traverse.Create(typeof(Coder<>).MakeGenericType(outputType));
+    /*if (target != null)
+	{	
+      var targetType = target.GetType();
+      var typeArgs = targetType.GenericTypeArguments;
+      var nodeType = typeArgs[typeArgs.Length - 1];
+      var coder = Traverse.Create(typeof(Coder<>).MakeGenericType(nodeType));
 
       if (coder.Property<bool>("SupportsComparison").Value)
       {
-        yield return new MenuItem(typeof(ObjectEquals<>).MakeGenericType(outputType));
+        yield return new MenuItem(typeof(ObjectEquals<>).MakeGenericType(nodeType));
       }
-    }
+      if (nodeType.IsNullable())
+	  {
+        yield return new MenuItem(typeof(IsNull<>).MakeGenericType(nodeType));
+        yield return new MenuItem(typeof(NotNull<>).MakeGenericType(nodeType));
+	  }
+      if (target is ProtoFluxOutputProxy { OutputType.Value: var outputType } && !outputType.IsUnmanaged())
+      {
+      }
+	}*/
+    yield break;
   }
 
+  internal static Type getUserControllerType(User user)
+  {
+    IStandardController controller = user.InputInterface.GetControllerNode(Chirality.Right);
+    Type? controllerType = controller.GetType();
+    if (controllerType != null)
+    {
+      if (controllerType == typeof(FrooxEngine.TouchController))
+        return typeof(ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Controllers.TouchController);
+      if (controllerType == typeof(FrooxEngine.IndexController))
+        return typeof(ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Controllers.IndexController);
+      if (controllerType == typeof(FrooxEngine.HPReverbController))
+        return typeof(ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Controllers.HPReverbController);
+      if (controllerType == typeof(FrooxEngine.ViveController))
+        return typeof(ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Controllers.ViveController);
+      if (controllerType == typeof(FrooxEngine.CosmosController))
+        return typeof(ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Controllers.CosmosController);
+      if (controllerType == typeof(FrooxEngine.WindowsMRController))
+        return typeof(ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Controllers.WindowsMRController);
+    }
+		return typeof(StandardController);
+  }
 
   #region Output Items
   /// <summary>
@@ -484,6 +520,18 @@ internal static class ContextualSelectionActionsPatch
     }
     var outputType = outputProxy.OutputType.Value;
 
+    var equalsNode = GetNodeForType(outputType, [
+      new NodeTypeRecord(typeof(ValueEquals<>), null, null),
+      new NodeTypeRecord(typeof(ObjectEquals<>), null, null),
+    ]);
+    yield return new MenuItem(equalsNode, group: "Comparisons");
+
+    var conditionalNode = GetNodeForType(outputType, [
+      new NodeTypeRecord(typeof(ValueConditional<>), null, null),
+      new NodeTypeRecord(typeof(ObjectConditional<>), null, null),
+    ]);
+    yield return new MenuItem(conditionalNode, group: "Comparisons");
+
     if (outputType == typeof(Slot))
     {
       yield return new MenuItem(typeof(GlobalTransform));
@@ -502,22 +550,26 @@ internal static class ContextualSelectionActionsPatch
 
       yield return new MenuItem(typeof(DynamicImpulseTrigger));
 
-      yield return new MenuItem(typeof(ObjectRelay<Slot>), name: "Foreach Child", onNodeSpawn: (ProtoFluxNode node, ProtoFluxElementProxy proxy, ProtoFluxTool tool) =>
+      bool shouldRelay = ProtoFluxContextualActions.ShouldUseRelays();
+      Type baseType = shouldRelay ? typeof(ObjectRelay<Slot>) : typeof(ChildrenCount);
+      yield return new MenuItem(baseType, name: "Foreach Child", onNodeSpawn: (ProtoFluxNode node, ProtoFluxElementProxy proxy, ProtoFluxTool tool) =>
       {
         tool.StartTask(async () =>
         {
+          var outputProxy = proxy as ProtoFluxOutputProxy;
           // Node definitions, specifically in FrooxEngine.ProtoFlux so the node actually spawns
           Type childCountNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Slots.ChildrenCount);
           Type forNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.For);
           Type getChildNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Slots.GetChild);
           Type relayNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ObjectRelay<Slot>);
 
+
           ProtoFluxNode thisChildCountNode = null;
           ProtoFluxNode thisForNode = null;
           ProtoFluxNode thisGetChild = null;
           ProtoFluxNode thisRelayNode = null;
 
-          tool.SpawnNode(childCountNode, newNode =>
+          if (shouldRelay) tool.SpawnNode(childCountNode, newNode =>
           {
             thisChildCountNode = newNode;
             newNode.EnsureVisual();
@@ -532,32 +584,34 @@ internal static class ContextualSelectionActionsPatch
             thisGetChild = newNode;
             newNode.EnsureVisual();
           });
-          tool.SpawnNode(relayNode, newNode =>
+          if (shouldRelay) tool.SpawnNode(relayNode, newNode =>
           {
             thisRelayNode = newNode;
             newNode.EnsureVisual();
           });
 
-          await new Updates(3);
+          await new Updates(6);
 
-          if (thisChildCountNode == null) return;
+          if (thisChildCountNode == null && shouldRelay) return;
           if (thisForNode == null) return;
           if (thisGetChild == null) return;
-          if (thisRelayNode == null) return;
+          if (thisRelayNode == null && shouldRelay) return;
 
           node.World.BeginUndoBatch("Create Foreach Child");
 
           node.Slot.CreateSpawnUndoPoint("Spawn Child Count");
-          thisChildCountNode.Slot.CreateSpawnUndoPoint("Spawn Child Count");
+          if (shouldRelay) {
+            thisChildCountNode!.Slot.CreateSpawnUndoPoint("Spawn Child Count");
+            thisRelayNode!.Slot.CreateSpawnUndoPoint("Spawn Relay");
+          }
           thisForNode.Slot.CreateSpawnUndoPoint("Spawn For");
           thisGetChild.Slot.CreateSpawnUndoPoint("Spawn Get Child");
-          thisRelayNode.Slot.CreateSpawnUndoPoint("Spawn Relay");
 
           // Inputs and outputs
           INodeOutput inputRelay = node.GetOutput(0);
 
-          ISyncRef childCountInstance = thisChildCountNode.GetInput(0);
-          INodeOutput childCount = thisChildCountNode.GetOutput(0);
+          ISyncRef? childCountInstance = shouldRelay ? thisChildCountNode!.GetInput(0) : null;
+          INodeOutput childCount = shouldRelay ? thisChildCountNode!.GetOutput(0) : node.GetOutput(0);
 
           ISyncRef forCount = thisForNode.GetInput(0);
           INodeOutput forIndex = thisForNode.GetOutput(0);
@@ -565,17 +619,20 @@ internal static class ContextualSelectionActionsPatch
           ISyncRef childInstance = thisGetChild.GetInput(0);
           ISyncRef childIndex = thisGetChild.GetInput(1);
 
-          ISyncRef relayInstance = thisRelayNode.GetInput(0);
-          INodeOutput relayOutput = thisRelayNode.GetOutput(0);
+          ISyncRef? relayInstance = shouldRelay ? thisRelayNode!.GetInput(0) : null;
+          INodeOutput? relayOutput = shouldRelay ? thisRelayNode!.GetOutput(0) : null;
 
           // Node Connections
-          relayInstance.Target = inputRelay;
-          childCountInstance.Target = inputRelay;
+          if (shouldRelay)
+          {
+            childCountInstance!.Target = inputRelay;
+            relayInstance!.Target = inputRelay;
+            childInstance.Target = relayOutput!;
+          }
 
           forCount.Target = childCount;
 
           childIndex.Target = forIndex;
-          childInstance.Target = relayOutput;
 
           // Positions
           float3 baseUp = node.Slot.Up;
@@ -588,10 +645,13 @@ internal static class ContextualSelectionActionsPatch
             target.GlobalPosition += (baseUp * Y) + (baseRight * X);
           }
 
-          LocalTransformNode(thisChildCountNode, 0.12f, 0.00375f);
           LocalTransformNode(thisForNode, 0.27f, -0.01125f);
 
-          LocalTransformNode(thisRelayNode, 0.075f, -0.105f);
+          if (shouldRelay)
+			    {
+            LocalTransformNode(thisChildCountNode!, 0.12f, 0.00375f);
+				    LocalTransformNode(thisRelayNode!, 0.075f, -0.105f);
+    			}
 
           LocalTransformNode(thisGetChild, 0.42f, -0.11625f);
 
@@ -601,15 +661,92 @@ internal static class ContextualSelectionActionsPatch
         return true;
 
       });
+
+      yield return new MenuItem(
+        typeof(ProtoFlux.Runtimes.Execution.Nodes.Casts.ObjectCast<Slot, IWorldElement>),
+        name: "Allocating User",
+        onNodeSpawn: (ProtoFluxNode node, ProtoFluxElementProxy proxy, ProtoFluxTool tool) =>
+        {
+          tool.StartTask(async () =>
+          {
+            // Node spawning
+            Type allocNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.References.AllocatingUser);
+            ProtoFluxNode? thisAllocNode = null;
+
+            tool.SpawnNode(allocNode, newNode =>
+            {
+              thisAllocNode = newNode;
+              newNode.EnsureVisual();
+            });
+
+            await new Updates(3);
+
+            if (thisAllocNode == null)
+            {
+              node.Slot.Destroy();
+              return;
+            }
+
+            node.World.BeginUndoBatch("Create Allocating User");
+
+            node.Slot.CreateSpawnUndoPoint("Spawn Object Cast");
+            thisAllocNode.Slot.CreateSpawnUndoPoint("Spawn Allocating User");
+
+            // Inputs and outputs
+            INodeOutput inputRelay = node.GetOutput(0);
+
+            ISyncRef allocInstance = thisAllocNode.GetInput(0);
+
+            allocInstance.Target = inputRelay;
+
+            // Positions
+            float3 baseUp = node.Slot.Up;
+            float3 baseRight = node.Slot.Right;
+
+            void LocalTransformNode(ProtoFluxNode input, float X, float Y)
+            {
+              Slot target = input.Slot;
+              target.CopyTransform(node.Slot);
+              target.GlobalPosition += (baseUp * Y) + (baseRight * X);
+            }
+
+            LocalTransformNode(thisAllocNode, 0.09f, 0.00375f);
+
+            node.World.EndUndoBatch();
+          });
+
+          return true;
+        }
+      );
     }
 
-    else if (outputType == typeof(bool))
+    if (outputType == typeof(bool))
     {
       yield return new MenuItem(typeof(If));
-      yield return new MenuItem(typeof(ValueConditional<int>)); // dummy type when // todo: convert to multi?
+      yield return new MenuItem(typeof(FireOnTrue), group: "Events");
+      yield return new MenuItem(typeof(FireOnLocalTrue), group: "Events");
     }
 
-    else if (outputType == typeof(string))
+    var changeVariableNode = GetNodeForType(outputType, [
+      new NodeTypeRecord(typeof(FireOnValueChange<>), null, null),
+      new NodeTypeRecord(typeof(FireOnObjectValueChange<>), null, null),
+      new NodeTypeRecord(typeof(FireOnRefChange<>), null, null),
+    ]);
+    yield return new MenuItem(changeVariableNode, group: "Events");
+    var localChangeVariableNode = GetNodeForType(outputType, [
+      new NodeTypeRecord(typeof(FireOnLocalValueChange<>), null, null),
+      new NodeTypeRecord(typeof(FireOnLocalObjectChange<>), null, null),
+    ]);
+    yield return new MenuItem(localChangeVariableNode, group: "Events");
+
+    if (!outputType.IsValueType)
+    {
+      yield return new MenuItem(typeof(IsNull<>).MakeGenericType(outputType), group: "Comparisons");
+      yield return new MenuItem(typeof(NotNull<>).MakeGenericType(outputType), group: "Comparisons");
+      yield return new MenuItem(typeof(NullCoalesce<>).MakeGenericType(outputType), group: "Comparisons");
+    }
+
+    if (outputType == typeof(string))
     {
       yield return new MenuItem(typeof(GetCharacter));
       yield return new MenuItem(typeof(StringLength));
@@ -672,6 +809,10 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(UserVR_Active));
       yield return new MenuItem(typeof(UserRootSlot));
       yield return new MenuItem(typeof(UserUserRoot));
+
+      yield return new MenuItem(typeof(StandardController), group: "Input");
+      Type controllerType = getUserControllerType(Engine.Current.WorldManager.FocusedWorld.LocalUser);
+      if (controllerType != typeof (StandardController)) yield return new MenuItem(controllerType, group: "Input");
     }
 
     if (outputType == typeof(BodyNode))
@@ -883,21 +1024,6 @@ internal static class ContextualSelectionActionsPatch
       ]);
       yield return createVariableNode(variableInput);
       yield return createVariableNode(variableLatchInput);
-      // For some reason, Inc/Dec dont seem to work. Possibly look into this later?
-      // ^ looked into it, its creating the slot, but isnt generating the visuals seemingly.
-      // for some reason though, its failing to actually assign the variable. write and writelatch work fine, but specifically these 2 dont.
-      // will leave them commented until i find an actual fix
-      /*if (nodeVariable.IsValueType)
-      {
-				var variableIncrementNode = GetNodeForType(nodeVariable, [
-        	new NodeTypeRecord(typeof(ValueIncrement<>), null, null),
-      	]);
-				var variableDecrementNode = GetNodeForType(nodeVariable, [
-        	new NodeTypeRecord(typeof(ValueDecrement<>), null, null),
-      	]);
-        yield return createVariableNode(variableIncrementNode);
-        yield return createVariableNode(variableDecrementNode);
-      }*/
     }
   }
   #endregion
@@ -935,10 +1061,11 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(LocalUser));
       yield return new MenuItem(typeof(HostUser));
       yield return new MenuItem(typeof(UserFromUsername));
+      yield return new MenuItem(typeof(UserFromID));
       yield return new MenuItem(typeof(GetActiveUser));
       yield return new MenuItem(typeof(GetActiveUserSelf));
 
-	  // Select a User in the current session
+      // Select a User in the current session
       List<User> users = [];
       inputProxy.Slot.World.GetUsers(users);
       foreach (User user in users)
@@ -956,6 +1083,12 @@ internal static class ContextualSelectionActionsPatch
           group: "User List"
         );
       }
+
+      yield return new MenuItem(
+        typeof(AllocatingUser),
+        name: "Allocating User",
+        binding: typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.References.AllocatingUser)
+      );
     }
 
     else if (inputType == typeof(UserRoot))

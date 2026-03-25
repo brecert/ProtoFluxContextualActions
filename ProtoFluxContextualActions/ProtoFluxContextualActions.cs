@@ -28,9 +28,12 @@ public class ProtoFluxContextualActions : ResoniteMod
 
   private static readonly Harmony harmony = new(HarmonyId);
 
-  internal static ModConfiguration? Config;
+  public static ModConfiguration? Config;
 
   private static readonly Dictionary<string, ModConfigurationKey<bool>> patchCategoryKeys = [];
+
+  [AutoRegisterConfigKey]
+  private static readonly ModConfigurationKey<bool> fluxStructureRelays = new("Structure Relays", "If \"Flux Structures\" should contain relays", () => true);
 
   static ProtoFluxContextualActions()
   {
@@ -129,5 +132,16 @@ public class ProtoFluxContextualActions : ResoniteMod
         harmony.UnpatchCategory(category);
       }
     }
+  }
+
+  public static bool ShouldUseRelays()
+  {
+    if (Config != null)
+		{
+			var cfgVal = Config?.GetValue(fluxStructureRelays);
+      if (cfgVal != null) return cfgVal.Value;
+      return true;
+		}
+    return true;
   }
 }
