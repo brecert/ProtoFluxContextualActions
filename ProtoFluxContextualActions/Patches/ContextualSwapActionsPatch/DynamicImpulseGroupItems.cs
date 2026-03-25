@@ -105,23 +105,23 @@ static partial class ContextualSwapActionsPatch
 
       List<Type?> sortedImpulses = keyedImpulses
         .Where(kv => !kv.Key.x)
-        .OrderBy(kv => IsTrigger ? kv.Key.y : false)
-        .OrderBy(kv => hasProxyHeld ? kv.Key.z : false)
+        .OrderBy(kv => hasProxyHeld ? !kv.Key.z : false)
+        .OrderBy(kv => IsTrigger ? !kv.Key.y : false)
         .Select(kv => kv.Value)
         .ToList();
 
       List<Type?> sortedAsyncImpulses = keyedImpulses
-        .Where(kv => !kv.Key.x)
-        .OrderBy(kv => IsTrigger ? kv.Key.y : false)
-        .OrderBy(kv => hasProxyHeld ? kv.Key.z : false)
+        .Where(kv => kv.Key.x)
+        .OrderBy(kv => hasProxyHeld ? !kv.Key.z : false)
+        .OrderBy(kv => IsTrigger ? !kv.Key.y : false)
         .Select(kv => kv.Value)
         .ToList();
 
-      foreach (var imp in sortedImpulses)
+      foreach (var imp in IsAsync ? sortedAsyncImpulses : sortedImpulses)
       {
         if (imp != null) yield return new(imp);
       }
-      foreach (var imp in sortedAsyncImpulses)
+      foreach (var imp in IsAsync ? sortedImpulses : sortedAsyncImpulses)
       {
         if (imp != null) yield return new(imp);
       }
