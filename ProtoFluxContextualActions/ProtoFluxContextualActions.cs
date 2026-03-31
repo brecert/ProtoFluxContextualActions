@@ -137,11 +137,11 @@ public class ProtoFluxContextualActions : ResoniteMod
   public static bool ShouldUseRelays()
   {
     if (Config != null)
-		{
-			var cfgVal = Config?.GetValue(fluxStructureRelays);
+    {
+      var cfgVal = Config?.GetValue(fluxStructureRelays);
       if (cfgVal != null) return cfgVal.Value;
       return true;
-		}
+    }
     return true;
   }
 }

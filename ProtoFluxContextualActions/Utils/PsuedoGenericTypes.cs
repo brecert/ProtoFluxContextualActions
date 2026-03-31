@@ -34,6 +34,7 @@ class PsuedoGenericTypes(World world)
   public PsuedoGenerics AvgMulti { get => field ??= MapTypes("AvgMulti_"); }
   public PsuedoGenerics BezierCurve { get => field ??= MapTypes("BezierCurve_"); }
   public PsuedoGenerics Ceil { get => field ??= MapTypes("Ceil_"); }
+  public PsuedoGenerics Round { get => field ??= MapTypes("Round_"); }
   public PsuedoGenerics CeilToInt { get => field ??= MapTypes("CeilToInt_"); }
   public PsuedoGenerics Clamp01 { get => field ??= MapTypes("Clamp01_"); }
 

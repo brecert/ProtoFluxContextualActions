@@ -94,7 +94,7 @@ internal static class ContextualSelectionActionsPatch
   {
     var elementProxy = ____currentProxy.Target;
     if (elementProxy == null) return true;
-    
+
     var selectionItems = MenuItems(elementProxy);
     bool hasSwaps = false;
     ProtoFluxNode? swapRoot = null;
@@ -105,7 +105,7 @@ internal static class ContextualSelectionActionsPatch
       hasSwaps = hitNode != null;
       swapRoot = hitNode;
     }
-    var swapItems = hasSwaps ? ContextualSwapActionsPatch.GetMenuItems(__instance, swapRoot!, elementProxy).Select((item)=>new MenuItem(item.node, group: "Swaps", name: item.name, isSwap: true, swapNode: swapRoot, swapType: item.connectionTransferType)) : [];
+    var swapItems = hasSwaps ? ContextualSwapActionsPatch.GetMenuItems(__instance, swapRoot!, elementProxy).Select((item) => new MenuItem(item.node, group: "Swaps", name: item.name, isSwap: true, swapNode: swapRoot, swapType: item.connectionTransferType)) : [];
     var items = selectionItems.Concat(swapItems)
       .Where(i => (i.binding ?? i.node).IsValidGenericType(validForInstantiation: true)) // this isn't great, we should instead catch errors before they propigate to here.
       .ToList();
@@ -161,10 +161,10 @@ internal static class ContextualSelectionActionsPatch
   private static void OnMenuItemClicked(ProtoFluxTool tool, MenuItem item, Action<ProtoFluxNode> setup)
   {
     if (item.isSwap)
-		{
+    {
       ContextualSwapActionsPatch.OnSwapNode(tool, item.swapNode!, new(item.node, item.name, item.swapType));
       return;
-		}
+    }
     var nodeBinding = item.binding ?? ProtoFluxHelper.GetBindingForNode(item.node);
     tool.SpawnNode(nodeBinding, n =>
     {
@@ -440,15 +440,17 @@ internal static class ContextualSelectionActionsPatch
             yield return new MenuItem(typeof(ValueAbs<>).MakeGenericType(outputType), group: "Math");
           }
 
-          /*if (coder.Property<bool>("SupportsComparison").Value)
+          if (coder.Property<bool>("SupportsComparison").Value)
           {
+            yield return new MenuItem(typeof(ValueMax<>).MakeGenericType(outputType), group: "Comparisons");
+            yield return new MenuItem(typeof(ValueClamp<>).MakeGenericType(outputType), group: "Comparisons");
             // yield return new MenuItem(typeof(ValueLessThan<>).MakeGenericType(outputType));
             // yield return new MenuItem(typeof(ValueLessOrEqual<>).MakeGenericType(outputType));
             // yield return new MenuItem(typeof(ValueGreaterThan<>).MakeGenericType(outputType));
             // yield return new MenuItem(typeof(ValueGreaterOrEqual<>).MakeGenericType(outputType));
             // yield return new MenuItem(typeof(ValueEquals<>).MakeGenericType(outputType));
             // yield return new MenuItem(typeof(ValueNotEquals<>).MakeGenericType(outputType));
-          }*/
+          }
 
           if (coder.Property<bool>("SupportsAddSub").Value)
           {
@@ -459,6 +461,19 @@ internal static class ContextualSelectionActionsPatch
           {
             yield return new MenuItem(typeof(ValueSquare<>).MakeGenericType(outputType), group: "Math");
           }
+        }
+
+        if (coder.Property<bool>("SupportsLerp").Value)
+        {
+          yield return new MenuItem(typeof(ValueLerp<>).MakeGenericType(outputType), group: "Math");
+        }
+        if (coder.Property<bool>("SupportsSmoothLerp").Value)
+        {
+          yield return new MenuItem(typeof(ValueSmoothLerp<>).MakeGenericType(outputType), group: "Math");
+        }
+        if (coder.Property<bool>("SupportsConstantLerp").Value)
+        {
+          yield return new MenuItem(typeof(ValueConstantLerp<>).MakeGenericType(outputType), group: "Math");
         }
 
 
@@ -476,6 +491,11 @@ internal static class ContextualSelectionActionsPatch
         if (psuedoGenericTypes.Mask.Any(n => n.Types.First() == outputType))
         {
           yield return new(psuedoGenericTypes.Mask.First(n => n.Types.First() == outputType).Node);
+        }
+
+        if (psuedoGenericTypes.Round.Any(n => n.Types.First() == outputType))
+        {
+          yield return new(psuedoGenericTypes.Round.First(n => n.Types.First() == outputType).Node, group: "Math");
         }
       }
     }
@@ -525,7 +545,7 @@ internal static class ContextualSelectionActionsPatch
       if (controllerType == typeof(FrooxEngine.WindowsMRController))
         return typeof(ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Controllers.WindowsMRController);
     }
-		return typeof(StandardController);
+    return typeof(StandardController);
   }
 
   #region Output Items
@@ -596,7 +616,8 @@ internal static class ContextualSelectionActionsPatch
           ProtoFluxNode thisGetChild = null;
           ProtoFluxNode thisRelayNode = null;
 
-          if (shouldRelay) {
+          if (shouldRelay)
+          {
             tool.SpawnNode(childCountNode, newNode =>
             {
               thisChildCountNode = newNode;
@@ -635,7 +656,8 @@ internal static class ContextualSelectionActionsPatch
           node.World.BeginUndoBatch("Create Foreach Child");
 
           node.Slot.CreateSpawnUndoPoint("Spawn Child Count");
-          if (shouldRelay) {
+          if (shouldRelay)
+          {
             thisChildCountNode!.Slot.CreateSpawnUndoPoint("Spawn Child Count");
             thisRelayNode!.Slot.CreateSpawnUndoPoint("Spawn Relay");
           }
@@ -686,10 +708,10 @@ internal static class ContextualSelectionActionsPatch
           LocalTransformNode(thisForNode, 0.27f + posOffset, -0.01125f);
 
           if (shouldRelay)
-			    {
+          {
             LocalTransformNode(thisChildCountNode!, 0.12f, 0.00375f);
-				    LocalTransformNode(thisRelayNode!, 0.075f, -0.105f);
-    			}
+            LocalTransformNode(thisRelayNode!, 0.075f, -0.105f);
+          }
 
           LocalTransformNode(thisGetChild, 0.42f + posOffset, -0.11625f);
 
@@ -697,26 +719,26 @@ internal static class ContextualSelectionActionsPatch
 
           ProtoFluxNode?[] allNodes = [node, thisChildCountNode, thisForNode, thisGetChild, thisRelayNode];
           foreach (var node in allNodes)
-			    {
+          {
             if (node == null) continue;
             if (node.IsRemoved) continue;
             node.Slot.GetComponent<Grabbable>().Enabled = false;
-			    }
+          }
           var tempGrab = tempSlot.AttachComponent<Grabbable>();
 
           await new Updates(480);
           int i = 0;
           while (tempGrab.IsGrabbed && i < 200)
-			    {
-				    await new Updates(5);
+          {
+            await new Updates(5);
             i++;
-			    }
+          }
           foreach (var node in allNodes)
-			    {
+          {
             if (node == null) continue;
             if (node.IsRemoved) continue;
             node.Slot.GetComponent<Grabbable>().Enabled = true;
-			    }
+          }
 
           tempSlot.Destroy(origParent);
         });
@@ -784,10 +806,10 @@ internal static class ContextualSelectionActionsPatch
 
     if (outputType == typeof(float2) || outputType == typeof(float3) || outputType == typeof(float4) ||
       outputType == typeof(double2) || outputType == typeof(double3) || outputType == typeof(double4))
-		{
+    {
       yield return new(psuedoGenericTypes.Normalized.First(n => n.Types.First() == outputType).Node, group: "Math");
       yield return new(psuedoGenericTypes.Magnitude.First(n => n.Types.First() == outputType).Node, group: "Math");
-		}
+    }
 
     if (outputType == typeof(bool))
     {
@@ -851,11 +873,11 @@ internal static class ContextualSelectionActionsPatch
       yield return new(typeof(RenderToTextureAsset));
     }
 
-    else if (outputType == typeof(int) && (IsIterationNode(nodeType) || nodeType == typeof(IndexOfString)))
+    /*else if (outputType == typeof(int) && (IsIterationNode(nodeType) || nodeType == typeof(IndexOfString)))
     {
       yield return new MenuItem(typeof(ValueInc<int>));
       yield return new MenuItem(typeof(ValueDec<int>));
-    }
+    }*/
 
     if (outputType == typeof(UserRef))
     {
@@ -882,7 +904,7 @@ internal static class ContextualSelectionActionsPatch
 
       yield return new MenuItem(typeof(StandardController), group: "Input");
       Type controllerType = GetUserControllerType(Engine.Current.WorldManager.FocusedWorld.LocalUser);
-      if (controllerType != typeof (StandardController)) yield return new MenuItem(controllerType, group: "Input");
+      if (controllerType != typeof(StandardController)) yield return new MenuItem(controllerType, group: "Input");
     }
 
     if (outputType == typeof(BodyNode))
@@ -1278,8 +1300,8 @@ internal static class ContextualSelectionActionsPatch
 
     else if (inputType == typeof(int) && (IsIterationNode(nodeType) || indirectlyConnectsToIterationNode))
     {
-      yield return new MenuItem(typeof(ValueInc<int>));
-      yield return new MenuItem(typeof(ValueDec<int>));
+      //yield return new MenuItem(typeof(ValueInc<int>));
+      //yield return new MenuItem(typeof(ValueDec<int>));
       yield return new MenuItem(typeof(ChildrenCount));
       yield return new MenuItem(typeof(CountOccurrences));
     }

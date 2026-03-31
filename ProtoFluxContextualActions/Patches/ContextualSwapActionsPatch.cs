@@ -138,8 +138,8 @@ internal static partial class ContextualSwapActionsPatch
   }
 
   internal static void OnSwapNode(ProtoFluxTool __instance, ProtoFluxNode hitNode, MenuItem menuItem)
-	{
-		try
+  {
+    try
     {
       SwapHitForNode(__instance, hitNode, menuItem);
     }
@@ -151,7 +151,7 @@ internal static partial class ContextualSwapActionsPatch
         hitNode.UndoableDestroy();
       }
     }
-	}
+  }
 
   private static void SwapHitForNode(ProtoFluxTool __instance, ProtoFluxNode hitNode, MenuItem menuItem)
   {
