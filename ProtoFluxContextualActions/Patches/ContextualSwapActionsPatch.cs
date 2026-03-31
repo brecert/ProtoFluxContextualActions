@@ -302,6 +302,7 @@ internal static partial class ContextualSwapActionsPatch
       .. SlotChildGroupItems(context),
       .. GetSlotActiveGroupItems(context),
       .. RepeatGroupItems(context),
+      .. TweenGroupItems(context),
     ];
 
     foreach (var menuItem in menuItems)
