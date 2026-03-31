@@ -25,7 +25,7 @@ internal static class ContextUtils
       await new Updates(3);
       var user = Engine.Current.WorldManager.FocusedWorld.LocalUser;
       var controller = user.InputInterface.GetControllerNode(tool.ActiveHandler.Side);
-      menuFields.Field<bool>("_flickModeActive").Value = controller.ActionPrimary.Held;
+      menuFields.Field<Sync<bool>>("_flickModeActive").Value.Value = controller.ActionPrimary.Held;
     });
     return menu;
   }

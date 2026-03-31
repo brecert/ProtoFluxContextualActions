@@ -61,6 +61,7 @@ using System.Text.RegularExpressions;
 using ProtoFlux.Runtimes.Execution;
 using FrooxEngine.Undo;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Controllers;
+using System.Globalization;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -376,126 +377,150 @@ internal static class ContextualSelectionActionsPatch
       // TODO: It's nice to have these work with any node, I think their precedence should be lower than manually specified ones and potentially hidden by default for many types that support but do not need, esp. comparison.
       //       When I'm more sure that Swapping won't world crash I think I can limit comparison to a single node and then swap to the right one as a sort of submenu?
       //       Feels a little weird though, ux is difficult. A custom uix menu could help.
-      if (target is ProtoFluxOutputProxy { OutputType.Value: var outputType } && (outputType.IsUnmanaged() || typeof(ISphericalHarmonics).IsAssignableFrom(outputType)))
+      if (target != null)
       {
+        Type? nodeType = null;
         var world = target.World;
-        var coder = Traverse.Create(typeof(Coder<>).MakeGenericType(outputType));
-        var isMatrix = outputType.IsMatrixType();
-        var isQuaternion = outputType.IsQuaternionType();
         var psuedoGenericTypes = world.GetPsuedoGenericTypesForWorld();
-        // only handle values
-
-        if (isQuaternion)
+        if (target is ProtoFluxOutputProxy { OutputType.Value: var outputType } && (outputType.IsUnmanaged() || typeof(ISphericalHarmonics).IsAssignableFrom(outputType)))
         {
-          if (TryGetPsuedoGenericForType(world, "Slerp_", outputType) is Type slerpType)
+          var coder = Traverse.Create(typeof(Coder<>).MakeGenericType(outputType));
+          var isMatrix = outputType.IsMatrixType();
+          var isQuaternion = outputType.IsQuaternionType();
+          nodeType = outputType;
+          // only handle values
+
+          if (isQuaternion)
           {
-            yield return new MenuItem(slerpType);
+            if (TryGetPsuedoGenericForType(world, "Slerp_", outputType) is Type slerpType)
+            {
+              yield return new MenuItem(slerpType);
+            }
+
+            if (TryGetPsuedoGenericForType(world, "Pow_", outputType) is Type powType)
+            {
+              yield return new MenuItem(powType);
+            }
+
+            if (coder.Property<bool>("SupportsMul").Value)
+            {
+              yield return new MenuItem(typeof(ValueMul<>).MakeGenericType(outputType));
+            }
+
+            if (coder.Property<bool>("SupportsDiv").Value)
+            {
+              yield return new MenuItem(typeof(ValueDiv<>).MakeGenericType(outputType));
+            }
+          }
+          else
+          {
+            if (coder.Property<bool>("SupportsAddSub").Value)
+            {
+              yield return new MenuItem(typeof(ValueAdd<>).MakeGenericType(outputType));
+              yield return new MenuItem(typeof(ValueSub<>).MakeGenericType(outputType));
+            }
+
+            if (coder.Property<bool>("SupportsMul").Value)
+            {
+              yield return new MenuItem(typeof(ValueMul<>).MakeGenericType(outputType));
+            }
+
+            if (coder.Property<bool>("SupportsDiv").Value)
+            {
+              yield return new MenuItem(typeof(ValueDiv<>).MakeGenericType(outputType));
+            }
+
+            if (coder.Property<bool>("SupportsNegate").Value)
+            {
+              yield return new MenuItem(typeof(ValueNegate<>).MakeGenericType(outputType));
+            }
+
+            if (coder.Property<bool>("SupportsMod").Value)
+            {
+              yield return new MenuItem(typeof(ValueMod<>).MakeGenericType(outputType), group: "Math");
+            }
+
+            if (coder.Property<bool>("SupportsAbs").Value && !isMatrix)
+            {
+              yield return new MenuItem(typeof(ValueAbs<>).MakeGenericType(outputType), group: "Math");
+            }
+
+            if (coder.Property<bool>("SupportsComparison").Value)
+            {
+              yield return new MenuItem(typeof(ValueMax<>).MakeGenericType(outputType), group: "Comparisons");
+              yield return new MenuItem(typeof(ValueClamp<>).MakeGenericType(outputType), group: "Comparisons");
+              // yield return new MenuItem(typeof(ValueLessThan<>).MakeGenericType(outputType));
+              // yield return new MenuItem(typeof(ValueLessOrEqual<>).MakeGenericType(outputType));
+              // yield return new MenuItem(typeof(ValueGreaterThan<>).MakeGenericType(outputType));
+              // yield return new MenuItem(typeof(ValueGreaterOrEqual<>).MakeGenericType(outputType));
+              // yield return new MenuItem(typeof(ValueEquals<>).MakeGenericType(outputType));
+              // yield return new MenuItem(typeof(ValueNotEquals<>).MakeGenericType(outputType));
+            }
+
+            if (coder.Property<bool>("SupportsAddSub").Value)
+            {
+              yield return new MenuItem(typeof(ValueInc<>).MakeGenericType(outputType), group: "Math");
+              yield return new MenuItem(typeof(ValueDec<>).MakeGenericType(outputType), group: "Math");
+            }
+            if (coder.Property<bool>("SupportsMul").Value)
+            {
+              yield return new MenuItem(typeof(ValueSquare<>).MakeGenericType(outputType), group: "Math");
+            }
           }
 
-          if (TryGetPsuedoGenericForType(world, "Pow_", outputType) is Type powType)
+          if (coder.Property<bool>("SupportsLerp").Value)
           {
-            yield return new MenuItem(powType);
+            yield return new MenuItem(typeof(ValueLerp<>).MakeGenericType(outputType), group: "Math");
+          }
+          if (coder.Property<bool>("SupportsSmoothLerp").Value)
+          {
+            yield return new MenuItem(typeof(ValueSmoothLerp<>).MakeGenericType(outputType), group: "Math");
+          }
+          if (coder.Property<bool>("SupportsConstantLerp").Value)
+          {
+            yield return new MenuItem(typeof(ValueConstantLerp<>).MakeGenericType(outputType), group: "Math");
           }
 
-          if (coder.Property<bool>("SupportsMul").Value)
+
+          if (TryGetInverseNode(outputType, out var inverseNodeType))
           {
-            yield return new MenuItem(typeof(ValueMul<>).MakeGenericType(outputType));
+            yield return new MenuItem(inverseNodeType);
           }
 
-          if (coder.Property<bool>("SupportsDiv").Value)
+          if (TryGetTransposeNode(outputType, out var transposeNodeType))
           {
-            yield return new MenuItem(typeof(ValueDiv<>).MakeGenericType(outputType));
+            yield return new MenuItem(transposeNodeType, name: "Transpose");
+          }
+
+          // While not often used, masking is useful.
+          if (psuedoGenericTypes.Mask.Any(n => n.Types.First() == outputType))
+          {
+            yield return new(psuedoGenericTypes.Mask.First(n => n.Types.First() == outputType).Node);
+          }
+
+          if (psuedoGenericTypes.Round.Any(n => n.Types.First() == outputType))
+          {
+            yield return new(psuedoGenericTypes.Round.First(n => n.Types.First() == outputType).Node, group: "Math");
+          }
+
+          if (outputType == typeof(bool))
+					{
+            foreach (var node in psuedoGenericTypes.ZeroOne)
+						{
+							yield return new(node.Node, group: "Zero One");
+						}
+					}
+        }
+        if (target is ProtoFluxInputProxy { InputType.Value: var inputType } && (inputType.IsUnmanaged() || typeof(ISphericalHarmonics).IsAssignableFrom(inputType)))
+        {
+          nodeType = inputType;
+          if (psuedoGenericTypes.ZeroOne.Any(n => n.Types.First() == nodeType))
+          {
+            yield return new(psuedoGenericTypes.ZeroOne.First(n => n.Types.First() == nodeType).Node, group: "Math");
           }
         }
-        else
+        if (nodeType != null)
         {
-          if (coder.Property<bool>("SupportsAddSub").Value)
-          {
-            yield return new MenuItem(typeof(ValueAdd<>).MakeGenericType(outputType));
-            yield return new MenuItem(typeof(ValueSub<>).MakeGenericType(outputType));
-          }
-
-          if (coder.Property<bool>("SupportsMul").Value)
-          {
-            yield return new MenuItem(typeof(ValueMul<>).MakeGenericType(outputType));
-          }
-
-          if (coder.Property<bool>("SupportsDiv").Value)
-          {
-            yield return new MenuItem(typeof(ValueDiv<>).MakeGenericType(outputType));
-          }
-
-          if (coder.Property<bool>("SupportsNegate").Value)
-          {
-            yield return new MenuItem(typeof(ValueNegate<>).MakeGenericType(outputType));
-          }
-
-          if (coder.Property<bool>("SupportsMod").Value)
-          {
-            yield return new MenuItem(typeof(ValueMod<>).MakeGenericType(outputType), group: "Math");
-          }
-
-          if (coder.Property<bool>("SupportsAbs").Value && !isMatrix)
-          {
-            yield return new MenuItem(typeof(ValueAbs<>).MakeGenericType(outputType), group: "Math");
-          }
-
-          if (coder.Property<bool>("SupportsComparison").Value)
-          {
-            yield return new MenuItem(typeof(ValueMax<>).MakeGenericType(outputType), group: "Comparisons");
-            yield return new MenuItem(typeof(ValueClamp<>).MakeGenericType(outputType), group: "Comparisons");
-            // yield return new MenuItem(typeof(ValueLessThan<>).MakeGenericType(outputType));
-            // yield return new MenuItem(typeof(ValueLessOrEqual<>).MakeGenericType(outputType));
-            // yield return new MenuItem(typeof(ValueGreaterThan<>).MakeGenericType(outputType));
-            // yield return new MenuItem(typeof(ValueGreaterOrEqual<>).MakeGenericType(outputType));
-            // yield return new MenuItem(typeof(ValueEquals<>).MakeGenericType(outputType));
-            // yield return new MenuItem(typeof(ValueNotEquals<>).MakeGenericType(outputType));
-          }
-
-          if (coder.Property<bool>("SupportsAddSub").Value)
-          {
-            yield return new MenuItem(typeof(ValueInc<>).MakeGenericType(outputType), group: "Math");
-            yield return new MenuItem(typeof(ValueDec<>).MakeGenericType(outputType), group: "Math");
-          }
-          if (coder.Property<bool>("SupportsMul").Value)
-          {
-            yield return new MenuItem(typeof(ValueSquare<>).MakeGenericType(outputType), group: "Math");
-          }
-        }
-
-        if (coder.Property<bool>("SupportsLerp").Value)
-        {
-          yield return new MenuItem(typeof(ValueLerp<>).MakeGenericType(outputType), group: "Math");
-        }
-        if (coder.Property<bool>("SupportsSmoothLerp").Value)
-        {
-          yield return new MenuItem(typeof(ValueSmoothLerp<>).MakeGenericType(outputType), group: "Math");
-        }
-        if (coder.Property<bool>("SupportsConstantLerp").Value)
-        {
-          yield return new MenuItem(typeof(ValueConstantLerp<>).MakeGenericType(outputType), group: "Math");
-        }
-
-
-        if (TryGetInverseNode(outputType, out var inverseNodeType))
-        {
-          yield return new MenuItem(inverseNodeType);
-        }
-
-        if (TryGetTransposeNode(outputType, out var transposeNodeType))
-        {
-          yield return new MenuItem(transposeNodeType, name: "Transpose");
-        }
-
-        // While not often used, masking is useful.
-        if (psuedoGenericTypes.Mask.Any(n => n.Types.First() == outputType))
-        {
-          yield return new(psuedoGenericTypes.Mask.First(n => n.Types.First() == outputType).Node);
-        }
-
-        if (psuedoGenericTypes.Round.Any(n => n.Types.First() == outputType))
-        {
-          yield return new(psuedoGenericTypes.Round.First(n => n.Types.First() == outputType).Node, group: "Math");
         }
       }
     }
@@ -948,6 +973,134 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(GetType));
       yield return new MenuItem(typeof(ToString_object));
     }
+
+    if (typeof(IWorldElement).IsAssignableFrom(outputType))
+		{
+			yield return new MenuItem(
+        typeof(ProtoFlux.Runtimes.Execution.Nodes.Casts.ObjectCast<,>).MakeGenericType(outputType, typeof(IWorldElement)),
+        name: "IWorldElement"
+      );
+		}
+
+    if (outputType == typeof(IWorldElement))
+		{
+			yield return new MenuItem(
+        typeof(ProtoFlux.Runtimes.Execution.Nodes.Casts.ObjectCast<IWorldElement, object>),
+        name: "RefID -> ULong",
+        onNodeSpawn: (ProtoFluxNode node, ProtoFluxElementProxy proxy, ProtoFluxTool tool) =>
+        {
+          tool.StartTask(async () =>
+          {
+            // Node spawning
+            Type toStringNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ParsingFormatting.ToString_object);
+            Type stringRemoveNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.Strings.StringRemove);
+            Type parseULongNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ParsingFormatting.Parse_Ulong);
+            Type lengthInputNode = ProtoFluxHelper.GetInputNode(typeof(int));
+            Type numberStyleNode = ProtoFluxHelper.GetInputNode(typeof(NumberStyles));
+            
+            ProtoFluxNode? thisToStringNode = null;
+            ProtoFluxNode? thisStringRemoveNode = null;
+            ProtoFluxNode? thisParseULongNode = null;
+            ProtoFluxNode? thisLengthInputNode = null;
+            ProtoFluxNode? thisNumberStyleNode = null;
+
+            tool.SpawnNode(toStringNode, newNode =>
+            {
+              thisToStringNode = newNode;
+              newNode.EnsureVisual();
+            });
+            tool.SpawnNode(stringRemoveNode, newNode =>
+            {
+              thisStringRemoveNode = newNode;
+              newNode.EnsureVisual();
+            });
+            tool.SpawnNode(parseULongNode, newNode =>
+            {
+              thisParseULongNode = newNode;
+              newNode.EnsureVisual();
+            });
+            tool.SpawnNode(lengthInputNode, newNode =>
+            {
+              thisLengthInputNode = newNode;
+              newNode.EnsureVisual();
+            });
+            tool.SpawnNode(numberStyleNode, newNode =>
+            {
+              thisNumberStyleNode = newNode;
+              newNode.EnsureVisual();
+            });
+
+            await new Updates(3);
+
+            if (thisToStringNode == null || thisStringRemoveNode == null || thisParseULongNode == null || thisLengthInputNode == null || thisNumberStyleNode == null)
+            {
+              node.Slot.Destroy();
+              thisToStringNode?.Slot.Destroy();
+              thisStringRemoveNode?.Slot.Destroy();
+              thisParseULongNode?.Slot.Destroy();
+              thisLengthInputNode?.Slot.Destroy();
+              thisNumberStyleNode?.Slot.Destroy();
+              return;
+            }
+
+            node.World.BeginUndoBatch("Create RefID -> ULong");
+
+            node.Slot.CreateSpawnUndoPoint("Spawn Object Cast");
+            thisToStringNode.Slot.CreateSpawnUndoPoint("Spawn ToString Node");
+            thisStringRemoveNode.Slot.CreateSpawnUndoPoint("Spawn String Remove Node");
+            thisParseULongNode.Slot.CreateSpawnUndoPoint("Spawn Parse ULong");
+            thisLengthInputNode.Slot.CreateSpawnUndoPoint("Spawn Length Input");
+            thisNumberStyleNode.Slot.CreateSpawnUndoPoint("Spawn Number Styles Input");
+
+            // Inputs and outputs
+            INodeOutput inputRelay = node.GetOutput(0);
+
+            ISyncRef objectInstance = thisToStringNode.GetInput(0);
+            INodeOutput objectValue = thisToStringNode.GetOutput(0);
+            ISyncRef stringRemoveInstance = thisStringRemoveNode.GetInput(0);
+            ISyncRef stringRemoveLength = thisStringRemoveNode.GetInput(2);
+            INodeOutput stringRemoveValue = thisStringRemoveNode.GetOutput(0);
+            ISyncRef parseULongInstance = thisParseULongNode.GetInput(0);
+            ISyncRef parseULongStyle = thisParseULongNode.GetInput(1);
+
+            INodeOutput lengthValue = thisLengthInputNode.GetOutput(0);
+            INodeOutput numberStylesValue = thisNumberStyleNode.GetOutput(0);
+
+            objectInstance.Target = inputRelay;
+            stringRemoveInstance.Target = thisToStringNode;
+            parseULongInstance.Target = stringRemoveValue;
+
+            stringRemoveLength.Target = lengthValue;
+            parseULongStyle.Target = numberStylesValue;
+
+            (thisLengthInputNode as FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ValueInput<int>)?.Value.Value = 2;
+            (thisNumberStyleNode as FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ValueInput<NumberStyles>)?.Value.Value = NumberStyles.HexNumber;
+
+            // Positions
+            float3 baseUp = node.Slot.Up;
+            float3 baseRight = node.Slot.Right;
+
+            void LocalTransformNode(ProtoFluxNode input, float X, float Y)
+            {
+              Slot target = input.Slot;
+              target.CopyTransform(node.Slot);
+              target.GlobalPosition += (baseUp * Y) + (baseRight * X);
+            }
+
+            LocalTransformNode(thisToStringNode, 0.09f, -0.02625f);
+            LocalTransformNode(thisStringRemoveNode, 0.24f, -0.02625f);
+            LocalTransformNode(thisParseULongNode, 0.405f, -0.02625f);
+
+            LocalTransformNode(thisLengthInputNode, 0.09f, -0.13125f);
+            LocalTransformNode(thisNumberStyleNode, 0.18f, 0.07874999f);
+
+            node.World.EndUndoBatch();
+          });
+
+          return true;
+        }
+      );
+		}
 
     if (outputType == typeof(bool) || outputType == typeof(bool2) || outputType == typeof(bool3) || outputType == typeof(bool4))
     {
