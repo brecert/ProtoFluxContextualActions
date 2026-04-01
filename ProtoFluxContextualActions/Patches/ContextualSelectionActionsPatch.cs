@@ -985,25 +985,32 @@ internal static class ContextualSelectionActionsPatch
     if (outputType == typeof(IWorldElement))
 		{
 			yield return new MenuItem(
-        typeof(ProtoFlux.Runtimes.Execution.Nodes.Casts.ObjectCast<IWorldElement, object>),
+        typeof(ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.References.ReferenceID),
         name: "RefID -> ULong",
         onNodeSpawn: (ProtoFluxNode node, ProtoFluxElementProxy proxy, ProtoFluxTool tool) =>
         {
           tool.StartTask(async () =>
           {
             // Node spawning
+            Type refIDObjectCastNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.Casts.ValueToObjectCast<RefID>);
             Type toStringNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ParsingFormatting.ToString_object);
             Type stringRemoveNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.Strings.StringRemove);
             Type parseULongNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ParsingFormatting.Parse_Ulong);
             Type lengthInputNode = ProtoFluxHelper.GetInputNode(typeof(int));
             Type numberStyleNode = ProtoFluxHelper.GetInputNode(typeof(NumberStyles));
             
+            ProtoFluxNode? thisRefIDObjectCastNode = null;
             ProtoFluxNode? thisToStringNode = null;
             ProtoFluxNode? thisStringRemoveNode = null;
             ProtoFluxNode? thisParseULongNode = null;
             ProtoFluxNode? thisLengthInputNode = null;
             ProtoFluxNode? thisNumberStyleNode = null;
 
+            tool.SpawnNode(refIDObjectCastNode, newNode =>
+            {
+              thisRefIDObjectCastNode = newNode;
+              newNode.EnsureVisual();
+            });
             tool.SpawnNode(toStringNode, newNode =>
             {
               thisToStringNode = newNode;
@@ -1032,9 +1039,16 @@ internal static class ContextualSelectionActionsPatch
 
             await new Updates(3);
 
-            if (thisToStringNode == null || thisStringRemoveNode == null || thisParseULongNode == null || thisLengthInputNode == null || thisNumberStyleNode == null)
+            if (
+              thisRefIDObjectCastNode == null ||
+              thisToStringNode == null ||
+              thisStringRemoveNode == null ||
+              thisParseULongNode == null ||
+              thisLengthInputNode == null ||
+              thisNumberStyleNode == null)
             {
               node.Slot.Destroy();
+              thisRefIDObjectCastNode?.Slot.Destroy();
               thisToStringNode?.Slot.Destroy();
               thisStringRemoveNode?.Slot.Destroy();
               thisParseULongNode?.Slot.Destroy();
@@ -1046,6 +1060,7 @@ internal static class ContextualSelectionActionsPatch
             node.World.BeginUndoBatch("Create RefID -> ULong");
 
             node.Slot.CreateSpawnUndoPoint("Spawn Object Cast");
+            thisRefIDObjectCastNode.Slot.CreateSpawnUndoPoint("Spawn ToString Node");
             thisToStringNode.Slot.CreateSpawnUndoPoint("Spawn ToString Node");
             thisStringRemoveNode.Slot.CreateSpawnUndoPoint("Spawn String Remove Node");
             thisParseULongNode.Slot.CreateSpawnUndoPoint("Spawn Parse ULong");
@@ -1055,6 +1070,8 @@ internal static class ContextualSelectionActionsPatch
             // Inputs and outputs
             INodeOutput inputRelay = node.GetOutput(0);
 
+            ISyncRef refIDInstance = thisRefIDObjectCastNode.GetInput(0);
+            INodeOutput refIDValue = thisRefIDObjectCastNode.GetOutput(0);
             ISyncRef objectInstance = thisToStringNode.GetInput(0);
             INodeOutput objectValue = thisToStringNode.GetOutput(0);
             ISyncRef stringRemoveInstance = thisStringRemoveNode.GetInput(0);
@@ -1066,7 +1083,9 @@ internal static class ContextualSelectionActionsPatch
             INodeOutput lengthValue = thisLengthInputNode.GetOutput(0);
             INodeOutput numberStylesValue = thisNumberStyleNode.GetOutput(0);
 
-            objectInstance.Target = inputRelay;
+            refIDInstance.Target = inputRelay;
+            objectInstance.Target = refIDValue;
+
             stringRemoveInstance.Target = thisToStringNode;
             parseULongInstance.Target = stringRemoveValue;
 
@@ -1087,12 +1106,14 @@ internal static class ContextualSelectionActionsPatch
               target.GlobalPosition += (baseUp * Y) + (baseRight * X);
             }
 
-            LocalTransformNode(thisToStringNode, 0.09f, -0.02625f);
-            LocalTransformNode(thisStringRemoveNode, 0.24f, -0.02625f);
-            LocalTransformNode(thisParseULongNode, 0.405f, -0.02625f);
+            LocalTransformNode(thisRefIDObjectCastNode, 0.09f, -0.00375f);
 
-            LocalTransformNode(thisLengthInputNode, 0.09f, -0.13125f);
-            LocalTransformNode(thisNumberStyleNode, 0.18f, 0.07874999f);
+            LocalTransformNode(thisToStringNode, 0.18f, -0.03f);
+            LocalTransformNode(thisStringRemoveNode, 0.33f, -0.03f);
+            LocalTransformNode(thisParseULongNode, 0.495f, -0.03f);
+
+            LocalTransformNode(thisLengthInputNode, 0.18f, -0.135f);
+            LocalTransformNode(thisNumberStyleNode, 0.27f, 0.075f);
 
             node.World.EndUndoBatch();
           });
