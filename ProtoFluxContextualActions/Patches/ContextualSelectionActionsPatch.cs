@@ -316,6 +316,8 @@ internal static class ContextualSelectionActionsPatch
     yield return new MenuItem(typeof(DelaySecondsFloat), group: "Async");
     yield return new MenuItem(typeof(AsyncDynamicImpulseTrigger), group: "Async");
 
+    yield return new MenuItem(typeof(DataModelBooleanToggle));
+
     if (IsIterationNode(nodeType))
     {
       yield return new MenuItem(typeof(ValueIncrement<int>)); // dec can be swapped to?
@@ -432,7 +434,7 @@ internal static class ContextualSelectionActionsPatch
 
             if (coder.Property<bool>("SupportsNegate").Value)
             {
-              yield return new MenuItem(typeof(ValueNegate<>).MakeGenericType(outputType));
+              yield return new MenuItem(typeof(ValueNegate<>).MakeGenericType(outputType), group: "Math");
             }
 
             if (coder.Property<bool>("SupportsMod").Value)
@@ -461,11 +463,16 @@ internal static class ContextualSelectionActionsPatch
             {
               yield return new MenuItem(typeof(ValueInc<>).MakeGenericType(outputType), group: "Math");
               yield return new MenuItem(typeof(ValueDec<>).MakeGenericType(outputType), group: "Math");
+              yield return new MenuItem(typeof(ValueOneMinus<>).MakeGenericType(outputType), group: "Math");
             }
             if (coder.Property<bool>("SupportsMul").Value)
             {
               yield return new MenuItem(typeof(ValueSquare<>).MakeGenericType(outputType), group: "Math");
             }
+            if (coder.Property<bool>("SupportsDiv").Value)
+						{
+              yield return new MenuItem(typeof(ValueReciprocal<>).MakeGenericType(outputType), group: "Math");
+						}
           }
 
           if (coder.Property<bool>("SupportsLerp").Value)
@@ -495,7 +502,7 @@ internal static class ContextualSelectionActionsPatch
           // While not often used, masking is useful.
           if (psuedoGenericTypes.Mask.Any(n => n.Types.First() == outputType))
           {
-            yield return new(psuedoGenericTypes.Mask.First(n => n.Types.First() == outputType).Node);
+            yield return new(psuedoGenericTypes.Mask.First(n => n.Types.First() == outputType).Node, group: "Comparisons");
           }
 
           if (psuedoGenericTypes.Round.Any(n => n.Types.First() == outputType))
@@ -705,6 +712,7 @@ internal static class ContextualSelectionActionsPatch
           INodeOutput? relayOutput = shouldRelay ? thisRelayNode!.GetOutput(0) : null;
 
           // Node Connections
+          childInstance.Target = inputRelay;
           if (shouldRelay)
           {
             childCountInstance!.Target = inputRelay;
@@ -832,8 +840,15 @@ internal static class ContextualSelectionActionsPatch
     if (outputType == typeof(float2) || outputType == typeof(float3) || outputType == typeof(float4) ||
       outputType == typeof(double2) || outputType == typeof(double3) || outputType == typeof(double4))
     {
-      yield return new(psuedoGenericTypes.Normalized.First(n => n.Types.First() == outputType).Node, group: "Math");
-      yield return new(psuedoGenericTypes.Magnitude.First(n => n.Types.First() == outputType).Node, group: "Math");
+      yield return new(psuedoGenericTypes.Normalized.First(n => n.Types.First() == outputType).Node, group: "Vectors");
+      yield return new(psuedoGenericTypes.Magnitude.First(n => n.Types.First() == outputType).Node, group: "Vectors");
+      yield return new(psuedoGenericTypes.Dot.First(n => n.Types.First() == outputType).Node, group: "Vectors");
+       yield return new(psuedoGenericTypes.Project.First(n => n.Types.First() == outputType).Node, group: "Vectors");
+      if (outputType == typeof(float3) || outputType == typeof(double3))
+			{
+        yield return new(psuedoGenericTypes.Reflect.First(n => n.Types.First() == outputType).Node, group: "Vectors");
+        yield return new(psuedoGenericTypes.Cross.First(n => n.Types.First() == outputType).Node, group: "Vectors");
+			}
     }
 
     if (outputType == typeof(bool))
@@ -985,7 +1000,7 @@ internal static class ContextualSelectionActionsPatch
     if (outputType == typeof(IWorldElement))
 		{
 			yield return new MenuItem(
-        typeof(ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.References.ReferenceID),
+        typeof(ReferenceID),
         name: "RefID -> ULong",
         onNodeSpawn: (ProtoFluxNode node, ProtoFluxElementProxy proxy, ProtoFluxTool tool) =>
         {
@@ -1037,7 +1052,13 @@ internal static class ContextualSelectionActionsPatch
               newNode.EnsureVisual();
             });
 
-            await new Updates(3);
+            await new Updates(6);
+
+            var nodeSlot = node.Slot;
+            var origParent = nodeSlot.Parent;
+            var tempSlot = origParent.AddSlot("Temp Flux Holder", false);
+            tempSlot.CopyTransform(nodeSlot);
+            nodeSlot.Parent = tempSlot;
 
             if (
               thisRefIDObjectCastNode == null ||
@@ -1096,13 +1117,13 @@ internal static class ContextualSelectionActionsPatch
             (thisNumberStyleNode as FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ValueInput<NumberStyles>)?.Value.Value = NumberStyles.HexNumber;
 
             // Positions
-            float3 baseUp = node.Slot.Up;
-            float3 baseRight = node.Slot.Right;
+            float3 baseUp = nodeSlot.Up;
+            float3 baseRight = nodeSlot.Right;
 
             void LocalTransformNode(ProtoFluxNode input, float X, float Y)
             {
               Slot target = input.Slot;
-              target.CopyTransform(node.Slot);
+              target.CopyTransform(nodeSlot);
               target.GlobalPosition += (baseUp * Y) + (baseRight * X);
             }
 
@@ -1116,6 +1137,31 @@ internal static class ContextualSelectionActionsPatch
             LocalTransformNode(thisNumberStyleNode, 0.27f, 0.075f);
 
             node.World.EndUndoBatch();
+
+            ProtoFluxNode?[] allNodes = [node, thisRefIDObjectCastNode, thisToStringNode, thisStringRemoveNode, thisParseULongNode, thisLengthInputNode, thisNumberStyleNode];
+            foreach (var node in allNodes)
+            {
+              if (node == null) continue;
+              if (node.IsRemoved) continue;
+              node.Slot.GetComponent<Grabbable>().Enabled = false;
+            }
+            var tempGrab = tempSlot.AttachComponent<Grabbable>();
+
+            await new Updates(480);
+            int i = 0;
+            while (tempGrab.IsGrabbed && i < 200)
+            {
+              await new Updates(5);
+              i++;
+            }
+            foreach (var node in allNodes)
+            {
+              if (node == null) continue;
+              if (node.IsRemoved) continue;
+              node.Slot.GetComponent<Grabbable>().Enabled = true;
+            }
+
+            tempSlot.Destroy(origParent);
           });
 
           return true;

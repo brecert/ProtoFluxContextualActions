@@ -98,6 +98,10 @@ class PsuedoGenericTypes(World world)
 
   public PsuedoGenerics Normalized { get => field ??= MapTypes("Normalized_"); }
   public PsuedoGenerics Magnitude { get => field ??= MapTypes("Magnitude_"); }
+  public PsuedoGenerics Dot { get => field ??= MapTypes("Dot_"); }
+  public PsuedoGenerics Cross { get => field ??= MapTypes("Cross_"); }
+  public PsuedoGenerics Reflect { get => field ??= MapTypes("Reflect_"); }
+  public PsuedoGenerics Project { get => field ??= MapTypes("Project_"); }
 
   public PsuedoGenerics PackTangentPoint
   {
