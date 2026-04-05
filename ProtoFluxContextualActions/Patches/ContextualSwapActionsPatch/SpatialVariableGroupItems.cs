@@ -26,21 +26,18 @@ static partial class ContextualSwapActionsPatch
     if (SpatialVariableGroup.Any(t => context.NodeType.IsGenericType ? t == context.NodeType.GetGenericTypeDefinition() : t == context.NodeType))
     {
       Type? target = null;
-      bool hasProxyHeld = false;
 
       if (context.proxy is ProtoFluxInputProxy)
       {
         ProtoFluxInputProxy inputType = (ProtoFluxInputProxy)context.proxy;
         Type targetType = inputType.InputType;
         target = targetType;
-        hasProxyHeld = true;
       }
       if (context.proxy is ProtoFluxOutputProxy)
       {
         ProtoFluxOutputProxy outputType = (ProtoFluxOutputProxy)context.proxy;
         Type targetType = outputType.OutputType;
         target = targetType;
-        hasProxyHeld = true;
       }
       if (context.NodeType.IsGenericType && target == null)
       {
@@ -57,21 +54,21 @@ static partial class ContextualSwapActionsPatch
       {
         if (target == typeof(bool))
         {
-          yield return new(typeof(SampleBooleanSpatialVariable));
+          yield return new(typeof(SampleBooleanSpatialVariable), name: "Sample Boolean");
         }
         var ReadValue = GetNodeForType(target, [
           new NodeTypeRecord(typeof(SampleValueSpatialVariable<>), null, null),
           new NodeTypeRecord(typeof(SampleObjectSpatialVariable<>), null, null),
         ]);
-        yield return new(ReadValue);
+        yield return new(ReadValue, name: $"Sample {(ReadValue.GetGenericTypeDefinition() == typeof(SampleValueSpatialVariable<>) ? "Value" : "Object")} <{target.GetNiceTypeName()}>");
 
         if (target.IsValueType)
         {
-          yield return new(typeof(SampleNumericSpatialVariable<>).MakeGenericType(target));
+          yield return new(typeof(SampleNumericSpatialVariable<>).MakeGenericType(target), name: $"Sample Numeric <{target.GetNiceTypeName()}>");
 
-          yield return new(typeof(SampleMinMaxSpatialVariable<>).MakeGenericType(target));
+          yield return new(typeof(SampleMinMaxSpatialVariable<>).MakeGenericType(target), name: $"Sample Min/Max <{target.GetNiceTypeName()}>");
 
-          yield return new(typeof(SampleSpatialVariablePartialDerivative<>).MakeGenericType(target));
+          yield return new(typeof(SampleSpatialVariablePartialDerivative<>).MakeGenericType(target), name: $"Sample Partial Derivative <{target.GetNiceTypeName()}>");
         }
       }
     }

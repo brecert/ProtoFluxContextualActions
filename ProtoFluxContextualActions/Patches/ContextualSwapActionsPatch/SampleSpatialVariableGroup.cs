@@ -19,6 +19,8 @@ static partial class ContextualSwapActionsPatch
 
   internal static IEnumerable<MenuItem> SampleSpatialVariableGroupItems(ContextualContext context)
   {
+    yield break;
+
     var nodeType = context.NodeType;
     if (nodeType.TryGetGenericTypeDefinition(out var genericType) && SampleSpatialVariableGroup.Contains(genericType))
     {

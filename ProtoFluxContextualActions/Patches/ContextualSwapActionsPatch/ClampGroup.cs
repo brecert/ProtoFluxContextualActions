@@ -23,6 +23,7 @@ static partial class ContextualSwapActionsPatch
       {
         thisType = genericTypes.First();
       }
+      else yield break;
     }
     if (thisType != null)
     {
@@ -32,7 +33,7 @@ static partial class ContextualSwapActionsPatch
       }
       if (thisType.IsValueType)
       {
-        yield return new(typeof(ValueClamp<>).MakeGenericType(thisType));
+        yield return new(typeof(ValueClamp<>).MakeGenericType(thisType), connectionTransferType: ConnectionTransferType.ByIndexLossy);
       }
     }
   }
