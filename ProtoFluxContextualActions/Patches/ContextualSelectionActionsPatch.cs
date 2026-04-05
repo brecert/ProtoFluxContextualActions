@@ -63,6 +63,8 @@ using FrooxEngine.Undo;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Controllers;
 using System.Globalization;
 using ProtoFlux.Runtimes.Execution.Nodes.Binary;
+using ProtoFlux.Runtimes.Execution.Nodes.Color;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Operators;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -477,6 +479,7 @@ internal static class ContextualSelectionActionsPatch
             if (coder.Property<bool>("SupportsMul").Value)
             {
               yield return new MenuItem(typeof(ValueSquare<>).MakeGenericType(outputType), group: "Math");
+              yield return new MenuItem(typeof(MulDeltaTime<>).MakeGenericType(outputType), group: "Math");
             }
             if (coder.Property<bool>("SupportsDiv").Value)
             {
@@ -675,6 +678,8 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(DestroySlot));
 
       yield return new MenuItem(typeof(DynamicImpulseTrigger));
+
+      yield return new MenuItem(typeof(SetForward));
 
       bool shouldRelay = ProtoFluxContextualActions.ShouldUseRelays();
       Type baseType = shouldRelay ? typeof(ObjectRelay<Slot>) : typeof(ChildrenCount);
@@ -880,6 +885,7 @@ internal static class ContextualSelectionActionsPatch
           return true;
         }
       );
+
     }
 
     if (outputType == typeof(float2) || outputType == typeof(float3) || outputType == typeof(float4) ||
@@ -937,6 +943,9 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(ConcatenateString));
       yield return new MenuItem(typeof(StringJoin));
       yield return new MenuItem(typeof(StringInsert));
+
+      yield return new MenuItem(typeof(UnescapeString));
+      yield return new MenuItem(typeof(UnescapeUriDataString));
     }
 
     else if (outputType == typeof(DateTime))
@@ -1032,6 +1041,13 @@ internal static class ContextualSelectionActionsPatch
     {
       yield return new MenuItem(typeof(GetType));
       yield return new MenuItem(typeof(ToString_object));
+    }
+
+    if (outputType == typeof(colorX))
+    {
+      yield return new MenuItem(typeof(ColorXMulValue));
+      yield return new MenuItem(typeof(ColorXSetAlpha));
+      yield return new MenuItem(typeof(ColorXToHexCode));
     }
 
     if (typeof(IWorldElement).IsAssignableFrom(outputType))

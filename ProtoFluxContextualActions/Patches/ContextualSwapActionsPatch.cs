@@ -307,6 +307,7 @@ internal static partial class ContextualSwapActionsPatch
       .. ClampGroupItems(context),
       .. LerpGroupItems(context),
       .. SampleAnimationGroupItems(context),
+      .. CloudVariableGroupItems(context),
     ];
 
     foreach (var menuItem in menuItems)
