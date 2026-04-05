@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using ProtoFlux.Runtimes.Execution.Nodes;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Utility;
 using ProtoFluxContextualActions.Utils;
 
 namespace ProtoFluxContextualActions.Patches;
@@ -9,7 +10,8 @@ static partial class ContextualSwapActionsPatch
 {
   static readonly HashSet<Type> ValueRelayGroup = [
     typeof(ValueRelay<>),
-    typeof(ContinuouslyChangingValueRelay<>)
+    typeof(ContinuouslyChangingValueRelay<>),
+    typeof(DelayValue<>)
   ];
 
   internal static IEnumerable<MenuItem> ValueRelayGroupItems(ContextualContext context)

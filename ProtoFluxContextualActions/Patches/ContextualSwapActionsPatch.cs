@@ -305,6 +305,8 @@ internal static partial class ContextualSwapActionsPatch
       .. TweenGroupItems(context),
       .. DynamicVariableGroupItems(context),
       .. SpatialVariableGroupItems(context),
+      .. ClampGroupItems(context),
+      .. LerpGroupItems(context),
     ];
 
     foreach (var menuItem in menuItems)

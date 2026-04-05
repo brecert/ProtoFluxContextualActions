@@ -450,7 +450,6 @@ internal static class ContextualSelectionActionsPatch
             if (coder.Property<bool>("SupportsComparison").Value)
             {
               yield return new MenuItem(typeof(ValueMax<>).MakeGenericType(outputType), group: "Comparisons");
-              yield return new MenuItem(typeof(ValueClamp<>).MakeGenericType(outputType), group: "Comparisons");
               // yield return new MenuItem(typeof(ValueLessThan<>).MakeGenericType(outputType));
               // yield return new MenuItem(typeof(ValueLessOrEqual<>).MakeGenericType(outputType));
               // yield return new MenuItem(typeof(ValueGreaterThan<>).MakeGenericType(outputType));
@@ -470,9 +469,9 @@ internal static class ContextualSelectionActionsPatch
               yield return new MenuItem(typeof(ValueSquare<>).MakeGenericType(outputType), group: "Math");
             }
             if (coder.Property<bool>("SupportsDiv").Value)
-						{
+            {
               yield return new MenuItem(typeof(ValueReciprocal<>).MakeGenericType(outputType), group: "Math");
-						}
+            }
           }
 
           if (coder.Property<bool>("SupportsLerp").Value)
@@ -488,6 +487,10 @@ internal static class ContextualSelectionActionsPatch
             yield return new MenuItem(typeof(ValueConstantLerp<>).MakeGenericType(outputType), group: "Math");
           }
 
+          if (coder.Property<bool>("SupportsMinMax").Value)
+          {
+            yield return new MenuItem(typeof(ValueClamp<>).MakeGenericType(outputType), group: "Comparisons");
+          }
 
           if (TryGetInverseNode(outputType, out var inverseNodeType))
           {
@@ -511,12 +514,12 @@ internal static class ContextualSelectionActionsPatch
           }
 
           if (outputType == typeof(bool))
-					{
+          {
             foreach (var node in psuedoGenericTypes.ZeroOne)
-						{
-							yield return new(node.Node, group: "Zero One");
-						}
-					}
+            {
+              yield return new(node.Node, group: "Zero One");
+            }
+          }
         }
         if (target is ProtoFluxInputProxy { InputType.Value: var inputType } && (inputType.IsUnmanaged() || typeof(ISphericalHarmonics).IsAssignableFrom(inputType)))
         {
@@ -843,12 +846,12 @@ internal static class ContextualSelectionActionsPatch
       yield return new(psuedoGenericTypes.Normalized.First(n => n.Types.First() == outputType).Node, group: "Vectors");
       yield return new(psuedoGenericTypes.Magnitude.First(n => n.Types.First() == outputType).Node, group: "Vectors");
       yield return new(psuedoGenericTypes.Dot.First(n => n.Types.First() == outputType).Node, group: "Vectors");
-       yield return new(psuedoGenericTypes.Project.First(n => n.Types.First() == outputType).Node, group: "Vectors");
+      yield return new(psuedoGenericTypes.Project.First(n => n.Types.First() == outputType).Node, group: "Vectors");
       if (outputType == typeof(float3) || outputType == typeof(double3))
-			{
+      {
         yield return new(psuedoGenericTypes.Reflect.First(n => n.Types.First() == outputType).Node, group: "Vectors");
         yield return new(psuedoGenericTypes.Cross.First(n => n.Types.First() == outputType).Node, group: "Vectors");
-			}
+      }
     }
 
     if (outputType == typeof(bool))
@@ -990,16 +993,16 @@ internal static class ContextualSelectionActionsPatch
     }
 
     if (typeof(IWorldElement).IsAssignableFrom(outputType))
-		{
-			yield return new MenuItem(
+    {
+      yield return new MenuItem(
         typeof(ProtoFlux.Runtimes.Execution.Nodes.Casts.ObjectCast<,>).MakeGenericType(outputType, typeof(IWorldElement)),
         name: "IWorldElement"
       );
-		}
+    }
 
     if (outputType == typeof(IWorldElement))
-		{
-			yield return new MenuItem(
+    {
+      yield return new MenuItem(
         typeof(ReferenceID),
         name: "RefID -> ULong",
         onNodeSpawn: (ProtoFluxNode node, ProtoFluxElementProxy proxy, ProtoFluxTool tool) =>
@@ -1013,7 +1016,7 @@ internal static class ContextualSelectionActionsPatch
             Type parseULongNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ParsingFormatting.Parse_Ulong);
             Type lengthInputNode = ProtoFluxHelper.GetInputNode(typeof(int));
             Type numberStyleNode = ProtoFluxHelper.GetInputNode(typeof(NumberStyles));
-            
+
             ProtoFluxNode? thisRefIDObjectCastNode = null;
             ProtoFluxNode? thisToStringNode = null;
             ProtoFluxNode? thisStringRemoveNode = null;
@@ -1167,7 +1170,7 @@ internal static class ContextualSelectionActionsPatch
           return true;
         }
       );
-		}
+    }
 
     if (outputType == typeof(bool) || outputType == typeof(bool2) || outputType == typeof(bool3) || outputType == typeof(bool4))
     {

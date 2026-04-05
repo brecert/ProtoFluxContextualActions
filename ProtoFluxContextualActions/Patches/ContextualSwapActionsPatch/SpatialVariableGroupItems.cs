@@ -48,13 +48,17 @@ static partial class ContextualSwapActionsPatch
         var opType = context.NodeType.GenericTypeArguments[opCount - 1];
         target = opType;
       }
+      if (context.NodeType == typeof(SampleBooleanSpatialVariable))
+      {
+        target = typeof(bool);
+      }
 
       if (target != null)
       {
         if (target == typeof(bool))
-				{
-					yield return new(typeof(SampleBooleanSpatialVariable));
-				}
+        {
+          yield return new(typeof(SampleBooleanSpatialVariable));
+        }
         var ReadValue = GetNodeForType(target, [
           new NodeTypeRecord(typeof(SampleValueSpatialVariable<>), null, null),
           new NodeTypeRecord(typeof(SampleObjectSpatialVariable<>), null, null),
@@ -62,13 +66,13 @@ static partial class ContextualSwapActionsPatch
         yield return new(ReadValue);
 
         if (target.IsValueType)
-				{	
+        {
           yield return new(typeof(SampleNumericSpatialVariable<>).MakeGenericType(target));
 
           yield return new(typeof(SampleMinMaxSpatialVariable<>).MakeGenericType(target));
 
           yield return new(typeof(SampleSpatialVariablePartialDerivative<>).MakeGenericType(target));
-				}
+        }
       }
     }
   }
