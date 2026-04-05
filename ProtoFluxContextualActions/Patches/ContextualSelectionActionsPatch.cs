@@ -56,7 +56,6 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Keyboard;
 using ProtoFlux.Runtimes.Execution.Nodes.Math.Rects;
 using ProtoFlux.Runtimes.Execution.Nodes.Utility.Uris;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Variables;
-using ProtoFluxContextualActions.NewScripts;
 using System.Text.RegularExpressions;
 using ProtoFlux.Runtimes.Execution;
 using FrooxEngine.Undo;
@@ -1401,6 +1400,8 @@ internal static class ContextualSelectionActionsPatch
       yield return createVariableNode(variableInput, "Write (Connect)", true);
       yield return createVariableNode(variableLatchInput, "Write Latch (Dont Connect)");
       yield return createVariableNode(variableLatchInput, "Write Latch (Connect)", true);
+
+      // todo: figure out ValueIncrement<> and ValueDecrement<> and why they never spawn properly
     }
     else
     {

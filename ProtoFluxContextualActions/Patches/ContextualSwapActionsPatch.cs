@@ -243,7 +243,7 @@ internal static partial class ContextualSwapActionsPatch
     IEnumerable<MenuItem> menuItems = [
       .. UserRootSwapGroups(nodeType),
       .. GlobalLocalEquivilentSwapGroups(nodeType),
-      .. GetDirectionGroupItems(context),
+      .. DirectionGroupItems(context),
       .. ForLoopGroupItems(context),
       .. EasingOfSameKindFloatItems(context),
       .. EasingOfSameKindDoubleItems(context),

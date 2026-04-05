@@ -6,7 +6,7 @@ using HarmonyLib;
 using Elements.Core;
 using static ProtoFluxContextualActions.Patches.ContextualSelectionActionsPatch;
 
-namespace ProtoFluxContextualActions.NewScripts;
+namespace ProtoFluxContextualActions.Utils;
 
 internal struct ContextItem
 {

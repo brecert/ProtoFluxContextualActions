@@ -8,7 +8,7 @@ using static ProtoFluxContextualActions.Patches.ContextualSelectionActionsPatch;
 using FrooxEngine;
 using System.Threading.Tasks;
 
-namespace ProtoFluxContextualActions.NewScripts;
+namespace ProtoFluxContextualActions.Utils;
 
 internal static class ContextUtils
 {
