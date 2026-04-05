@@ -72,7 +72,11 @@ namespace ProtoFluxContextualActions.Patches;
 internal static class ContextualSelectionActionsPatch
 {
 
-  internal readonly struct MenuItem(Type node, Type? binding = null, string? name = null, bool overload = false, string group = "", Func<ProtoFluxNode, ProtoFluxElementProxy, ProtoFluxTool, bool>? onNodeSpawn = null, bool isSwap = false, ProtoFluxNode? swapNode = null, ContextualSwapActionsPatch.ConnectionTransferType? swapType = null)
+  internal readonly struct MenuItem(
+    Type node, Type? binding = null, string? name = null, bool overload = false,
+    string group = "", Func<ProtoFluxNode, ProtoFluxElementProxy, ProtoFluxTool, bool>? onNodeSpawn = null,
+    int orderOffset = 0,
+    bool isSwap = false, ProtoFluxNode? swapNode = null, ContextualSwapActionsPatch.ConnectionTransferType? swapType = null)
   {
     internal readonly Type node = node;
 
@@ -82,7 +86,12 @@ internal static class ContextualSelectionActionsPatch
 
     internal readonly bool overload = overload;
 
+
     internal readonly string group = group;
+
+    // allows for items to be placed before/after others, without needing to reorder the code itself.
+    internal readonly int orderOffset = orderOffset;
+
 
     internal readonly bool isSwap = isSwap;
     internal readonly ProtoFluxNode? swapNode = swapNode;
@@ -152,6 +161,7 @@ internal static class ContextualSelectionActionsPatch
           throw new Exception("found items for unsupported protoflux contextual action type");
       }
 
+      items.Sort((a, b) => a.orderOffset - b.orderOffset);
       GroupManager grouper = new(__instance, items, targetColor, (item) => OnMenuItemClicked(__instance, item, (node) => currentAction(__instance, elementProxy, item, node)));
       bool success = grouper.RenderRoot();
 
@@ -995,9 +1005,13 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(UserRootSlot));
       yield return new MenuItem(typeof(UserUserRoot));
 
+      yield return new MenuItem(typeof(FindCharacterControllerFromUser));
+
       yield return new MenuItem(typeof(StandardController), group: "Input");
       Type controllerType = GetUserControllerType(Engine.Current.WorldManager.FocusedWorld.LocalUser);
       if (controllerType != typeof(StandardController)) yield return new MenuItem(controllerType, group: "Input");
+      // todo: find a way to get the user from the output flux node?
+      // if the user isnt null, add the controller type of the user to the list
     }
 
     if (outputType == typeof(BodyNode))
@@ -1005,6 +1019,7 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(BodyNodeSlot));
       yield return new MenuItem(typeof(BodyNodeChirality));
       yield return new MenuItem(typeof(OtherSide));
+      yield return new MenuItem(typeof(RelativeBodyNode));
     }
 
     if (outputType == typeof(Grabber))
@@ -1044,6 +1059,7 @@ internal static class ContextualSelectionActionsPatch
 
     if (outputType == typeof(colorX))
     {
+      // add color swaps to allow this to work better?
       yield return new MenuItem(typeof(ColorXMulValue));
       yield return new MenuItem(typeof(ColorXSetAlpha));
       yield return new MenuItem(typeof(ColorXToHexCode));
