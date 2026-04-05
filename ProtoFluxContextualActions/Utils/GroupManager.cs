@@ -60,9 +60,18 @@ internal class GroupManager
       else GroupedItems.Add(itemGroup, [item]);
     });
 
-    PagedGroups = GroupedItems.ToDictionary(kv => kv.Key, kv => kv.Value.SplitToGroups(MaxPerPage));
+    PagedGroups = GroupedItems.ToDictionary(kv => kv.Key, kv => SplitGroups2(kv.Value));
     currentTool = tool;
   }
+
+  internal List<List<T>> SplitGroups2<T>(List<T> items)
+	{
+		var groups = items.SplitToGroups(MaxPerPage);
+    if (groups.Count == 2 && groups[1].Count == 1) {
+      return [[.. groups[0], .. groups[1]]];
+    }
+    return groups;
+	}
 
   internal bool RenderRoot()
   {
@@ -83,7 +92,7 @@ internal class GroupManager
       }
       currentRootItems.AddRange(RootItems);
 
-      List<List<ContextItem>> pagedRootItems = currentRootItems.SplitToGroups(MaxPerPage);
+      List<List<ContextItem>> pagedRootItems = SplitGroups2(currentRootItems);
       RenderFolder(pagedRootItems, 0, true);
     }
     else if (PagedGroups.Count == 0) return false;
