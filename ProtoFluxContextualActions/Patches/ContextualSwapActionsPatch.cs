@@ -290,7 +290,6 @@ internal static partial class ContextualSwapActionsPatch
       .. ApproximatelyNodesGroupItems(context),
       .. GrabbableValuePropertyGroupItems(context),
       .. SinCosSwapGroup(context),
-      .. SampleSpatialVariableGroupItems(context),
       .. KeyStateGroupItems(context),
       .. FireOnBoolGroupItems(context),
       .. WriteGroupItems(context),
@@ -307,6 +306,7 @@ internal static partial class ContextualSwapActionsPatch
       .. SpatialVariableGroupItems(context),
       .. ClampGroupItems(context),
       .. LerpGroupItems(context),
+      .. SampleAnimationGroupItems(context),
     ];
 
     foreach (var menuItem in menuItems)
