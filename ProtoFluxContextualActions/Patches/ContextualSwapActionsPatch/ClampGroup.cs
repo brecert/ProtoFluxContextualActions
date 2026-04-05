@@ -15,7 +15,6 @@ static partial class ContextualSwapActionsPatch
   {
     var psuedoGenericTypes = context.World.GetPsuedoGenericTypesForWorld();
     Type? thisType = null;
-    UniLog.Warning($"Input. checking clamp types, input is '{context.NodeType.GetNiceFullName()}'");
     if (context.NodeType.IsGenericType && context.NodeType.GetGenericTypeDefinition() == typeof(ValueClamp<>)) thisType = context.NodeType.GenericTypeArguments.First();
     else
     {
@@ -25,7 +24,6 @@ static partial class ContextualSwapActionsPatch
         thisType = genericTypes.First();
       }
     }
-    UniLog.Warning($"Finished checking clamp types, type is '{thisType.GetNiceTypeName()}'");
     if (thisType != null)
     {
       if (psuedoGenericTypes.Clamp01.Any(n => n.Types.First() == thisType))
