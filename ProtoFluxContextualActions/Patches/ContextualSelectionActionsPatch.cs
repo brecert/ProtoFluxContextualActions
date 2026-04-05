@@ -62,6 +62,7 @@ using ProtoFlux.Runtimes.Execution;
 using FrooxEngine.Undo;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Controllers;
 using System.Globalization;
+using ProtoFlux.Runtimes.Execution.Nodes.Binary;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -339,6 +340,15 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(AttachSprite));
     }
 
+    else if (nodeType.IsGenericType)
+    {
+      var typeDef = nodeType.GetGenericTypeDefinition();
+      if (typeDef == typeof(FireOnValueChange<>) || typeDef == typeof(FireOnObjectValueChange<>) || typeDef == typeof(FireOnLocalValueChange<>) || typeDef == typeof(FireOnLocalObjectChange<>))
+      {
+        yield return new MenuItem(typeof(LocalImpulseTimeoutSeconds));
+      }
+    }
+
     else if (nodeType == typeof(ImpulseDemultiplexer))
     {
       yield return new MenuItem(typeof(ImpulseMultiplexer), name: "Impulse Multiplex");
@@ -520,6 +530,22 @@ internal static class ContextualSelectionActionsPatch
               yield return new(node.Node, group: "Zero One");
             }
           }
+
+          if (nodeType == typeof(Half)) yield return new(typeof(HalfAsUShort), group: "Utility");
+          if (nodeType == typeof(float)) yield return new(typeof(FloatAsUInt), group: "Utility");
+          if (nodeType == typeof(double)) yield return new(typeof(DoubleAsULong), group: "Utility");
+
+          if (nodeType == typeof(ushort)) yield return new(typeof(UShortAsHalf), group: "Utility");
+          if (nodeType == typeof(uint)) yield return new(typeof(UIntAsFloat), group: "Utility");
+          if (nodeType == typeof(ulong)) yield return new(typeof(ULongAsDouble), group: "Utility");
+
+          if (nodeType == typeof(byte) || nodeType == typeof(ushort) || nodeType == typeof(uint) || nodeType == typeof(ulong))
+          {
+            yield return new(psuedoGenericTypes.AND.First(n => n.Types.First() == outputType).Node, group: "Utility");
+            yield return new(psuedoGenericTypes.ShiftLeft.First(n => n.Types.First() == outputType).Node, group: "Utility");
+
+            yield return new(psuedoGenericTypes.ExtractBits.First(n => n.Types.First() == outputType).Node, group: "Utility");
+          }
         }
         if (target is ProtoFluxInputProxy { InputType.Value: var inputType } && (inputType.IsUnmanaged() || typeof(ISphericalHarmonics).IsAssignableFrom(inputType)))
         {
@@ -528,9 +554,25 @@ internal static class ContextualSelectionActionsPatch
           {
             yield return new(psuedoGenericTypes.ZeroOne.First(n => n.Types.First() == nodeType).Node, group: "Math");
           }
+
+          if (nodeType == typeof(Half)) yield return new(typeof(UShortAsHalf), group: "Utility");
+          if (nodeType == typeof(float)) yield return new(typeof(UIntAsFloat), group: "Utility");
+          if (nodeType == typeof(double)) yield return new(typeof(ULongAsDouble), group: "Utility");
+
+          if (nodeType == typeof(ushort)) yield return new(typeof(HalfAsUShort), group: "Utility");
+          if (nodeType == typeof(uint)) yield return new(typeof(FloatAsUInt), group: "Utility");
+          if (nodeType == typeof(ulong)) yield return new(typeof(DoubleAsULong), group: "Utility");
+
+          if (nodeType == typeof(byte) || nodeType == typeof(ushort) || nodeType == typeof(uint) || nodeType == typeof(ulong))
+          {
+
+            yield return new(psuedoGenericTypes.ComposeBits.First(n => n.Types.First() == nodeType).Node, group: "Utility");
+          }
         }
         if (nodeType != null)
         {
+          // keeping this around *just in case* something ends up needing it.
+          // though, i dont know what would actually go here, despite trying multiple times.
         }
       }
     }
@@ -1313,10 +1355,11 @@ internal static class ContextualSelectionActionsPatch
 
     if (nodeVariable != null)
     {
-      MenuItem createVariableNode(Type node)
+      MenuItem createVariableNode(Type node, string name, bool connectNode = false)
       {
         return new MenuItem(
           node,
+          name: name,
           onNodeSpawn: (ProtoFluxNode newNode, ProtoFluxElementProxy proxy, ProtoFluxTool _) =>
           {
             ProtoFluxOutputProxy output = (ProtoFluxOutputProxy)proxy;
@@ -1325,7 +1368,7 @@ internal static class ContextualSelectionActionsPatch
 
             newNode.TryConnectReference(targetRef, outputProxy.Node.Target, undoable: true);
 
-            return false;
+            return connectNode;
           },
           group: "Variables"
         );
@@ -1338,8 +1381,23 @@ internal static class ContextualSelectionActionsPatch
         new NodeTypeRecord(typeof(ValueWriteLatch<>), null, null),
         new NodeTypeRecord(typeof(ObjectWriteLatch<>), null, null),
       ]);
-      yield return createVariableNode(variableInput);
-      yield return createVariableNode(variableLatchInput);
+      yield return createVariableNode(variableInput, "Write (Dont Connect)");
+      yield return createVariableNode(variableInput, "Write (Connect)", true);
+      yield return createVariableNode(variableLatchInput, "Write Latch (Dont Connect)");
+      yield return createVariableNode(variableLatchInput, "Write Latch (Connect)", true);
+    }
+    else
+    {
+      var variableInput = GetNodeForType(outputType, [
+        new NodeTypeRecord(typeof(ValueWrite<>), null, null),
+        new NodeTypeRecord(typeof(ObjectWrite<>), null, null),
+      ]);
+      var variableLatchInput = GetNodeForType(outputType, [
+        new NodeTypeRecord(typeof(ValueWriteLatch<>), null, null),
+        new NodeTypeRecord(typeof(ObjectWriteLatch<>), null, null),
+      ]);
+      yield return new MenuItem(variableInput, group: "Variables");
+      yield return new MenuItem(variableLatchInput, group: "Variables");
     }
   }
   #endregion

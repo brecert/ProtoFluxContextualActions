@@ -12,6 +12,9 @@ namespace ProtoFluxContextualActions.Patches;
 static partial class ContextualSwapActionsPatch
 {
   static readonly HashSet<Type> DynamicVariableGroup = [
+    typeof(DynamicVariableValueInput<>),
+    typeof(DynamicVariableObjectInput<>),
+
     typeof(ReadDynamicValueVariable<>),
     typeof(ReadDynamicObjectVariable<>),
 
@@ -67,6 +70,12 @@ static partial class ContextualSwapActionsPatch
           new NodeTypeRecord(typeof(WriteDynamicObjectVariable<>), null, null),
         ]);
         yield return new(WriteDyn);
+
+        var DynInput = GetNodeForType(target, [
+          new NodeTypeRecord(typeof(DynamicVariableValueInput<>), null, null),
+          new NodeTypeRecord(typeof(DynamicVariableObjectInput<>), null, null),
+        ]);
+        yield return new(DynInput);
 
         var CreateDyn = GetNodeForType(target, [
           new NodeTypeRecord(typeof(CreateDynamicValueVariable<>), null, null),

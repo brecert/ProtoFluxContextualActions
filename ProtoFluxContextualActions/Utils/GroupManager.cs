@@ -65,13 +65,14 @@ internal class GroupManager
   }
 
   internal List<List<T>> SplitGroups2<T>(List<T> items)
-	{
-		var groups = items.SplitToGroups(MaxPerPage);
-    if (groups.Count == 2 && groups[1].Count == 1) {
+  {
+    var groups = items.SplitToGroups(MaxPerPage);
+    if (groups.Count == 2 && groups[1].Count == 1)
+    {
       return [[.. groups[0], .. groups[1]]];
     }
     return groups;
-	}
+  }
 
   internal bool RenderRoot()
   {

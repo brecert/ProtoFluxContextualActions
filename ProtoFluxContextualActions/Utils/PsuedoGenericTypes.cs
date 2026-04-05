@@ -87,6 +87,9 @@ class PsuedoGenericTypes(World world)
   public PsuedoGenerics RotateLeft { get => field ??= MapTypes("RotateLeft_"); }
   public PsuedoGenerics RotateRight { get => field ??= MapTypes("RotateRight_"); }
 
+  public PsuedoGenerics ExtractBits { get => field ??= MapTypes("ExtractBits_"); }
+  public PsuedoGenerics ComposeBits { get => field ??= MapTypes("ComposeBits_"); }
+
   public PsuedoGenerics All { get => field ??= MapTypes("All_"); }
   public PsuedoGenerics Any { get => field ??= MapTypes("Any_"); }
   public PsuedoGenerics None { get => field ??= MapTypes("None_"); }
