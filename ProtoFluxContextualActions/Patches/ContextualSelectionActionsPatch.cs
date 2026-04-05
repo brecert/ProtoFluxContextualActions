@@ -1127,6 +1127,7 @@ internal static class ContextualSelectionActionsPatch
             {
               Slot target = input.Slot;
               target.CopyTransform(nodeSlot);
+              target.Parent = nodeSlot.Parent;
               target.GlobalPosition += (baseUp * Y) + (baseRight * X);
             }
 
