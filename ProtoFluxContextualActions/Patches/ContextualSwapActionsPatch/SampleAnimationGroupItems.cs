@@ -44,9 +44,9 @@ static partial class ContextualSwapActionsPatch
           new NodeTypeRecord(typeof(SampleObjectAnimationTrack<>), null, null),
         ]);
         if (AnimType.IsValidGenericType(true))
-				{	
+        {
           yield return new(AnimType, name: $"Sample {(AnimType.GetGenericTypeDefinition() == typeof(SampleValueAnimationTrack<>) ? "Value" : "Object")} Animation Track <{target.GetNiceTypeName()}>");
-				}
+        }
       }
     }
   }

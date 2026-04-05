@@ -97,7 +97,7 @@ internal class GroupManager
     bool showPreviousButton = pageIndex > 0;
     bool showNextButton = pageIndex < Items.Count - 1;
     bool showBackButton =
-            (Items.Count + RootItems.Count) != 1
+            (RootItems.Count + PagedGroups.Count) != 1
             && (ShowBackOnAllPages || pageIndex == 0)
             && !isRoot;
 
