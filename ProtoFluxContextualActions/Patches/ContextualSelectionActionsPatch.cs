@@ -161,7 +161,8 @@ internal static class ContextualSelectionActionsPatch
           throw new Exception("found items for unsupported protoflux contextual action type");
       }
 
-      items.Sort((a, b) => a.orderOffset - b.orderOffset);
+      // the idea behind this would have worked, but i must have written it wrong as this breaks all ordering of everything
+      //items.Sort((a, b) => a.orderOffset - b.orderOffset);
       GroupManager grouper = new(__instance, items, targetColor, (item) => OnMenuItemClicked(__instance, item, (node) => currentAction(__instance, elementProxy, item, node)));
       bool success = grouper.RenderRoot();
 
