@@ -26,6 +26,9 @@ static partial class ContextualSwapActionsPatch
 
     typeof(WriteOrCreateDynamicValueVariable<>),
     typeof(WriteOrCreateDynamicObjectVariable<>),
+
+    typeof(DeleteDynamicVariable<>),
+    typeof(ClearDynamicVariablesOfType<>),
   ];
 
 
@@ -88,6 +91,9 @@ static partial class ContextualSwapActionsPatch
           new NodeTypeRecord(typeof(WriteOrCreateDynamicObjectVariable<>), null, null),
         ]);
         yield return new(WriteOrCreateDyn);
+
+        yield return new(typeof(DeleteDynamicVariable<>));
+        yield return new(typeof(ClearDynamicVariablesOfType<>));
       }
     }
   }

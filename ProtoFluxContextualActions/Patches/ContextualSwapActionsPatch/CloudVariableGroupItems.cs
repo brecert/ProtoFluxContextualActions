@@ -13,20 +13,11 @@ namespace ProtoFluxContextualActions.Patches;
 static partial class ContextualSwapActionsPatch
 {
   static readonly HashSet<Type> CloudVariableGroup = [
-    typeof(DynamicVariableValueInput<>),
-    typeof(DynamicVariableObjectInput<>),
+    typeof(ReadValueCloudVariable<>),
+    typeof(ReadObjectCloudVariable<>),
 
-    typeof(ReadDynamicValueVariable<>),
-    typeof(ReadDynamicObjectVariable<>),
-
-    typeof(WriteDynamicValueVariable<>),
-    typeof(WriteDynamicObjectVariable<>),
-
-    typeof(CreateDynamicValueVariable<>),
-    typeof(CreateDynamicObjectVariable<>),
-
-    typeof(WriteOrCreateDynamicValueVariable<>),
-    typeof(WriteOrCreateDynamicObjectVariable<>),
+    typeof(WriteValueCloudVariable<>),
+    typeof(WriteObjectCloudVariable<>),
   ];
 
 

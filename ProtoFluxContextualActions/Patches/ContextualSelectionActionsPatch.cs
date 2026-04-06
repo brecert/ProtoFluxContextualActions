@@ -64,6 +64,7 @@ using System.Globalization;
 using ProtoFlux.Runtimes.Execution.Nodes.Binary;
 using ProtoFlux.Runtimes.Execution.Nodes.Color;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Operators;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Time;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -1443,8 +1444,10 @@ internal static class ContextualSelectionActionsPatch
   /// <returns></returns>
   internal static IEnumerable<MenuItem> InputMenuItems(ProtoFluxInputProxy inputProxy)
   {
+    var world = inputProxy.World;
     var inputType = inputProxy.InputType.Value;
     var nodeType = inputProxy.Node.Target.NodeType;
+    var psuedoGenericTypes = world.GetPsuedoGenericTypesForWorld();
 
     // one level deep check
     var nodeInstance = inputProxy.Node.Target.NodeInstance;
@@ -1457,6 +1460,15 @@ internal static class ContextualSelectionActionsPatch
       {
         yield return new MenuItem(packNodeType);
       }
+    }
+
+    if (inputType == typeof(float))
+    {
+      foreach (var worldTimeType in Groups.WorldTimeFloatGroup)
+      {
+        yield return new MenuItem(worldTimeType, group: "Time");
+      }
+        yield return new MenuItem(typeof(DeltaTime), group: "Time");
     }
 
     if (inputType == typeof(string))

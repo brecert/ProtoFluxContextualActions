@@ -15,6 +15,7 @@ static class Groups
     typeof(WorldTime2Float),
     typeof(WorldTime10Float),
     typeof(WorldTimeTenthFloat),
+    typeof(WorldTimeHalfFloat),
   ];
 
   public static FrozenSet<Type> WorldTimeDoubleGroup = [
