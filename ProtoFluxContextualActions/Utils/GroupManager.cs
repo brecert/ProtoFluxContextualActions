@@ -74,7 +74,7 @@ internal class GroupManager
     return groups;
   }
 
-  internal bool RenderRoot()
+  internal bool RenderRoot(bool initialMenu = false)
   {
     if (currentTool.IsRemoved) return false;
     if (PagedGroups.Count + RootItems.Count == 0) return false;
@@ -87,21 +87,21 @@ internal class GroupManager
         {
           name = group.Key,
           color = colorX.White,
-          onClick = () => RenderFolder(group.Value, 0, false),
+          onClick = () => RenderFolder(group.Value, 0, false, initialMenu),
           iconUri = FolderIcon
         });
       }
       currentRootItems.AddRange(RootItems);
 
       List<List<ContextItem>> pagedRootItems = SplitGroups2(currentRootItems);
-      RenderFolder(pagedRootItems, 0, true);
+      RenderFolder(pagedRootItems, 0, true, initialMenu);
     }
     else if (PagedGroups.Count == 0) return false;
-    else RenderFolder(PagedGroups.Values.ToList()[0], 0, true);
+    else RenderFolder(PagedGroups.Values.ToList()[0], 0, true, initialMenu);
     return true;
   }
 
-  void RenderFolder(List<List<ContextItem>> Items, int pageIndex, bool isRoot = false)
+  void RenderFolder(List<List<ContextItem>> Items, int pageIndex, bool isRoot = false, bool initialMenu = false)
   {
     if (currentTool.IsRemoved) return;
     bool showPreviousButton = pageIndex > 0;
@@ -114,7 +114,7 @@ internal class GroupManager
 
     currentTool.StartTask(async () =>
     {
-      var menu = await ContextUtils.CreateContextMenu(currentTool);
+      var menu = await ContextMenuCreator.CreateMenu(currentTool, initialMenu);
 
       if (showBackButton)
       {
