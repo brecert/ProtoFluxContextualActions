@@ -103,10 +103,31 @@ internal static class ContextualSelectionActionsPatch
     internal readonly string DisplayName => name ?? NodeMetadataHelper.GetMetadata(node).Name ?? node.GetNiceTypeName();
   }
 
+  [HarmonyPostfix]
+  [HarmonyPatch(typeof(ProtoFluxTool), nameof(ProtoFluxTool.GenerateMenuItems))]
+  internal static void GenerateMenuItemsPatch()
+  {
+    lastProxy = null;
+  }
+
+  static ProtoFluxElementProxy? lastProxy = null;
+
   internal static bool Prefix(ProtoFluxTool __instance, SyncRef<ProtoFluxElementProxy> ____currentProxy)
   {
     var elementProxy = ____currentProxy.Target;
-    if (elementProxy == null) return true;
+    if (elementProxy == null)
+    {
+      if (__instance.LocalUser.IsContextMenuOpen())
+      {
+        if (lastProxy != null)
+        {
+          __instance.StartDraggingWire(lastProxy);
+          __instance.LocalUser.CloseContextMenu(__instance);
+          lastProxy = null;
+        }
+      }
+      return true;
+    }
 
     var selectionItems = MenuItems(elementProxy);
     bool hasSwaps = false;
@@ -128,11 +149,17 @@ internal static class ContextualSelectionActionsPatch
     {
       if (__instance.LocalUser.IsContextMenuOpen())
       {
+        if (elementProxy == null && lastProxy != null)
+        {
+          __instance.StartDraggingWire(lastProxy);
+        }
         __instance.LocalUser.CloseContextMenu(__instance);
         return true;
       }
       Action<ProtoFluxTool, ProtoFluxElementProxy, MenuItem, ProtoFluxNode>? currentAction = null;
       colorX? targetColor = null;
+
+      lastProxy = elementProxy;
 
       switch (elementProxy)
       {
@@ -1846,7 +1873,6 @@ internal static class ContextualSelectionActionsPatch
   [HarmonyPatch(typeof(ProtoFluxTool), "OnSecondaryPress")]
   [MethodImpl(MethodImplOptions.NoInlining)]
   internal static void OnSecondaryPress(ProtoFluxTool instance) => throw new NotImplementedException();
-
 
   [HarmonyReversePatch]
   [HarmonyPatch(typeof(ProtoFluxHelper), "GetNodeForType")]
