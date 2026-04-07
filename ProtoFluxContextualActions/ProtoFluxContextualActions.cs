@@ -38,6 +38,8 @@ public class ProtoFluxContextualActions : ResoniteMod
   private static readonly ModConfigurationKey<bool> tryFixFlick = new("Try Fix Context Flick", "If the context menu should attempt to fix flicking", () => true);
   [AutoRegisterConfigKey]
   private static readonly ModConfigurationKey<bool> tryKeepContextPosition = new("Try Keep Context Menu Position", "If the context menu should attempt to stay in the same position", () => false);
+  [AutoRegisterConfigKey]
+  private static readonly ModConfigurationKey<int> maxItemsPerPage = new("Max Items Per Page", "Determines the maximum amount of items per page", () => 10);
 
   static ProtoFluxContextualActions()
   {
@@ -169,5 +171,16 @@ public class ProtoFluxContextualActions : ResoniteMod
       return false;
     }
     return false;
+  }
+
+  public static int GetMaxItemsPerPage()
+  {
+    if (Config != null)
+    {
+      var cfgVal = Config?.GetValue(maxItemsPerPage);
+      if (cfgVal != null) return cfgVal.Value;
+      return 10;
+    }
+    return 10;
   }
 }

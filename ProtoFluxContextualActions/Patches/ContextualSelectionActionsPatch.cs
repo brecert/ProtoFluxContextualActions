@@ -1468,7 +1468,7 @@ internal static class ContextualSelectionActionsPatch
       {
         yield return new MenuItem(worldTimeType, group: "Time");
       }
-        yield return new MenuItem(typeof(DeltaTime), group: "Time");
+      yield return new MenuItem(typeof(DeltaTime), group: "Time");
     }
 
     if (inputType == typeof(string))
