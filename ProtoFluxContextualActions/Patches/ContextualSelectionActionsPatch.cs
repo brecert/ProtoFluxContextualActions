@@ -93,7 +93,7 @@ internal static class ContextualSelectionActionsPatch
     // allows for items to be placed before/after others, without needing to reorder the code itself.
     internal readonly int orderOffset = orderOffset;
 
-
+    // including this here sucks, but it isnt like i can currently put this anywhere else, considering how everything is structured
     internal readonly bool isSwap = isSwap;
     internal readonly ProtoFluxNode? swapNode = swapNode;
     internal readonly ContextualSwapActionsPatch.ConnectionTransferType? swapType = swapType;
@@ -990,6 +990,7 @@ internal static class ContextualSelectionActionsPatch
     {
       yield return new MenuItem(typeof(Sub_DateTime));
       yield return new MenuItem(typeof(Add_DateTime_TimeSpan));
+      yield return new MenuItem(typeof(ToLocalTime));
     }
 
     else if (outputType == typeof(BoundingBox))
