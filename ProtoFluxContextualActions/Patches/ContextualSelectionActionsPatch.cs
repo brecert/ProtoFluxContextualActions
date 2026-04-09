@@ -347,11 +347,13 @@ internal static class ContextualSelectionActionsPatch
     yield return new MenuItem(typeof(If));
     yield return new MenuItem(typeof(ValueWrite<dummy>));
     yield return new MenuItem(typeof(Sequence));
+    yield return new MenuItem(typeof(While));
     yield return new MenuItem(typeof(ImpulseDemultiplexer), name: "Impulse Demultiplex");
 
     yield return new MenuItem(typeof(DynamicImpulseTrigger));
     yield return new MenuItem(typeof(StartAsyncTask), group: "Async");
     yield return new MenuItem(typeof(AsyncFor), group: "Async");
+    yield return new MenuItem(typeof(AsyncWhile), group: "Async");
     yield return new MenuItem(typeof(AsyncSequence), group: "Async");
     yield return new MenuItem(typeof(DelayUpdates), group: "Async");
     yield return new MenuItem(typeof(DelaySecondsFloat), group: "Async");

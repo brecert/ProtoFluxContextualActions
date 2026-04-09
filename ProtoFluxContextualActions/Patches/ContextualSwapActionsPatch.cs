@@ -309,6 +309,7 @@ internal static partial class ContextualSwapActionsPatch
       .. SampleAnimationGroupItems(context),
       .. CloudVariableGroupItems(context),
       .. TimeoutGroupItems(context),
+      .. WorldTimeGroupItems(context),
     ];
 
     foreach (var menuItem in menuItems)
