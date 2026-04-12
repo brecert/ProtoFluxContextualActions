@@ -584,8 +584,11 @@ internal static class ContextualSelectionActionsPatch
 
           if (nodeType == typeof(byte) || nodeType == typeof(ushort) || nodeType == typeof(uint) || nodeType == typeof(ulong))
           {
-            yield return new(psuedoGenericTypes.AND.First(n => n.Types.First() == outputType).Node, group: "Utility");
-            yield return new(psuedoGenericTypes.ShiftLeft.First(n => n.Types.First() == outputType).Node, group: "Utility");
+            if (nodeType == typeof(uint) || nodeType == typeof(ulong))
+            {
+              yield return new(psuedoGenericTypes.AND.First(n => n.Types.First() == outputType).Node, group: "Utility");
+              yield return new(psuedoGenericTypes.ShiftLeft.First(n => n.Types.First() == outputType).Node, group: "Utility");
+            }
 
             yield return new(psuedoGenericTypes.ExtractBits.First(n => n.Types.First() == outputType).Node, group: "Utility");
           }
