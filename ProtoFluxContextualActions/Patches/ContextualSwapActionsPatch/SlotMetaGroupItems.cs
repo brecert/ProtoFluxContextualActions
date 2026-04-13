@@ -10,7 +10,8 @@ static partial class ContextualSwapActionsPatch
     typeof(GetSlotName),
     typeof(GetTag),
     typeof(ChildrenCount),
-    typeof(IndexOfChild)
+    typeof(IndexOfChild),
+    typeof(GetSlotOrderOffset),
   ];
 
   internal static IEnumerable<MenuItem> SlotMetaGroupItems(ContextualContext context)

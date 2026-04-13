@@ -1069,8 +1069,6 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(CharacterControllerUser));
 
       yield return new MenuItem(typeof(SetCharacterVelocity));
-      yield return new MenuItem(typeof(SetCharacterGravity));
-      yield return new MenuItem(typeof(ApplyCharacterForce));
       yield return new MenuItem(typeof(ApplyCharacterImpulse));
     }
 
