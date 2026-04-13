@@ -312,6 +312,7 @@ internal static partial class ContextualSwapActionsPatch
       .. WorldTimeGroupItems(context),
       .. CharacterControllerGroupItems(context),
       .. OrderOffsetGroupItems(context),
+      .. StringAddGroupItems(context),
     ];
 
     foreach (var menuItem in menuItems)

@@ -114,6 +114,9 @@ internal static class ContextualSelectionActionsPatch
 
   internal static bool Prefix(ProtoFluxTool __instance, SyncRef<ProtoFluxElementProxy> ____currentProxy)
   {
+    var grabbedReference = __instance.GetGrabbedReference();
+    // Grabbed References usually mean we should not run the main function.
+    if (grabbedReference != null) return true;
     var elementProxy = ____currentProxy.Target;
     if (elementProxy == null)
     {
@@ -1714,25 +1717,24 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(RandomFloat));
     }
 
-    // As is this, being able to create a variable without a write.
-    // Of course, i have *no* idea if this is actually a good way of doing value/object type switching,
-    // But i saw it somewhere else in this project, and it works well.
+    // Can be swapped to Local or Store at any point
     var variableInput = GetNodeForType(inputType, [
-      new NodeTypeRecord(typeof(LocalValue<>), null, null),
-      new NodeTypeRecord(typeof(LocalObject<>), null, null),
-    ]);
-    var variableInput2 = GetNodeForType(inputType, [
-      new NodeTypeRecord(typeof(StoredValue<>), null, null),
-      new NodeTypeRecord(typeof(StoredObject<>), null, null),
-    ]);
-    var variableInput3 = GetNodeForType(inputType, [
       new NodeTypeRecord(typeof(DataModelValueFieldStore<>), null, null),
       new NodeTypeRecord(typeof(DataModelObjectRefStore<>), null, null),
     ]);
-
     yield return new MenuItem(variableInput, group: "Variables");
-    yield return new MenuItem(variableInput2, group: "Variables");
-    yield return new MenuItem(variableInput3, group: "Variables");
+
+    var dynVariableInput = GetNodeForType(inputType, [
+      new NodeTypeRecord(typeof(DynamicVariableValueInput<>), null, null),
+      new NodeTypeRecord(typeof(DynamicVariableObjectInput<>), null, null),
+    ]);
+    var spatialVariableInput = GetNodeForType(inputType, [
+      new NodeTypeRecord(typeof(SampleValueSpatialVariable<>), null, null),
+      new NodeTypeRecord(typeof(SampleObjectSpatialVariable<>), null, null),
+    ]);
+
+    yield return new MenuItem(dynVariableInput);
+    yield return new MenuItem(spatialVariableInput);
   }
 
   internal static Dictionary<Type, List<Type>> UnpackNodeMapping(World world) =>
