@@ -953,6 +953,8 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(If));
       yield return new MenuItem(typeof(FireOnTrue), group: "Events");
       yield return new MenuItem(typeof(FireOnLocalTrue), group: "Events");
+      yield return new MenuItem(typeof(FireWhileTrue), group: "Events");
+      yield return new MenuItem(typeof(LocalFireWhileTrue), group: "Events");
     }
 
     var changeVariableNode = GetNodeForType(outputType, [
@@ -1042,6 +1044,8 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(UserVR_Active));
       yield return new MenuItem(typeof(UserRootSlot));
       yield return new MenuItem(typeof(UserUserRoot));
+
+      yield return new MenuItem(typeof(GetActiveUser));
 
       yield return new MenuItem(typeof(FindCharacterControllerFromUser));
 
@@ -1554,12 +1558,9 @@ internal static class ContextualSelectionActionsPatch
 
     else if (inputType == typeof(bool))
     {
-      // I want to use dummy's here but it's not safe to do so.
-      yield return new MenuItem(typeof(ValueLessThan<int>));
-      yield return new MenuItem(typeof(ValueLessOrEqual<int>));
-      yield return new MenuItem(typeof(ValueGreaterThan<int>));
-      yield return new MenuItem(typeof(ValueGreaterOrEqual<int>));
       yield return new MenuItem(typeof(ValueEquals<int>));
+      yield return new MenuItem(typeof(AND_Bool));
+      yield return new MenuItem(typeof(NOT_Bool));
 
       // Sometimes this can be really helpful to have around
       yield return new MenuItem(typeof(DataModelBooleanToggle));
