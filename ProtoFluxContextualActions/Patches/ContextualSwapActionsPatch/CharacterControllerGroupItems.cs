@@ -13,11 +13,24 @@ static partial class ContextualSwapActionsPatch
     typeof(SetCharacterVelocity)
   ];
 
+  static readonly HashSet<Type> FindCharacterControllerGroup = [
+    typeof(FindCharacterControllerFromSlot),
+    typeof(FindCharacterControllerFromUser),
+  ];
+
   internal static IEnumerable<MenuItem> CharacterControllerGroupItems(ContextualContext context)
   {
     if (CharacterControllerGroup.Contains(context.NodeType))
     {
       foreach (var match in CharacterControllerGroup)
+      {
+        yield return new MenuItem(match);
+      }
+    }
+
+    if (FindCharacterControllerGroup.Contains(context.NodeType))
+    {
+      foreach (var match in FindCharacterControllerGroup)
       {
         yield return new MenuItem(match);
       }

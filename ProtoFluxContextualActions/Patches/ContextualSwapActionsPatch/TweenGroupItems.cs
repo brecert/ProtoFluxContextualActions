@@ -40,7 +40,7 @@ static partial class ContextualSwapActionsPatch
         target = opType;
       }
 
-      if (hasProxyHeld && target != null)
+      if (hasProxyHeld && target != null && (target.IsUnmanaged() || typeof(ISphericalHarmonics).IsAssignableFrom(target)))
       {
         yield return new(typeof(TweenValue<>).MakeGenericType(target));
       }

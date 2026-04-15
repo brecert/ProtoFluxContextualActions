@@ -263,7 +263,7 @@ internal static class ContextualSelectionActionsPatch
     if (item.overload) throw new Exception("Overloading with ProtoFluxOutputProxy is not supported");
     var input = addedNode.NodeInputs
         .FirstOrDefault(i => i.TargetType.IsGenericType && (outputProxy.OutputType.Value.IsAssignableFrom(i.TargetType.GenericTypeArguments[0]) || ProtoFlux.Core.TypeHelper.CanImplicitlyConvertTo(outputProxy.OutputType, i.TargetType.GenericTypeArguments[0])))
-        ?? throw new Exception($"Could not find matching input of type '{outputProxy.OutputType}' in '{addedNode}'");
+        ?? (ISyncRef)addedNode.NodeInputLists.First().GetElement(0) ?? throw new Exception($"Could not find matching input of type '{outputProxy.OutputType}' in '{addedNode}'");
 
     tool.StartTask(async () =>
     {
@@ -518,6 +518,7 @@ internal static class ContextualSelectionActionsPatch
               yield return new MenuItem(typeof(ValueInc<>).MakeGenericType(outputType), group: "Math");
               yield return new MenuItem(typeof(ValueDec<>).MakeGenericType(outputType), group: "Math");
               yield return new MenuItem(typeof(ValueOneMinus<>).MakeGenericType(outputType), group: "Math");
+              yield return new MenuItem(typeof(ValueDelta<>).MakeGenericType(outputType), group: "Math");
             }
             if (coder.Property<bool>("SupportsMul").Value)
             {
@@ -685,6 +686,10 @@ internal static class ContextualSelectionActionsPatch
     var world = outputProxy.World;
     var nodeType = outputProxy.Node.Target.NodeType;
     var psuedoGenericTypes = world.GetPsuedoGenericTypesForWorld();
+
+    var nodeInstance = outputProxy.Node.Target.NodeInstance;
+    var query = new NodeQueryAcceleration(nodeInstance.Runtime.Group);
+    var indirectlyConnectsToIterationNode = query.GetEvaluatingNodes(nodeInstance).Any(n => IsIterationNode(n.GetType()));
 
     if (TryGetUnpackNode(outputProxy.World, outputProxy.OutputType, out var unpackNodeTypes))
     {
@@ -1374,11 +1379,23 @@ internal static class ContextualSelectionActionsPatch
         nodeType == typeof(ImpulseDemultiplexer)
         || TypeUtils.MatchesType(typeof(IndexOfFirstValueMatch<>), nodeType)
         || TypeUtils.MatchesType(typeof(IndexOfFirstObjectMatch<>), nodeType)
+        || IsIterationNode(nodeType) || indirectlyConnectsToIterationNode
         ))
     {
-      yield return new MenuItem(typeof(ValueMultiplex<dummy>), name: "Value Multiplex");
-      yield return new MenuItem(typeof(ImpulseMultiplexer), name: "Impulse Multiplex");
-      yield return new MenuItem(typeof(ValueDemultiplex<dummy>), name: "Value Demultiplex");
+      yield return new MenuItem(typeof(ImpulseMultiplexer), name: "Impulse Multiplex", group: "Selections");
+    }
+    else
+    {
+      var multiplexNode = GetNodeForType(outputType, [
+        new NodeTypeRecord(typeof(ValueMultiplex<>), null, null),
+        new NodeTypeRecord(typeof(ObjectMultiplex<>), null, null),
+      ]);
+      var indexOfFirstMatchNode = GetNodeForType(outputType, [
+        new NodeTypeRecord(typeof(IndexOfFirstValueMatch<>), null, null),
+        new NodeTypeRecord(typeof(IndexOfFirstObjectMatch<>), null, null),
+      ]);
+      yield return new MenuItem(multiplexNode, group: "Selections");
+      yield return new MenuItem(indexOfFirstMatchNode, group: "Selections");
     }
 
     if (nodeType == typeof(DataModelBooleanToggle) && outputType == typeof(bool))

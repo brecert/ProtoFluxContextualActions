@@ -63,7 +63,8 @@ static partial class ContextualSwapActionsPatch
         ]);
         yield return new(ReadValue, name: $"Sample {(ReadValue.GetGenericTypeDefinition() == typeof(SampleValueSpatialVariable<>) ? "Value" : "Object")} <{target.GetNiceTypeName()}>");
 
-        if (target.IsValueType)
+        // Enums are not valid for these types, and will cause a crash if used.
+        if (target.IsValueType && !target.IsEnum)
         {
           yield return new(typeof(SampleNumericSpatialVariable<>).MakeGenericType(target), name: $"Sample Numeric <{target.GetNiceTypeName()}>");
 

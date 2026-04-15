@@ -15,14 +15,11 @@ static partial class ContextualSwapActionsPatch
 
   internal static IEnumerable<MenuItem> StringAddGroupItems(ContextualContext context)
   {
-    if (TypeUtils.TryGetGenericTypeDefinition(context.NodeType, out var genericType) && StringAddGroup.Contains(genericType))
+    if (StringAddGroup.Contains(context.NodeType))
     {
       foreach (var match in StringAddGroup)
       {
-        yield return new MenuItem(
-          match.MakeGenericType(context.NodeType.GenericTypeArguments[0]),
-          name: match == typeof(ConcatenateMultiString) ? FormatMultiName(context.NodeType) : null,
-          connectionTransferType: ConnectionTransferType.ByIndexLossy);
+        yield return new MenuItem(match, connectionTransferType: ConnectionTransferType.ByIndexLossy);
       }
     }
   }
