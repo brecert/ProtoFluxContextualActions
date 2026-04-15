@@ -1740,7 +1740,7 @@ internal static class ContextualSelectionActionsPatch
       new NodeTypeRecord(typeof(DataModelValueFieldStore<>), null, null),
       new NodeTypeRecord(typeof(DataModelObjectRefStore<>), null, null),
     ]);
-    yield return new MenuItem(variableInput, group: "Variables");
+    yield return new MenuItem(variableInput);
 
     var dynVariableInput = GetNodeForType(inputType, [
       new NodeTypeRecord(typeof(DynamicVariableValueInput<>), null, null),
