@@ -140,47 +140,11 @@ public class ProtoFluxContextualActions : ResoniteMod
     }
   }
 
-  public static bool ShouldUseRelays()
-  {
-    if (Config != null)
-    {
-      var cfgVal = Config?.GetValue(fluxStructureRelays);
-      if (cfgVal != null) return cfgVal.Value;
-      return true;
-    }
-    return true;
-  }
+  public static bool ShouldUseRelays() => fluxStructureRelays.Value;
 
-  public static bool ShouldTryFixFlick()
-  {
-    if (Config != null)
-    {
-      var cfgVal = Config?.GetValue(tryFixFlick);
-      if (cfgVal != null) return cfgVal.Value;
-      return true;
-    }
-    return true;
-  }
+  public static bool ShouldTryFixFlick() => tryFixFlick.Value;
 
-  public static bool ShouldTryKeepContextPosition()
-  {
-    if (Config != null)
-    {
-      var cfgVal = Config?.GetValue(tryKeepContextPosition);
-      if (cfgVal != null) return cfgVal.Value;
-      return false;
-    }
-    return false;
-  }
+  public static bool ShouldTryKeepContextPosition() => tryKeepContextPosition.Value;
 
-  public static int GetMaxItemsPerPage()
-  {
-    if (Config != null)
-    {
-      var cfgVal = Config?.GetValue(maxItemsPerPage);
-      if (cfgVal != null) return cfgVal.Value;
-      return 10;
-    }
-    return 10;
-  }
+  public static int GetMaxItemsPerPage() => maxItemsPerPage.Value;
 }
