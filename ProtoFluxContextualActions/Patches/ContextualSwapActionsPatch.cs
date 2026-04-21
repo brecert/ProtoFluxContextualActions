@@ -314,6 +314,7 @@ internal static partial class ContextualSwapActionsPatch
       .. OrderOffsetGroupItems(context),
       .. StringAddGroupItems(context),
       .. LoopGroupItems(context),
+      .. InputGroupItems(context),
     ];
 
     foreach (var menuItem in menuItems)
