@@ -1383,7 +1383,7 @@ internal static class ContextualSelectionActionsPatch
         || IsIterationNode(nodeType) || indirectlyConnectsToIterationNode
         ))
     {
-      yield return new MenuItem(typeof(ImpulseMultiplexer), name: "Impulse Multiplex", group: "Selections");
+      yield return new MenuItem(typeof(ImpulseMultiplexer), name: "Impulse Multiplex", group: "Comparisons");
     }
     else
     {
@@ -1395,8 +1395,8 @@ internal static class ContextualSelectionActionsPatch
         new NodeTypeRecord(typeof(IndexOfFirstValueMatch<>), null, null),
         new NodeTypeRecord(typeof(IndexOfFirstObjectMatch<>), null, null),
       ]);
-      yield return new MenuItem(multiplexNode, group: "Selections");
-      yield return new MenuItem(indexOfFirstMatchNode, group: "Selections");
+      yield return new MenuItem(multiplexNode, group: "Comparisons");
+      yield return new MenuItem(indexOfFirstMatchNode, group: "Comparisons");
     }
 
     if (nodeType == typeof(DataModelBooleanToggle) && outputType == typeof(bool))
