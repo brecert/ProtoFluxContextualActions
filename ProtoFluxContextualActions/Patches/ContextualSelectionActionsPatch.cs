@@ -727,7 +727,7 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(GetParentSlot));
       yield return new MenuItem(typeof(SetParent));
       yield return new MenuItem(typeof(DestroySlot));
-      
+
       yield return new MenuItem(typeof(GetActiveUser));
 
       yield return new MenuItem(typeof(DynamicImpulseTrigger));
@@ -1470,10 +1470,8 @@ internal static class ContextualSelectionActionsPatch
         new NodeTypeRecord(typeof(ValueWriteLatch<>), null, null),
         new NodeTypeRecord(typeof(ObjectWriteLatch<>), null, null),
       ]);
-      yield return createVariableNode(variableInput, "Write (Dont Connect)");
-      yield return createVariableNode(variableInput, "Write (Connect)", true);
-      yield return createVariableNode(variableLatchInput, "Write Latch (Dont Connect)");
-      yield return createVariableNode(variableLatchInput, "Write Latch (Connect)", true);
+      yield return createVariableNode(variableInput, "Write");
+      yield return createVariableNode(variableLatchInput, "Write Latch");
 
       // todo: figure out ValueIncrement<> and ValueDecrement<> and why they never spawn properly
     }
