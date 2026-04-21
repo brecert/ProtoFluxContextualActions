@@ -142,7 +142,7 @@ internal static class ContextualSelectionActionsPatch
       hasSwaps = hitNode != null;
       swapRoot = hitNode;
     }
-    var swapItems = hasSwaps ? ContextualSwapActionsPatch.GetMenuItems(__instance, swapRoot!, elementProxy).Select((item) => new MenuItem(item.node, group: "Swaps", name: item.name, isSwap: true, swapNode: swapRoot, swapType: item.connectionTransferType)) : [];
+    var swapItems = hasSwaps ? ContextualSwapActionsPatch.GetMenuItems(__instance, swapRoot!, elementProxy, true).Select((item) => new MenuItem(item.node, group: "Swaps", name: item.name, isSwap: true, swapNode: swapRoot, swapType: item.connectionTransferType)) : [];
     var items = selectionItems.Concat(swapItems)
       .Where(i => (i.binding ?? i.node).IsValidGenericType(validForInstantiation: true)) // this isn't great, we should instead catch errors before they propigate to here.
       .ToList();

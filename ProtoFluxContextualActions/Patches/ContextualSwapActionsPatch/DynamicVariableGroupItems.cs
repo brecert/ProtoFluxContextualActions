@@ -92,8 +92,8 @@ static partial class ContextualSwapActionsPatch
         ]);
         yield return new(WriteOrCreateDyn);
 
-        yield return new(typeof(DeleteDynamicVariable<>));
-        yield return new(typeof(ClearDynamicVariablesOfType<>));
+        if (context.NodeType.BaseType == typeof(DeleteDynamicVariable<>) && context.selectSwap) yield return new(typeof(DeleteDynamicVariable<>));
+        if (context.NodeType.BaseType == typeof(ClearDynamicVariablesOfType<>) && context.selectSwap) yield return new(typeof(ClearDynamicVariablesOfType<>));
       }
     }
   }

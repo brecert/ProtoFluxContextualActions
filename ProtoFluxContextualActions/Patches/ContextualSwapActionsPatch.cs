@@ -52,7 +52,7 @@ internal static partial class ContextualSwapActionsPatch
     internal readonly string DisplayName => name ?? NodeMetadataHelper.GetMetadata(node).Name ?? node.GetNiceTypeName();
   }
 
-  internal record ContextualContext(Type NodeType, World World, ProtoFluxElementProxy? proxy);
+  internal record ContextualContext(Type NodeType, World World, ProtoFluxElementProxy? proxy, bool selectSwap);
 
   // additional data we store for the protoflux tool
   internal class ProtoFluxToolData
@@ -234,11 +234,11 @@ internal static partial class ContextualSwapActionsPatch
     };
   }
 
-  internal static IEnumerable<MenuItem> GetMenuItems(ProtoFluxTool __instance, ProtoFluxNode nodeComponent, ProtoFluxElementProxy? proxy)
+  internal static IEnumerable<MenuItem> GetMenuItems(ProtoFluxTool __instance, ProtoFluxNode nodeComponent, ProtoFluxElementProxy? proxy, bool isSelectSwap = false)
   {
     var node = nodeComponent.NodeInstance;
     var nodeType = node.GetType();
-    var context = new ContextualContext(nodeType, __instance.World, proxy);
+    var context = new ContextualContext(nodeType, __instance.World, proxy, isSelectSwap);
 
     IEnumerable<MenuItem> menuItems = [
       .. UserRootSwapGroups(nodeType),
