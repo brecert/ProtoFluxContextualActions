@@ -346,28 +346,28 @@ internal static class ContextualSelectionActionsPatch
     var nodeType = impulseProxy.Node.Target.NodeType;
 
     // TODO: convert to while?
-    yield return new MenuItem(typeof(For));
+    yield return new MenuItem(typeof(For), group: "Loops");
     yield return new MenuItem(typeof(If));
-    yield return new MenuItem(typeof(ValueWrite<dummy>));
+    yield return new MenuItem(typeof(ValueWrite<int>), group: "Variables"); // while using dummy works, having int be the default is better (and its more consistent)
     yield return new MenuItem(typeof(Sequence));
-    yield return new MenuItem(typeof(While));
+    yield return new MenuItem(typeof(While), group: "Loops");
     yield return new MenuItem(typeof(ImpulseDemultiplexer), name: "Impulse Demultiplex");
 
     yield return new MenuItem(typeof(DynamicImpulseTrigger));
     yield return new MenuItem(typeof(StartAsyncTask), group: "Async");
-    yield return new MenuItem(typeof(AsyncFor), group: "Async");
-    yield return new MenuItem(typeof(AsyncWhile), group: "Async");
+    yield return new MenuItem(typeof(AsyncFor), group: "Async/Loops");
+    yield return new MenuItem(typeof(AsyncWhile), group: "Async/Loops");
     yield return new MenuItem(typeof(AsyncSequence), group: "Async");
     yield return new MenuItem(typeof(DelayUpdates), group: "Async");
     yield return new MenuItem(typeof(DelaySecondsFloat), group: "Async");
     yield return new MenuItem(typeof(AsyncDynamicImpulseTrigger), group: "Async");
 
-    yield return new MenuItem(typeof(DataModelBooleanToggle));
+    yield return new MenuItem(typeof(DataModelBooleanToggle), group: "Variables");
 
     if (IsIterationNode(nodeType))
     {
-      yield return new MenuItem(typeof(ValueIncrement<int>)); // dec can be swapped to?
-      yield return new MenuItem(typeof(ValueDecrement<int>)); // dec can be swapped to?
+      yield return new MenuItem(typeof(ValueIncrement<int>), group: "Variables");
+      yield return new MenuItem(typeof(ValueDecrement<int>), group: "Variables");
     }
 
     else if (nodeType == typeof(DuplicateSlot))
@@ -516,14 +516,13 @@ internal static class ContextualSelectionActionsPatch
             if (coder.Property<bool>("SupportsAddSub").Value)
             {
               yield return new MenuItem(typeof(ValueInc<>).MakeGenericType(outputType), group: "Math");
-              yield return new MenuItem(typeof(ValueDec<>).MakeGenericType(outputType), group: "Math");
               yield return new MenuItem(typeof(ValueOneMinus<>).MakeGenericType(outputType), group: "Math");
-              yield return new MenuItem(typeof(ValueDelta<>).MakeGenericType(outputType), group: "Math");
+              yield return new MenuItem(typeof(ValueDelta<>).MakeGenericType(outputType), group: "Math/Time");
             }
             if (coder.Property<bool>("SupportsMul").Value)
             {
               yield return new MenuItem(typeof(ValueSquare<>).MakeGenericType(outputType), group: "Math");
-              yield return new MenuItem(typeof(MulDeltaTime<>).MakeGenericType(outputType), group: "Math");
+              yield return new MenuItem(typeof(MulDeltaTime<>).MakeGenericType(outputType), group: "Math/Time");
             }
             if (coder.Property<bool>("SupportsDiv").Value)
             {
@@ -533,15 +532,15 @@ internal static class ContextualSelectionActionsPatch
 
           if (coder.Property<bool>("SupportsLerp").Value)
           {
-            yield return new MenuItem(typeof(ValueLerp<>).MakeGenericType(outputType), group: "Math");
+            yield return new MenuItem(typeof(ValueLerp<>).MakeGenericType(outputType), group: "Math/Lerping");
           }
           if (coder.Property<bool>("SupportsSmoothLerp").Value)
           {
-            yield return new MenuItem(typeof(ValueSmoothLerp<>).MakeGenericType(outputType), group: "Math");
+            yield return new MenuItem(typeof(ValueSmoothLerp<>).MakeGenericType(outputType), group: "Math/Lerping");
           }
           if (coder.Property<bool>("SupportsConstantLerp").Value)
           {
-            yield return new MenuItem(typeof(ValueConstantLerp<>).MakeGenericType(outputType), group: "Math");
+            yield return new MenuItem(typeof(ValueConstantLerp<>).MakeGenericType(outputType), group: "Math/Lerping");
           }
 
           if (coder.Property<bool>("SupportsMinMax").Value)
@@ -569,6 +568,10 @@ internal static class ContextualSelectionActionsPatch
           {
             yield return new(psuedoGenericTypes.Round.First(n => n.Types.First() == outputType).Node, group: "Math");
           }
+          if (psuedoGenericTypes.RoundToInt.Any(n => n.Types.First() == outputType))
+          {
+            yield return new(psuedoGenericTypes.RoundToInt.First(n => n.Types.First() == outputType).Node, group: "Math");
+          }
 
           if (outputType == typeof(bool))
           {
@@ -578,23 +581,23 @@ internal static class ContextualSelectionActionsPatch
             }
           }
 
-          if (nodeType == typeof(Half)) yield return new(typeof(HalfAsUShort), group: "Utility");
-          if (nodeType == typeof(float)) yield return new(typeof(FloatAsUInt), group: "Utility");
-          if (nodeType == typeof(double)) yield return new(typeof(DoubleAsULong), group: "Utility");
+          if (nodeType == typeof(Half)) yield return new(typeof(HalfAsUShort), group: "Math/Binary");
+          if (nodeType == typeof(float)) yield return new(typeof(FloatAsUInt), group: "Math/Binary");
+          if (nodeType == typeof(double)) yield return new(typeof(DoubleAsULong), group: "Math/Binary");
 
-          if (nodeType == typeof(ushort)) yield return new(typeof(UShortAsHalf), group: "Utility");
-          if (nodeType == typeof(uint)) yield return new(typeof(UIntAsFloat), group: "Utility");
-          if (nodeType == typeof(ulong)) yield return new(typeof(ULongAsDouble), group: "Utility");
+          if (nodeType == typeof(ushort)) yield return new(typeof(UShortAsHalf), group: "Math/Binary");
+          if (nodeType == typeof(uint)) yield return new(typeof(UIntAsFloat), group: "Math/Binary");
+          if (nodeType == typeof(ulong)) yield return new(typeof(ULongAsDouble), group: "Math/Binary");
 
           if (nodeType == typeof(byte) || nodeType == typeof(ushort) || nodeType == typeof(uint) || nodeType == typeof(ulong))
           {
             if (nodeType == typeof(uint) || nodeType == typeof(ulong))
             {
-              yield return new(psuedoGenericTypes.AND.First(n => n.Types.First() == outputType).Node, group: "Utility");
-              yield return new(psuedoGenericTypes.ShiftLeft.First(n => n.Types.First() == outputType).Node, group: "Utility");
+              yield return new(psuedoGenericTypes.AND.First(n => n.Types.First() == outputType).Node, group: "Math/Binary");
+              yield return new(psuedoGenericTypes.ShiftLeft.First(n => n.Types.First() == outputType).Node, group: "Math/Binary");
             }
 
-            yield return new(psuedoGenericTypes.ExtractBits.First(n => n.Types.First() == outputType).Node, group: "Utility");
+            yield return new(psuedoGenericTypes.ExtractBits.First(n => n.Types.First() == outputType).Node, group: "Math/Binary");
           }
         }
         if (target is ProtoFluxInputProxy { InputType.Value: var inputType } && (inputType.IsUnmanaged() || typeof(ISphericalHarmonics).IsAssignableFrom(inputType)))
@@ -605,18 +608,18 @@ internal static class ContextualSelectionActionsPatch
             yield return new(psuedoGenericTypes.ZeroOne.First(n => n.Types.First() == nodeType).Node, group: "Math");
           }
 
-          if (nodeType == typeof(Half)) yield return new(typeof(UShortAsHalf), group: "Utility");
-          if (nodeType == typeof(float)) yield return new(typeof(UIntAsFloat), group: "Utility");
-          if (nodeType == typeof(double)) yield return new(typeof(ULongAsDouble), group: "Utility");
+          if (nodeType == typeof(Half)) yield return new(typeof(UShortAsHalf), group: "Math/Binary");
+          if (nodeType == typeof(float)) yield return new(typeof(UIntAsFloat), group: "Math/Binary");
+          if (nodeType == typeof(double)) yield return new(typeof(ULongAsDouble), group: "Math/Binary");
 
-          if (nodeType == typeof(ushort)) yield return new(typeof(HalfAsUShort), group: "Utility");
-          if (nodeType == typeof(uint)) yield return new(typeof(FloatAsUInt), group: "Utility");
-          if (nodeType == typeof(ulong)) yield return new(typeof(DoubleAsULong), group: "Utility");
+          if (nodeType == typeof(ushort)) yield return new(typeof(HalfAsUShort), group: "Math/Binary");
+          if (nodeType == typeof(uint)) yield return new(typeof(FloatAsUInt), group: "Math/Binary");
+          if (nodeType == typeof(ulong)) yield return new(typeof(DoubleAsULong), group: "Math/Binary");
 
           if (nodeType == typeof(byte) || nodeType == typeof(ushort) || nodeType == typeof(uint) || nodeType == typeof(ulong))
           {
 
-            yield return new(psuedoGenericTypes.ComposeBits.First(n => n.Types.First() == nodeType).Node, group: "Utility");
+            yield return new(psuedoGenericTypes.ComposeBits.First(n => n.Types.First() == nodeType).Node, group: "Math/Binary");
           }
         }
         if (nodeType != null)
@@ -718,25 +721,29 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(GetForward));
       yield return new MenuItem(typeof(GetChild));
       yield return new MenuItem(typeof(ChildrenCount));
-      yield return new MenuItem(typeof(FindChildByTag)); // use tag here because it has less inputs which fits better when going to swap.
-      yield return new MenuItem(typeof(GetSlotActive));
-      yield return new MenuItem(typeof(GetSlotName));
+      yield return new MenuItem(typeof(FindChildByTag), group: "Slots/Children"); // use tag here because it has less inputs which fits better when going to swap.
+      yield return new MenuItem(typeof(GetSlotName), group: "Slots");
 
-      // I swear this was in the original version. Very useful!
+      yield return new MenuItem(typeof(SetSlotActiveSelf));
+      yield return new MenuItem(typeof(SetSlotPersistentSelf), group: "Slots");
+
+      yield return new MenuItem(typeof(SetGlobalTransform), group: "Slots/Transforms"); // swappable, but still useful to have right there
+
       yield return new MenuItem(typeof(DuplicateSlot));
-      yield return new MenuItem(typeof(GetParentSlot));
-      yield return new MenuItem(typeof(SetParent));
-      yield return new MenuItem(typeof(DestroySlot));
+      yield return new MenuItem(typeof(DestroySlot), group: "Slots");
 
-      yield return new MenuItem(typeof(GetActiveUser));
+      yield return new MenuItem(typeof(GetParentSlot), group: "Slots");
+      yield return new MenuItem(typeof(SetParent), group: "Slots");
 
-      yield return new MenuItem(typeof(DynamicImpulseTrigger));
+      yield return new MenuItem(typeof(GetActiveUser), group: "Slots");
 
-      yield return new MenuItem(typeof(SetForward));
+      yield return new MenuItem(typeof(DynamicImpulseTrigger), group: "Events");
+
+      yield return new MenuItem(typeof(SetForward), group: "Slots/Transforms");
 
       bool shouldRelay = ProtoFluxContextualActions.ShouldUseRelays();
       Type baseType = shouldRelay ? typeof(ObjectRelay<Slot>) : typeof(ChildrenCount);
-      yield return new MenuItem(baseType, name: "Foreach Child", onNodeSpawn: (ProtoFluxNode node, ProtoFluxElementProxy proxy, ProtoFluxTool tool) =>
+      yield return new MenuItem(baseType, name: "Foreach Child", group: "Slots/Children", onNodeSpawn: (ProtoFluxNode node, ProtoFluxElementProxy proxy, ProtoFluxTool tool) =>
       {
         tool.StartTask(async () =>
         {
@@ -885,6 +892,7 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(
         typeof(ProtoFlux.Runtimes.Execution.Nodes.Casts.ObjectCast<Slot, IWorldElement>),
         name: "Allocating User",
+        group: "Slots",
         onNodeSpawn: (ProtoFluxNode node, ProtoFluxElementProxy proxy, ProtoFluxTool tool) =>
         {
           tool.StartTask(async () =>
@@ -1045,12 +1053,12 @@ internal static class ContextualSelectionActionsPatch
 
     if (outputType == typeof(User))
     {
-      yield return new MenuItem(typeof(UserUsername));
-      yield return new MenuItem(typeof(UserUserID));
-      yield return new MenuItem(typeof(IsLocalUser));
-      yield return new MenuItem(typeof(UserVR_Active));
-      yield return new MenuItem(typeof(UserRootSlot));
-      yield return new MenuItem(typeof(UserUserRoot));
+      yield return new MenuItem(typeof(UserUsername), group: "Info");
+      yield return new MenuItem(typeof(UserUserID), group: "Info");
+      yield return new MenuItem(typeof(IsLocalUser), group: "Info");
+      yield return new MenuItem(typeof(UserVR_Active), group: "Info");
+      yield return new MenuItem(typeof(UserRootSlot), group: "");
+      yield return new MenuItem(typeof(UserUserRoot), group: "");
 
 
       yield return new MenuItem(typeof(FindCharacterControllerFromUser));
@@ -1077,17 +1085,16 @@ internal static class ContextualSelectionActionsPatch
 
     if (outputType == typeof(CharacterController))
     {
-      yield return new MenuItem(typeof(CharacterLinearVelocity));
-      yield return new MenuItem(typeof(IsCharacterOnGround));
-      yield return new MenuItem(typeof(CharacterControllerUser));
+      yield return new MenuItem(typeof(CharacterLinearVelocity), group: "Velocity");
+      yield return new MenuItem(typeof(IsCharacterOnGround), group: "State");
+      yield return new MenuItem(typeof(CharacterControllerUser), group: "State");
 
-      yield return new MenuItem(typeof(SetCharacterVelocity));
-      yield return new MenuItem(typeof(ApplyCharacterImpulse));
+      yield return new MenuItem(typeof(SetCharacterVelocity), group: "Velocity");
+      yield return new MenuItem(typeof(ApplyCharacterImpulse), group: "Velocity");
     }
 
     if (outputType == typeof(Type))
     {
-      yield return new MenuItem(typeof(IndexOfFirstObjectMatch<Type>));
       yield return new MenuItem(typeof(TypeColor));
       yield return new MenuItem(typeof(NiceTypeName));
     }
@@ -1311,7 +1318,6 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(NextValue<>).MakeGenericType(outputType), name: typeof(NextValue<>).GetNiceName());
       yield return new MenuItem(typeof(ShiftEnum<>).MakeGenericType(outputType), name: typeof(ShiftEnum<>).GetNiceName());
       yield return new MenuItem(typeof(TryEnumToInt<>).MakeGenericType(outputType), name: "TryEnumToInt<T>");
-      yield return new MenuItem(typeof(ValueEquals<>).MakeGenericType(outputType));
 
       var enumType = outputType.GetEnumUnderlyingType();
       if (NodeUtils.TryGetEnumToNumberNode(enumType, out var toNumberType))
@@ -1376,28 +1382,21 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(GetAsset<>).MakeGenericType(assetProviderType.GenericTypeArguments[0]));
     }
 
-    if (outputType == typeof(int) && (
-        nodeType == typeof(ImpulseDemultiplexer)
-        || TypeUtils.MatchesType(typeof(IndexOfFirstValueMatch<>), nodeType)
-        || TypeUtils.MatchesType(typeof(IndexOfFirstObjectMatch<>), nodeType)
-        || IsIterationNode(nodeType) || indirectlyConnectsToIterationNode
-        ))
+    if (outputType == typeof(int))
     {
-      yield return new MenuItem(typeof(ImpulseMultiplexer), name: "Impulse Multiplex", group: "Comparisons");
+      yield return new MenuItem(typeof(ImpulseMultiplexer), name: "Impulse Multiplex", group: "Comparisons/Selection");
     }
-    else
-    {
-      var multiplexNode = GetNodeForType(outputType, [
-        new NodeTypeRecord(typeof(ValueMultiplex<>), null, null),
-        new NodeTypeRecord(typeof(ObjectMultiplex<>), null, null),
-      ]);
-      var indexOfFirstMatchNode = GetNodeForType(outputType, [
-        new NodeTypeRecord(typeof(IndexOfFirstValueMatch<>), null, null),
-        new NodeTypeRecord(typeof(IndexOfFirstObjectMatch<>), null, null),
-      ]);
-      yield return new MenuItem(multiplexNode, group: "Comparisons");
-      yield return new MenuItem(indexOfFirstMatchNode, group: "Comparisons");
-    }
+
+    var multiplexNode = GetNodeForType(outputType, [
+      new NodeTypeRecord(typeof(ValueMultiplex<>), null, null),
+      new NodeTypeRecord(typeof(ObjectMultiplex<>), null, null),
+    ]);
+    var indexOfFirstMatchNode = GetNodeForType(outputType, [
+      new NodeTypeRecord(typeof(IndexOfFirstValueMatch<>), null, null),
+      new NodeTypeRecord(typeof(IndexOfFirstObjectMatch<>), null, null),
+    ]);
+    yield return new MenuItem(multiplexNode, group: "Comparisons/Selection");
+    yield return new MenuItem(indexOfFirstMatchNode, group: "Comparisons/Selection");
 
     if (nodeType == typeof(DataModelBooleanToggle) && outputType == typeof(bool))
     {
@@ -1532,13 +1531,6 @@ internal static class ContextualSelectionActionsPatch
     }
     else if (inputType == typeof(User))
     {
-      yield return new MenuItem(typeof(LocalUser));
-      yield return new MenuItem(typeof(HostUser));
-      yield return new MenuItem(typeof(UserFromUsername));
-      yield return new MenuItem(typeof(UserFromID));
-      yield return new MenuItem(typeof(GetActiveUser));
-      yield return new MenuItem(typeof(GetActiveUserSelf));
-
       // Select a User in the current session
       List<User> users = [];
       inputProxy.Slot.World.GetUsers(users);
@@ -1558,9 +1550,17 @@ internal static class ContextualSelectionActionsPatch
         );
       }
 
+      yield return new MenuItem(typeof(LocalUser));
+      yield return new MenuItem(typeof(HostUser));
+      yield return new MenuItem(typeof(UserFromUsername), group: "User From");
+      yield return new MenuItem(typeof(UserFromID), group: "User From");
+      yield return new MenuItem(typeof(GetActiveUser));
+      yield return new MenuItem(typeof(GetActiveUserSelf));
+
       yield return new MenuItem(
         typeof(AllocatingUser),
         name: "Allocating User",
+        group: "User From",
         binding: typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.References.AllocatingUser)
       );
     }
@@ -1666,15 +1666,14 @@ internal static class ContextualSelectionActionsPatch
       //     overload: true
       // );
     }
-
-    else if (nodeType == typeof(Mul_FloatQ_Float3) && inputProxy.ElementName == "B")
+    else if (inputType == typeof(float3))
     {
-      yield return new MenuItem(typeof(GetForward));
-      yield return new MenuItem(typeof(GetBackward));
-      yield return new MenuItem(typeof(GetUp));
-      yield return new MenuItem(typeof(GetDown));
-      yield return new MenuItem(typeof(GetLeft));
-      yield return new MenuItem(typeof(GetRight));
+      yield return new MenuItem(typeof(GetForward), group: "Directions");
+      yield return new MenuItem(typeof(GetBackward), group: "Directions");
+      yield return new MenuItem(typeof(GetUp), group: "Directions");
+      yield return new MenuItem(typeof(GetDown), group: "Directions");
+      yield return new MenuItem(typeof(GetLeft), group: "Directions");
+      yield return new MenuItem(typeof(GetRight), group: "Directions");
     }
 
     else if (inputType == typeof(int) && (IsIterationNode(nodeType) || indirectlyConnectsToIterationNode))

@@ -5,6 +5,7 @@ using FrooxEngine.ProtoFlux;
 using HarmonyLib;
 using Elements.Core;
 using static ProtoFluxContextualActions.Patches.ContextualSelectionActionsPatch;
+using FrooxEngine;
 
 namespace ProtoFluxContextualActions.Utils;
 
@@ -29,6 +30,7 @@ internal class GroupManager
 
   // Instance Variables
   readonly Dictionary<string, List<List<ContextItem>>> PagedGroups = [];
+  readonly Dictionary<string, List<ContextItem>> GroupedItems = [];
   readonly List<ContextItem> RootItems = [];
   readonly Action<MenuItem> onItemClicked;
   readonly ProtoFluxTool currentTool;
@@ -51,7 +53,6 @@ internal class GroupManager
       };
     }).ToList();
 
-    Dictionary<string, List<ContextItem>> GroupedItems = [];
     contextItems.ForEach((item) =>
     {
       string itemGroup = item.baseItem.group;
@@ -62,6 +63,95 @@ internal class GroupManager
 
     PagedGroups = GroupedItems.ToDictionary(kv => kv.Key, kv => SplitGroups2(kv.Value));
     currentTool = tool;
+  }
+
+  List<ContextItem> GetLevelItems(string prefix, out List<string> subgroups)
+  {
+    subgroups = [];
+    var items = new List<ContextItem>();
+    var subgroupSet = new HashSet<string>();
+
+    foreach (var kv in GroupedItems)
+    {
+      string key = kv.Key;
+
+      if (prefix.Length == 0)
+      {
+        // ROOT LEVEL
+
+        if (!key.Contains("/"))
+        {
+          subgroupSet.Add(key);
+        }
+        else
+        {
+          var first = key.Split('/')[0];
+          subgroupSet.Add(first);
+        }
+
+        continue;
+      }
+
+      // NON-ROOT
+
+      if (!key.StartsWith(prefix + "/") && key != prefix)
+        continue;
+
+      if (key == prefix)
+      {
+        items.AddRange(kv.Value);
+        continue;
+      }
+
+      var remaining = key.Substring(prefix.Length + 1);
+
+      int slash = remaining.IndexOf('/');
+      if (slash >= 0)
+      {
+        var next = remaining.Substring(0, slash);
+        subgroupSet.Add(next);
+      }
+      else
+      {
+        // This is a direct child group → MUST be a folder
+        subgroupSet.Add(remaining);
+      }
+    }
+
+    subgroups = subgroupSet.ToList();
+    return items;
+  }
+  string GetParentPrefix(string prefix)
+  {
+    if (string.IsNullOrEmpty(prefix)) return "";
+
+    int idx = prefix.LastIndexOf('/');
+    if (idx < 0) return "";
+
+    return prefix.Substring(0, idx);
+  }
+
+  List<List<ContextItem>> BuildPages(string prefix)
+  {
+    var items = GetLevelItems(prefix, out var subgroups);
+
+    List<ContextItem> combined = [];
+
+    foreach (var subgroup in subgroups)
+    {
+      string path = string.IsNullOrEmpty(prefix) ? subgroup : $"{prefix}/{subgroup}";
+      combined.Add(new()
+      {
+        name = subgroup,
+        color = RadiantUI_Constants.Neutrals.LIGHT,
+        onClick = () => RenderGroup(path, 0, false),
+        iconUri = FolderIcon
+      });
+    }
+
+    combined.AddRange(items);
+
+    return SplitGroups2(combined);
   }
 
   internal List<List<T>> SplitGroups2<T>(List<T> items)
@@ -77,31 +167,47 @@ internal class GroupManager
   internal bool RenderRoot(bool initialMenu = false)
   {
     if (currentTool.IsRemoved) return false;
-    if (PagedGroups.Count + RootItems.Count == 0) return false;
-    if (PagedGroups.Count != 1 || RootItems.Count != 0)
+    if (GroupedItems.Count + RootItems.Count == 0) return false;
+
+    var rootPages = BuildPages("");
+
+    if (rootPages.Count != 1 || RootItems.Count != 0)
     {
       List<ContextItem> currentRootItems = [];
-      foreach (var group in PagedGroups)
+
+      var items = GetLevelItems("", out var subgroups);
+
+      foreach (var subgroup in subgroups)
       {
+        string path = subgroup;
         currentRootItems.Add(new()
         {
-          name = group.Key,
-          color = colorX.White,
-          onClick = () => RenderFolder(group.Value, 0, false, initialMenu),
+          name = subgroup,
+          color = RadiantUI_Constants.Neutrals.LIGHT,
+          onClick = () => RenderGroup(path, 0, false, initialMenu),
           iconUri = FolderIcon
         });
       }
+
+      currentRootItems.AddRange(items);
       currentRootItems.AddRange(RootItems);
 
       List<List<ContextItem>> pagedRootItems = SplitGroups2(currentRootItems);
-      RenderFolder(pagedRootItems, 0, true, initialMenu);
+      RenderFolder(pagedRootItems, 0, true, initialMenu, "");
     }
-    else if (PagedGroups.Count == 0) return false;
-    else RenderFolder(PagedGroups.Values.ToList()[0], 0, true, initialMenu);
+    else if (GroupedItems.Count == 0) return false;
+    else RenderFolder(rootPages, 0, true, initialMenu, "");
+
     return true;
   }
 
-  void RenderFolder(List<List<ContextItem>> Items, int pageIndex, bool isRoot = false, bool initialMenu = false)
+  void RenderGroup(string prefix, int pageIndex, bool isRoot = false, bool initialMenu = false)
+  {
+    var pages = BuildPages(prefix);
+    RenderFolder(pages, pageIndex, isRoot, initialMenu, prefix);
+  }
+
+  void RenderFolder(List<List<ContextItem>> Items, int pageIndex, bool isRoot = false, bool initialMenu = false, string prefix = "")
   {
     if (currentTool.IsRemoved) return;
     bool showPreviousButton = pageIndex > 0;
@@ -118,11 +224,29 @@ internal class GroupManager
 
       if (showBackButton)
       {
-        menu.AddMenuItem("Back", colorX.Red, () => RenderRoot());
+        menu.AddMenuItem("Back", RadiantUI_Constants.Hero.RED, () =>
+        {
+          if (string.IsNullOrEmpty(prefix))
+          {
+            RenderRoot();
+          }
+          else
+          {
+            string parentFolder = GetParentPrefix(prefix);
+            if (string.IsNullOrEmpty(parentFolder))
+            {
+              RenderRoot();
+            }
+            else
+            {
+              RenderGroup(parentFolder, 0);
+            }
+          }
+        });
       }
       if (showPreviousButton)
       {
-        menu.AddMenuItem("Previous", colorX.Orange, () => RenderFolder(Items, pageIndex - 1, isRoot));
+        menu.AddMenuItem("Previous", RadiantUI_Constants.Hero.ORANGE, () => RenderFolder(Items, pageIndex - 1, isRoot));
       }
 
       foreach (var item in Items[pageIndex])
@@ -133,7 +257,7 @@ internal class GroupManager
 
       if (showNextButton)
       {
-        menu.AddMenuItem("Next", colorX.Cyan, () => RenderFolder(Items, pageIndex + 1, isRoot));
+        menu.AddMenuItem("Next", RadiantUI_Constants.Hero.CYAN, () => RenderFolder(Items, pageIndex + 1, isRoot));
       }
     });
   }
