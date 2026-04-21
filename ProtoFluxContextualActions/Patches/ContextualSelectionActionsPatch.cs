@@ -727,6 +727,8 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(GetParentSlot));
       yield return new MenuItem(typeof(SetParent));
       yield return new MenuItem(typeof(DestroySlot));
+      
+      yield return new MenuItem(typeof(GetActiveUser));
 
       yield return new MenuItem(typeof(DynamicImpulseTrigger));
 
@@ -1050,7 +1052,6 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(UserRootSlot));
       yield return new MenuItem(typeof(UserUserRoot));
 
-      yield return new MenuItem(typeof(GetActiveUser));
 
       yield return new MenuItem(typeof(FindCharacterControllerFromUser));
 
