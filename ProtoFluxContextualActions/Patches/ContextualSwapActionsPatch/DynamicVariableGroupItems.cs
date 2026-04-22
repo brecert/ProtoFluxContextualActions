@@ -3,6 +3,7 @@ using FrooxEngine.ProtoFlux;
 using ProtoFlux.Core;
 using ProtoFlux.Runtimes.Execution.Nodes.Actions;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Variables;
+using ProtoFluxContextualActions.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,29 +30,28 @@ static partial class ContextualSwapActionsPatch
 
     typeof(DeleteDynamicVariable<>),
     typeof(ClearDynamicVariablesOfType<>),
+    typeof(ClearDynamicVariables),
   ];
 
 
   internal static IEnumerable<MenuItem> DynamicVariableGroupItems(ContextualContext context)
   {
-    if (DynamicVariableGroup.Any(t => context.NodeType.IsGenericType ? t == context.NodeType.GetGenericTypeDefinition() : t == context.NodeType))
+    Type baseNodeType = context.NodeType.IsGenericType ? context.NodeType.GetGenericTypeDefinition() : context.NodeType;
+    if (DynamicVariableGroup.Any(t => t == baseNodeType))
     {
       Type? target = null;
-      bool hasProxyHeld = false;
 
       if (context.proxy is ProtoFluxInputProxy)
       {
         ProtoFluxInputProxy inputType = (ProtoFluxInputProxy)context.proxy;
         Type targetType = inputType.InputType;
         target = targetType;
-        hasProxyHeld = true;
       }
       if (context.proxy is ProtoFluxOutputProxy)
       {
         ProtoFluxOutputProxy outputType = (ProtoFluxOutputProxy)context.proxy;
         Type targetType = outputType.OutputType;
         target = targetType;
-        hasProxyHeld = true;
       }
       if (context.NodeType.IsGenericType && target == null)
       {
@@ -62,6 +62,16 @@ static partial class ContextualSwapActionsPatch
 
       if (target != null)
       {
+        if (context.selectSwap)
+				{
+					if (baseNodeType == typeof(DeleteDynamicVariable<>) || baseNodeType == typeof(ClearDynamicVariablesOfType<>) || baseNodeType == typeof(ClearDynamicVariables))
+					{
+						yield return new(typeof(DeleteDynamicVariable<>).MakeGenericType(target));
+            yield return new(typeof(ClearDynamicVariablesOfType<>).MakeGenericType(target));
+            yield return new(typeof(ClearDynamicVariables));
+					}
+				}
+
         var ReadDyn = GetNodeForType(target, [
           new NodeTypeRecord(typeof(ReadDynamicValueVariable<>), null, null),
           new NodeTypeRecord(typeof(ReadDynamicObjectVariable<>), null, null),
@@ -92,8 +102,7 @@ static partial class ContextualSwapActionsPatch
         ]);
         yield return new(WriteOrCreateDyn);
 
-        if (context.NodeType.BaseType == typeof(DeleteDynamicVariable<>) && context.selectSwap) yield return new(typeof(DeleteDynamicVariable<>));
-        if (context.NodeType.BaseType == typeof(ClearDynamicVariablesOfType<>) && context.selectSwap) yield return new(typeof(ClearDynamicVariablesOfType<>));
+       
       }
     }
   }

@@ -319,7 +319,7 @@ internal static partial class ContextualSwapActionsPatch
 
     foreach (var menuItem in menuItems)
     {
-      yield return menuItem;
+      if (menuItem.node != context.NodeType) yield return menuItem;
     }
   }
 
