@@ -77,8 +77,6 @@ internal class GroupManager
 
       if (prefix.Length == 0)
       {
-        // ROOT LEVEL
-
         if (!key.Contains("/"))
         {
           subgroupSet.Add(key);
@@ -92,8 +90,6 @@ internal class GroupManager
         continue;
       }
 
-      // NON-ROOT
-
       if (!key.StartsWith(prefix + "/") && key != prefix)
         continue;
 
@@ -103,22 +99,21 @@ internal class GroupManager
         continue;
       }
 
-      var remaining = key.Substring(prefix.Length + 1);
+      var remaining = key[(prefix.Length + 1)..];
 
       int slash = remaining.IndexOf('/');
       if (slash >= 0)
       {
-        var next = remaining.Substring(0, slash);
+        var next = remaining[..slash];
         subgroupSet.Add(next);
       }
       else
       {
-        // This is a direct child group → MUST be a folder
         subgroupSet.Add(remaining);
       }
     }
 
-    subgroups = subgroupSet.ToList();
+    subgroups = [.. subgroupSet];
     return items;
   }
   string GetParentPrefix(string prefix)
@@ -128,7 +123,7 @@ internal class GroupManager
     int idx = prefix.LastIndexOf('/');
     if (idx < 0) return "";
 
-    return prefix.Substring(0, idx);
+    return prefix[..idx];
   }
 
   List<List<ContextItem>> BuildPages(string prefix)
