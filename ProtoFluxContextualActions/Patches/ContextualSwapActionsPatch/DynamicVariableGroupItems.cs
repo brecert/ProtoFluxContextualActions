@@ -63,14 +63,14 @@ static partial class ContextualSwapActionsPatch
       if (target != null)
       {
         if (context.selectSwap)
-				{
-					if (baseNodeType == typeof(DeleteDynamicVariable<>) || baseNodeType == typeof(ClearDynamicVariablesOfType<>) || baseNodeType == typeof(ClearDynamicVariables))
-					{
-						yield return new(typeof(DeleteDynamicVariable<>).MakeGenericType(target));
+        {
+          if (baseNodeType == typeof(DeleteDynamicVariable<>) || baseNodeType == typeof(ClearDynamicVariablesOfType<>) || baseNodeType == typeof(ClearDynamicVariables))
+          {
+            yield return new(typeof(DeleteDynamicVariable<>).MakeGenericType(target));
             yield return new(typeof(ClearDynamicVariablesOfType<>).MakeGenericType(target));
             yield return new(typeof(ClearDynamicVariables));
-					}
-				}
+          }
+        }
 
         var ReadDyn = GetNodeForType(target, [
           new NodeTypeRecord(typeof(ReadDynamicValueVariable<>), null, null),
@@ -102,7 +102,7 @@ static partial class ContextualSwapActionsPatch
         ]);
         yield return new(WriteOrCreateDyn);
 
-       
+
       }
     }
   }

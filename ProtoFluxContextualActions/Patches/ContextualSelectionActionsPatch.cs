@@ -581,6 +581,15 @@ internal static class ContextualSelectionActionsPatch
             }
           }
 
+          if (outputType == typeof(float))
+          {
+            yield return new(typeof(Remap_Float), group: "Math");
+          }
+          if (outputType == typeof(double))
+          {
+            yield return new(typeof(Remap_Double), group: "Math");
+          }
+
           if (nodeType == typeof(Half)) yield return new(typeof(HalfAsUShort), group: "Math/Binary");
           if (nodeType == typeof(float)) yield return new(typeof(FloatAsUInt), group: "Math/Binary");
           if (nodeType == typeof(double)) yield return new(typeof(DoubleAsULong), group: "Math/Binary");
@@ -869,7 +878,7 @@ internal static class ContextualSelectionActionsPatch
           }
           var tempGrab = tempSlot.AttachComponent<Grabbable>();
 
-          await new Updates(480);
+          await new Updates(240);
           int i = 0;
           while (tempGrab.IsGrabbed && i < 200)
           {
@@ -1110,6 +1119,11 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(ToString_object));
     }
 
+    if (outputType == typeof(RefID))
+    {
+      yield return new MenuItem(typeof(ToString_object));
+    }
+
     if (outputType == typeof(colorX))
     {
       // add color swaps to allow this to work better?
@@ -1128,6 +1142,7 @@ internal static class ContextualSelectionActionsPatch
 
     if (outputType == typeof(IWorldElement))
     {
+      yield return new MenuItem(typeof(ReferenceID));
       yield return new MenuItem(
         typeof(ReferenceID),
         name: "RefID -> ULong",
@@ -1277,7 +1292,7 @@ internal static class ContextualSelectionActionsPatch
             }
             var tempGrab = tempSlot.AttachComponent<Grabbable>();
 
-            await new Updates(480);
+            await new Updates(240);
             int i = 0;
             while (tempGrab.IsGrabbed && i < 200)
             {

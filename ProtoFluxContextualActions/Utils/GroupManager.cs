@@ -113,7 +113,7 @@ internal class GroupManager
     subgroups = [.. subgroupSet];
     return items;
   }
-  
+
   string GetParentPrefix(string prefix)
   {
     if (string.IsNullOrEmpty(prefix)) return "";

@@ -37,6 +37,8 @@ class PsuedoGenericTypes(World world)
   public PsuedoGenerics CeilToInt { get => field ??= MapTypes("CeilToInt_"); }
   public PsuedoGenerics Round { get => field ??= MapTypes("Round_"); }
   public PsuedoGenerics RoundToInt { get => field ??= MapTypes("RoundToInt_"); }
+  public PsuedoGenerics Floor { get => field ??= MapTypes("Floor_"); }
+  public PsuedoGenerics FloorToInt { get => field ??= MapTypes("FloorToInt_"); }
   public PsuedoGenerics Clamp01 { get => field ??= MapTypes("Clamp01_"); }
 
   public PsuedoGenerics ZeroOne { get => field ??= MapTypes("ZeroOne"); }
