@@ -29,9 +29,9 @@ static partial class ContextualSwapActionsPatch
       {
         yield return new MenuItem(match.Key);
       }
-      if (roundItems.TryGetValue(context.NodeType, out var g2)) yield return new MenuItem(roundIntItems.First(v=>g2.SequenceEqual(v.Value)).Key);
-      if (floorItems.TryGetValue(context.NodeType, out g2)) yield return new MenuItem(floorIntItems.First(v=>g2.SequenceEqual(v.Value)).Key);
-      if (ceilItems.TryGetValue(context.NodeType, out g2)) yield return new MenuItem(ceilIntItems.First(v=>g2.SequenceEqual(v.Value)).Key);
+      if (roundItems.TryGetValue(context.NodeType, out var g2)) yield return new MenuItem(roundIntItems.First(v => g2.SequenceEqual(v.Value)).Key);
+      if (floorItems.TryGetValue(context.NodeType, out g2)) yield return new MenuItem(floorIntItems.First(v => g2.SequenceEqual(v.Value)).Key);
+      if (ceilItems.TryGetValue(context.NodeType, out g2)) yield return new MenuItem(ceilIntItems.First(v => g2.SequenceEqual(v.Value)).Key);
     }
     if (roundToIntGroup.TryGetValue(context.NodeType, out var genericTypes2))
     {
@@ -40,9 +40,9 @@ static partial class ContextualSwapActionsPatch
       {
         yield return new MenuItem(match.Key);
       }
-      if (roundIntItems.TryGetValue(context.NodeType, out var g2)) yield return new MenuItem(roundItems.First(v=>g2.SequenceEqual(v.Value)).Key);
-      if (floorIntItems.TryGetValue(context.NodeType, out g2)) yield return new MenuItem(floorItems.First(v=>g2.SequenceEqual(v.Value)).Key);
-      if (ceilIntItems.TryGetValue(context.NodeType, out g2)) yield return new MenuItem(ceilItems.First(v=>g2.SequenceEqual(v.Value)).Key);
+      if (roundIntItems.TryGetValue(context.NodeType, out var g2)) yield return new MenuItem(roundItems.First(v => g2.SequenceEqual(v.Value)).Key);
+      if (floorIntItems.TryGetValue(context.NodeType, out g2)) yield return new MenuItem(floorItems.First(v => g2.SequenceEqual(v.Value)).Key);
+      if (ceilIntItems.TryGetValue(context.NodeType, out g2)) yield return new MenuItem(ceilItems.First(v => g2.SequenceEqual(v.Value)).Key);
     }
   }
 }

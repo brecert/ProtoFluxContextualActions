@@ -1018,9 +1018,9 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(UnescapeUriDataString));
     }
     else if (outputType == typeof(char))
-		{
-			yield return new MenuItem(typeof(CharToString));
-		}
+    {
+      yield return new MenuItem(typeof(CharToString));
+    }
 
     else if (outputType == typeof(DateTime))
     {
@@ -1107,9 +1107,9 @@ internal static class ContextualSelectionActionsPatch
     }
 
     if (outputType == typeof(ILocomotionModule))
-		{
-			yield return new MenuItem(typeof(GetLocomotionArchetype));
-		}
+    {
+      yield return new MenuItem(typeof(GetLocomotionArchetype));
+    }
 
     if (outputType == typeof(Type))
     {
@@ -1133,12 +1133,14 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(ToString_object));
     }
 
-    else {
+    else
+    {
       if (psuedoGenericTypes.ObjToString.Any(n => n.Types.First() == outputType))
       {
         yield return new(psuedoGenericTypes.ObjToString.First(n => n.Types.First() == outputType).Node, group: "Casts");
       }
-      else if (outputType != typeof(string)) {
+      else if (outputType != typeof(string))
+      {
         yield return new(typeof(ToString_object), group: "Casts");
       }
     }
@@ -1159,7 +1161,7 @@ internal static class ContextualSelectionActionsPatch
       );
     }
     if (outputType != typeof(object))
-		{
+    {
       if (outputType.IsUnmanaged())
       {
         yield return new MenuItem(
@@ -1168,9 +1170,9 @@ internal static class ContextualSelectionActionsPatch
         );
       }
       else if (ReflectionHelper.IsNullable(outputType))
-			{
-				yield return new MenuItem(typeof(NullableToObjectCast<>).MakeGenericType(Nullable.GetUnderlyingType(outputType) ?? outputType), name: "Object", group: "Casts");
-			}
+      {
+        yield return new MenuItem(typeof(NullableToObjectCast<>).MakeGenericType(Nullable.GetUnderlyingType(outputType) ?? outputType), name: "Object", group: "Casts");
+      }
       else if (outputType.IsClass)
       {
         yield return new MenuItem(
@@ -1178,8 +1180,8 @@ internal static class ContextualSelectionActionsPatch
           name: "Object", group: "Casts"
         );
       }
-		}
-    
+    }
+
 
     if (outputType == typeof(IWorldElement))
     {
@@ -1809,7 +1811,7 @@ internal static class ContextualSelectionActionsPatch
 
     yield return new MenuItem(dynVariableInput);
     yield return new MenuItem(spatialVariableInput);
-    
+
     if (psuedoGenericTypes.Parse.Any(n => n.Types.First() == inputType))
     {
       yield return new(psuedoGenericTypes.Parse.First(n => n.Types.First() == inputType).Node);
