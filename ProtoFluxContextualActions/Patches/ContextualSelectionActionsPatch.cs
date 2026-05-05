@@ -1721,6 +1721,11 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(GetAsset<>).MakeGenericType(inputType));
     }
 
+    if (psuedoGenericTypes.Parse.Any(n => n.Types.First() == inputType))
+    {
+      yield return new(psuedoGenericTypes.Parse.First(n => n.Types.First() == inputType).Node);
+    }
+
     if (inputType.IsEnum)
     {
       // yield return new MenuItem(typeof(NextValue<>).MakeGenericType(inputType));
