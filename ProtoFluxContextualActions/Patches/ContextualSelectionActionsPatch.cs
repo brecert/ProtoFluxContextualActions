@@ -66,6 +66,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.Color;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Operators;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Time;
 using ProtoFlux.Runtimes.Execution.Nodes.Casts;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Locomotion;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -1073,6 +1074,8 @@ internal static class ContextualSelectionActionsPatch
 
       yield return new MenuItem(typeof(FindCharacterControllerFromUser));
 
+      yield return new MenuItem(typeof(GetActiveLocomotionModule));
+
       yield return new MenuItem(typeof(StandardController), group: "Input");
       Type controllerType = GetUserControllerType(Engine.Current.WorldManager.FocusedWorld.LocalUser);
       if (controllerType != typeof(StandardController)) yield return new MenuItem(controllerType, group: "Input");
@@ -1102,6 +1105,11 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(SetCharacterVelocity), group: "Velocity");
       yield return new MenuItem(typeof(ApplyCharacterImpulse), group: "Velocity");
     }
+
+    if (outputType == typeof(ILocomotionModule))
+		{
+			yield return new MenuItem(typeof(GetLocomotionArchetype));
+		}
 
     if (outputType == typeof(Type))
     {
@@ -1146,7 +1154,7 @@ internal static class ContextualSelectionActionsPatch
     if (typeof(IWorldElement).IsAssignableFrom(outputType) && outputType != typeof(IWorldElement))
     {
       yield return new MenuItem(
-        typeof(ProtoFlux.Runtimes.Execution.Nodes.Casts.ObjectCast<,>).MakeGenericType(outputType, typeof(IWorldElement)),
+        typeof(ObjectCast<,>).MakeGenericType(outputType, typeof(IWorldElement)),
         name: "IWorldElement", group: "Casts"
       );
     }
@@ -1155,14 +1163,18 @@ internal static class ContextualSelectionActionsPatch
       if (outputType.IsUnmanaged())
       {
         yield return new MenuItem(
-          typeof(ProtoFlux.Runtimes.Execution.Nodes.Casts.ValueToObjectCast<>).MakeGenericType(outputType),
+          typeof(ValueToObjectCast<>).MakeGenericType(outputType),
           name: "Object", group: "Casts"
         );
       }
-      else
+      else if (ReflectionHelper.IsNullable(outputType))
+			{
+				yield return new MenuItem(typeof(NullableToObjectCast<>).MakeGenericType(Nullable.GetUnderlyingType(outputType) ?? outputType), name: "Object", group: "Casts");
+			}
+      else if (outputType.IsClass)
       {
         yield return new MenuItem(
-          typeof(ProtoFlux.Runtimes.Execution.Nodes.Casts.ObjectCast<,>).MakeGenericType(outputType, typeof(object)),
+          typeof(ObjectCast<,>).MakeGenericType(outputType, typeof(object)),
           name: "Object", group: "Casts"
         );
       }
