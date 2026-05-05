@@ -568,10 +568,6 @@ internal static class ContextualSelectionActionsPatch
           {
             yield return new(psuedoGenericTypes.Round.First(n => n.Types.First() == outputType).Node, group: "Math");
           }
-          if (psuedoGenericTypes.RoundToInt.Any(n => n.Types.First() == outputType))
-          {
-            yield return new(psuedoGenericTypes.RoundToInt.First(n => n.Types.First() == outputType).Node, group: "Math");
-          }
 
           if (outputType == typeof(bool))
           {
