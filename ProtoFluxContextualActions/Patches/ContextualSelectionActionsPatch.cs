@@ -67,6 +67,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Operators;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Time;
 using ProtoFlux.Runtimes.Execution.Nodes.Casts;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Locomotion;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Playback;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -464,7 +465,7 @@ internal static class ContextualSelectionActionsPatch
           {
             if (TryGetPsuedoGenericForType(world, "Slerp_", outputType) is Type slerpType)
             {
-              yield return new MenuItem(slerpType);
+              yield return new MenuItem(slerpType, group: "Math/Lerping");
             }
 
             if (TryGetPsuedoGenericForType(world, "Pow_", outputType) is Type powType)
@@ -1375,6 +1376,32 @@ internal static class ContextualSelectionActionsPatch
           return true;
         }
       );
+    }
+
+    if (typeof(IPlayable).IsAssignableFrom(outputType))
+    {
+      yield return new(typeof(Play));
+      yield return new(typeof(Pause));
+      yield return new(typeof(Resume));
+      yield return new(typeof(Stop));
+
+      yield return new(typeof(Wait), group: "Async");
+      yield return new(typeof(PlayAndWait), group: "Async");
+
+      yield return new(typeof(Position), group: "State");
+      yield return new(typeof(SetPosition), group: "State");
+      yield return new(typeof(ShiftPosition), group: "State");
+      yield return new(typeof(NormalizedPosition), group: "State");
+      yield return new(typeof(SetNormalizedPosition), group: "State");
+
+      yield return new(typeof(Speed), group: "State");
+      yield return new(typeof(SetSpeed), group: "State");
+
+      yield return new(typeof(IsPlaying), group: "Playback");
+      yield return new(typeof(IsLooped), group: "Playback");
+      yield return new(typeof(Toggle), group: "Playback");
+      yield return new(typeof(PlaybackState), group: "Playback");
+      yield return new(typeof(PlaybackDrive), group: "Playback");
     }
 
     if (outputType == typeof(bool) || outputType == typeof(bool2) || outputType == typeof(bool3) || outputType == typeof(bool4))

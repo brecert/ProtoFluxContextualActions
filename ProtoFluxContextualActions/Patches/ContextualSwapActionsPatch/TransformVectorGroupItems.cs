@@ -23,12 +23,19 @@ static partial class ContextualSwapActionsPatch
     { typeof(GlobalScaleToLocal), typeof(LocalScaleToGlobal) },
     { typeof(GlobalRotationToLocal), typeof(LocalRotationToGlobal) },
   };
-  static readonly BiDictionary<Type, Type> VectorTransformSwapGroup = new() {
+  static readonly BiDictionary<Type, Type> GlobalVectorTransformSwapGroup = new() {
     { typeof(GlobalPointToLocal), typeof(TransformPoint) },
     { typeof(GlobalDirectionToLocal), typeof(TransformDirection) },
     { typeof(GlobalVectorToLocal), typeof(TransformVector) },
     { typeof(GlobalScaleToLocal), typeof(TransformScale) },
     { typeof(GlobalRotationToLocal), typeof(TransformRotation) },
+  };
+  static readonly BiDictionary<Type, Type> LocalVectorTransformSwapGroup = new() {
+    { typeof(LocalPointToGlobal), typeof(TransformPoint) },
+    { typeof(LocalDirectionToGlobal), typeof(TransformDirection) },
+    { typeof(LocalVectorToGlobal), typeof(TransformVector) },
+    { typeof(LocalScaleToGlobal), typeof(TransformScale) },
+    { typeof(LocalRotationToGlobal), typeof(TransformRotation) },
   };
 
   internal static IEnumerable<MenuItem> TransformVectorGroupItems(ContextualContext context)
@@ -37,10 +44,12 @@ static partial class ContextualSwapActionsPatch
     {
       foreach (var vecNode in TransformVectorGroup)
       {
-        yield return new MenuItem(vecNode);
+        yield return new MenuItem(vecNode, connectionTransferType: ConnectionTransferType.ByIndexLossy);
       }
     }
     if (TryGetSwap(VectorGlobalLocalGroup, context.NodeType, out Type match)) yield return new(match);
-    if (TryGetSwap(VectorTransformSwapGroup, context.NodeType, out match)) yield return new(match);
+    if (TryGetSwap(GlobalVectorTransformSwapGroup, context.NodeType, out match)) yield return new(match);
+    // this one may not be needed, but it could speed some things up a little.
+    if (TryGetSwap(LocalVectorTransformSwapGroup, context.NodeType, out match)) yield return new(match);
   }
 }
