@@ -1136,7 +1136,7 @@ internal static class ContextualSelectionActionsPatch
         name: "IWorldElement", group: "Casts"
       );
     }
-    if (outputType.IsValueType)
+    if (typeof(ValueToObjectCast<>).MakeGenericType(outputType).IsValidGenericType(true))
     {
       yield return new MenuItem(
         typeof(ProtoFlux.Runtimes.Execution.Nodes.Casts.ValueToObjectCast<>).MakeGenericType(outputType),
