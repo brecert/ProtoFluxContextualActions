@@ -63,6 +63,9 @@ static class PsuedoGenericTypesHelper
     [
       .. psuedoGenerics.Pack,
       .. psuedoGenerics.FromEuler,
+      .. psuedoGenerics.AxisAngle,
+      .. psuedoGenerics.LookRotation,
+      .. psuedoGenerics.FromToRotation,
       .. psuedoGenerics.PackRows,
       .. psuedoGenerics.PackColumns,
       .. psuedoGenerics.ComposeTRS,
@@ -73,6 +76,7 @@ static class PsuedoGenericTypesHelper
     [
       .. psuedoGenerics.Unpack,
       .. psuedoGenerics.EulerAngles,
+      .. psuedoGenerics.ToAxisAngle,
       .. psuedoGenerics.UnpackRows,
       .. psuedoGenerics.UnpackColumns,
       // .. psuedoGenerics.ComposeTRS,

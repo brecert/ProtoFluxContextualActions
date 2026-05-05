@@ -564,7 +564,7 @@ internal static class ContextualSelectionActionsPatch
 
           if (TryGetInverseNode(outputType, out var inverseNodeType))
           {
-            yield return new MenuItem(inverseNodeType);
+            yield return new MenuItem(inverseNodeType, group: "Math");
           }
 
           if (TryGetTransposeNode(outputType, out var transposeNodeType))
