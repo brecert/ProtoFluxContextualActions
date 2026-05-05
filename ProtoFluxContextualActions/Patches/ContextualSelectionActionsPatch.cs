@@ -1738,11 +1738,6 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(GetAsset<>).MakeGenericType(inputType));
     }
 
-    if (psuedoGenericTypes.Parse.Any(n => n.Types.First() == inputType))
-    {
-      yield return new(psuedoGenericTypes.Parse.First(n => n.Types.First() == inputType).Node);
-    }
-
     if (inputType.IsEnum)
     {
       // yield return new MenuItem(typeof(NextValue<>).MakeGenericType(inputType));
@@ -1785,6 +1780,7 @@ internal static class ContextualSelectionActionsPatch
     // Can be swapped to Local or Store at any point
     var variableInput = GetNodeForType(inputType, [
       new NodeTypeRecord(typeof(DataModelValueFieldStore<>), null, null),
+      new NodeTypeRecord(typeof(DataModelObjectFieldStore<>), null, null),
       new NodeTypeRecord(typeof(DataModelObjectRefStore<>), null, null),
     ]);
     yield return new MenuItem(variableInput);
@@ -1800,6 +1796,11 @@ internal static class ContextualSelectionActionsPatch
 
     yield return new MenuItem(dynVariableInput);
     yield return new MenuItem(spatialVariableInput);
+    
+    if (psuedoGenericTypes.Parse.Any(n => n.Types.First() == inputType))
+    {
+      yield return new(psuedoGenericTypes.Parse.First(n => n.Types.First() == inputType).Node);
+    }
   }
 
   internal static Dictionary<Type, List<Type>> UnpackNodeMapping(World world) =>
