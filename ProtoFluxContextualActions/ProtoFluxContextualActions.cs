@@ -39,6 +39,8 @@ public class ProtoFluxContextualActions : ResoniteMod
   [AutoRegisterConfigKey]
   private static readonly ModConfigurationKey<bool> tryKeepContextPosition = new("Try Keep Context Menu Position", "If the context menu should attempt to stay in the same position", () => false);
   [AutoRegisterConfigKey]
+  private static readonly ModConfigurationKey<bool> defaultActionOnPrimaryRelease = new("Default Action On Primary Release", "If a display/input should be created when primary is released", () => false);
+  [AutoRegisterConfigKey]
   private static readonly ModConfigurationKey<int> maxItemsPerPage = new("Max Items Per Page", "The maximum amount of items per page", () => 10);
 
   static ProtoFluxContextualActions()
@@ -147,4 +149,6 @@ public class ProtoFluxContextualActions : ResoniteMod
   public static bool ShouldTryKeepContextPosition() => tryKeepContextPosition.Value;
 
   public static int GetMaxItemsPerPage() => maxItemsPerPage.Value;
+
+  public static bool ShouldDoDefaultActionOnPrimaryRelease() => defaultActionOnPrimaryRelease.Value;
 }

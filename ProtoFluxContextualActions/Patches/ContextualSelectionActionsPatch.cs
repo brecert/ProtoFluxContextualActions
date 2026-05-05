@@ -114,6 +114,15 @@ internal static class ContextualSelectionActionsPatch
 
   static ProtoFluxElementProxy? lastProxy = null;
 
+  [HarmonyPrefix]
+  [HarmonyPatch(typeof(ProtoFluxTool), nameof(ProtoFluxTool.OnPrimaryRelease))]
+  internal static void PrimaryReleasePatch(ProtoFluxTool __instance, SyncRef<ProtoFluxElementProxy> ____currentProxy)
+	{
+		if (!ProtoFluxContextualActions.ShouldDoDefaultActionOnPrimaryRelease()) return;
+    if (!__instance.LocalUser.IsContextMenuOpen()) return;
+    __instance.OnSecondaryPress();
+	}
+
   internal static bool Prefix(ProtoFluxTool __instance, SyncRef<ProtoFluxElementProxy> ____currentProxy)
   {
     var grabbedReference = __instance.GetGrabbedReference();
