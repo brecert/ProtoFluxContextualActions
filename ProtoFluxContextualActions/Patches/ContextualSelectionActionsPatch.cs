@@ -1466,6 +1466,7 @@ internal static class ContextualSelectionActionsPatch
     if (TypeUtils.MatchInterface(outputType, typeof(IAssetProvider<AudioClip>), out _))
     {
       yield return new MenuItem(typeof(PlayOneShot));
+      yield return new MenuItem(typeof(PlayOneShotAndWait));
     }
 
     if (typeof(IComponent).IsAssignableFrom(outputType))
