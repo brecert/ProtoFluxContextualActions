@@ -64,6 +64,7 @@
             <Name>%(ResoniteReference.Identity)</Name>
             <HintPath Condition="'%(HintPath)' == '' And Exists('$(ResoniteAssemblyPath)/%(Identity).dll')">$(ResoniteAssemblyPath)/%(Identity).dll</HintPath>
             <HintPath Condition="'%(HintPath)' == '' And Exists('$(ResoniteAssemblyPath)/%(Identity).exe')">$(ResoniteAssemblyPath)/%(Identity).exe</HintPath>
+			<Private>False</Private>
         </Reference>
     </ItemGroup>
 
@@ -71,10 +72,12 @@
       <Reference Include="ResoniteModLoader">
         <HintPath>$(ResonitePath)ResoniteModLoader.dll</HintPath>
         <HintPath>$(ResonitePath)Libraries\ResoniteModLoader.dll</HintPath>
+		<Private>False</Private>
       </Reference>
       <Reference Include="HarmonyLib">
         <HintPath>$(ResonitePath)rml_libs\0Harmony.dll</HintPath>
         <HintPath Condition="Exists('$(ResonitePath)0Harmony.dll')">$(ResonitePath)0Harmony.dll</HintPath>
+		<Private>False</Private>
       </Reference>
       <Reference Include="ResoniteHotReloadLib" Condition="'$(Configuration)'=='Debug'">
         <HintPath>$(ResonitePath)rml_libs\ResoniteHotReloadLib.dll</HintPath>
