@@ -1393,6 +1393,7 @@ internal static class ContextualSelectionActionsPatch
       yield return new(typeof(ShiftPosition), group: "State");
       yield return new(typeof(NormalizedPosition), group: "State");
       yield return new(typeof(SetNormalizedPosition), group: "State");
+      yield return new(typeof(ClipLengthFloat), group: "State");
 
       yield return new(typeof(Speed), group: "State");
       yield return new(typeof(SetSpeed), group: "State");
@@ -1401,6 +1402,10 @@ internal static class ContextualSelectionActionsPatch
       yield return new(typeof(IsLooped), group: "Playback");
       yield return new(typeof(Toggle), group: "Playback");
       yield return new(typeof(PlaybackState), group: "Playback");
+    }
+
+    if (outputType == typeof(SyncPlayback))
+    {
       yield return new(typeof(PlaybackDrive), group: "Playback");
     }
 
