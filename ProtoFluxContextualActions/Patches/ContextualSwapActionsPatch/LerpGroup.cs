@@ -27,7 +27,10 @@ static partial class ContextualSwapActionsPatch
     {
       foreach (var match in LerpGroup)
       {
-        yield return new MenuItem(match.MakeGenericType(context.NodeType.GenericTypeArguments));
+        yield return new MenuItem(
+          match.MakeGenericType(context.NodeType.GenericTypeArguments),
+          name: match == typeof(ValueMultiLerp<>) ? "Multi Lerp" : null,
+          connectionTransferType: match == typeof(ValueMultiLerp<>) ? ConnectionTransferType.ByMappingsLossy : ConnectionTransferType.ByNameLossy);
       }
     }
     if (SmoothLerpGroup.Any(t => context.NodeType.IsGenericType ? t == context.NodeType.GetGenericTypeDefinition() : t == context.NodeType))
