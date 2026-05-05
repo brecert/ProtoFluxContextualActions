@@ -1782,6 +1782,7 @@ internal static class ContextualSelectionActionsPatch
       new NodeTypeRecord(typeof(DataModelValueFieldStore<>), null, null),
       new NodeTypeRecord(typeof(DataModelObjectFieldStore<>), null, null),
       new NodeTypeRecord(typeof(DataModelObjectRefStore<>), null, null),
+      new NodeTypeRecord(typeof(StoredObject<>), null, null),
     ]);
     yield return new MenuItem(variableInput);
 
