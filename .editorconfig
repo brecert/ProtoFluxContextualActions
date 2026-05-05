@@ -4,3 +4,6 @@ root = true
 indent_size = 2
 indent_style = space
 tab_width = 2
+
+# CS8625: Cannot convert null literal to non-nullable reference type.
+dotnet_diagnostic.CS8625.severity = none

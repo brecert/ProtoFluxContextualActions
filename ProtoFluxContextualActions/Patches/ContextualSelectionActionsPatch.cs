@@ -65,7 +65,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.Binary;
 using ProtoFlux.Runtimes.Execution.Nodes.Color;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Operators;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Time;
-using FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.Casts;
+using ProtoFlux.Runtimes.Execution.Nodes.Casts;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -295,7 +295,7 @@ internal static class ContextualSelectionActionsPatch
     }
 
     var operation = addedNode.NodeOperationCount > 0 ? addedNode.GetOperation(0) : addedNode.GetOperationList(0).GetElement(0) as INodeOperation;
-    addedNode.TryConnectImpulse(impulseProxy.NodeImpulse.Target, operation, undoable: true);
+    addedNode.TryConnectImpulse(impulseProxy.NodeImpulse.Target, operation!, undoable: true);
   }
   private static void ProcessOperationProxyItem(ProtoFluxTool tool, ProtoFluxElementProxy elementProxy, MenuItem item, ProtoFluxNode addedNode)
   {
@@ -759,10 +759,10 @@ internal static class ContextualSelectionActionsPatch
           Type relayNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ObjectRelay<Slot>);
 
 
-          ProtoFluxNode thisChildCountNode = null;
-          ProtoFluxNode thisForNode = null;
-          ProtoFluxNode thisGetChild = null;
-          ProtoFluxNode thisRelayNode = null;
+          ProtoFluxNode? thisChildCountNode = null;
+          ProtoFluxNode? thisForNode = null;
+          ProtoFluxNode? thisGetChild = null;
+          ProtoFluxNode? thisRelayNode = null;
 
           if (shouldRelay)
           {
@@ -1016,6 +1016,10 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(UnescapeString));
       yield return new MenuItem(typeof(UnescapeUriDataString));
     }
+    else if (outputType == typeof(char))
+		{
+			yield return new MenuItem(typeof(CharToString));
+		}
 
     else if (outputType == typeof(DateTime))
     {
@@ -1116,9 +1120,19 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(ToString_object));
     }
 
-    if (outputType == typeof(RefID))
+    else if (outputType == typeof(RefID))
     {
       yield return new MenuItem(typeof(ToString_object));
+    }
+
+    else {
+      if (psuedoGenericTypes.ObjToString.Any(n => n.Types.First() == outputType))
+      {
+        yield return new(psuedoGenericTypes.ObjToString.First(n => n.Types.First() == outputType).Node, group: "Casts");
+      }
+      else if (outputType != typeof(string)) {
+        yield return new(typeof(ToString_object), group: "Casts");
+      }
     }
 
     if (outputType == typeof(colorX))
@@ -1136,20 +1150,23 @@ internal static class ContextualSelectionActionsPatch
         name: "IWorldElement", group: "Casts"
       );
     }
-    if (typeof(ValueToObjectCast<>).MakeGenericType(outputType).IsValidGenericType(true))
-    {
-      yield return new MenuItem(
-        typeof(ProtoFlux.Runtimes.Execution.Nodes.Casts.ValueToObjectCast<>).MakeGenericType(outputType),
-        name: "Object", group: "Casts"
-      );
-    }
-    else
-    {
-      yield return new MenuItem(
-        typeof(ProtoFlux.Runtimes.Execution.Nodes.Casts.ObjectCast<,>).MakeGenericType(outputType, typeof(object)),
-        name: "Object", group: "Casts"
-      );
-    }
+    if (outputType != typeof(object))
+		{
+      if (outputType.IsUnmanaged())
+      {
+        yield return new MenuItem(
+          typeof(ProtoFlux.Runtimes.Execution.Nodes.Casts.ValueToObjectCast<>).MakeGenericType(outputType),
+          name: "Object", group: "Casts"
+        );
+      }
+      else
+      {
+        yield return new MenuItem(
+          typeof(ProtoFlux.Runtimes.Execution.Nodes.Casts.ObjectCast<,>).MakeGenericType(outputType, typeof(object)),
+          name: "Object", group: "Casts"
+        );
+      }
+		}
     
 
     if (outputType == typeof(IWorldElement))
