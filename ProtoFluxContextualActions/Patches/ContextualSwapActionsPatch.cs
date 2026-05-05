@@ -150,6 +150,7 @@ internal static partial class ContextualSwapActionsPatch
       {
         hitNode.UndoableDestroy();
       }
+      __instance.LocalUser.CloseContextMenu(__instance);
     }
   }
 
@@ -317,6 +318,7 @@ internal static partial class ContextualSwapActionsPatch
       .. InputGroupItems(context),
       .. RoundGroupItems(context),
       .. StringIncludesGroupItems(context),
+      .. TransformVectorGroupItems(context),
     ];
 
     foreach (var menuItem in menuItems)

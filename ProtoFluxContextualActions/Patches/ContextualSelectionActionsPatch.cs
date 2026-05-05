@@ -120,6 +120,8 @@ internal static class ContextualSelectionActionsPatch
   {
     if (!ProtoFluxContextualActions.ShouldDoDefaultActionOnPrimaryRelease()) return;
     if (!__instance.LocalUser.IsContextMenuOpen()) return;
+    // only allow the contextmenu to trigger if the menu came from the tool
+    if (__instance.LocalUser.GetUserContextMenu().CurrentSummoner != __instance) return;
     __instance.OnSecondaryPress();
   }
 
@@ -906,7 +908,7 @@ internal static class ContextualSelectionActionsPatch
       });
 
       yield return new MenuItem(
-        typeof(ProtoFlux.Runtimes.Execution.Nodes.Casts.ObjectCast<Slot, IWorldElement>),
+        typeof(ObjectCast<Slot, IWorldElement>),
         name: "Allocating User",
         group: "Slots",
         onNodeSpawn: (ProtoFluxNode node, ProtoFluxElementProxy proxy, ProtoFluxTool tool) =>
@@ -977,6 +979,15 @@ internal static class ContextualSelectionActionsPatch
         yield return new(psuedoGenericTypes.Reflect.First(n => n.Types.First() == outputType).Node, group: "Vectors");
         yield return new(psuedoGenericTypes.Cross.First(n => n.Types.First() == outputType).Node, group: "Vectors");
       }
+    }
+
+    if (outputType == typeof(float3))
+    {
+      yield return new(typeof(TransformPoint), group: "Vectors");
+    }
+    if (outputType == typeof(floatQ))
+    {
+      yield return new(typeof(TransformRotation), group: "Vectors");
     }
 
     if (outputType == typeof(bool))
