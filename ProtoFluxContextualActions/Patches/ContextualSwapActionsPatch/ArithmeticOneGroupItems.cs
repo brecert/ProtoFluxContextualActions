@@ -30,6 +30,7 @@ static partial class ContextualSwapActionsPatch
     typeof(ValueDec<>),
     typeof(ValueOneMinus<>),
     typeof(ValueNegate<>),
+    typeof(ValueReciprocal<>),
   ];
 
   internal static IEnumerable<MenuItem> ArithmeticOneGroupItems(ContextualContext context)
