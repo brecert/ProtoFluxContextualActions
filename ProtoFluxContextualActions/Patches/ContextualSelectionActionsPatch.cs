@@ -65,6 +65,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.Binary;
 using ProtoFlux.Runtimes.Execution.Nodes.Color;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Operators;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Time;
+using FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.Casts;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -1128,13 +1129,28 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(ColorXToHexCode));
     }
 
-    if (typeof(IWorldElement).IsAssignableFrom(outputType))
+    if (typeof(IWorldElement).IsAssignableFrom(outputType) && outputType != typeof(IWorldElement))
     {
       yield return new MenuItem(
         typeof(ProtoFlux.Runtimes.Execution.Nodes.Casts.ObjectCast<,>).MakeGenericType(outputType, typeof(IWorldElement)),
-        name: "IWorldElement"
+        name: "IWorldElement", group: "Casts"
       );
     }
+    if (outputType.IsValueType)
+    {
+      yield return new MenuItem(
+        typeof(ProtoFlux.Runtimes.Execution.Nodes.Casts.ValueToObjectCast<>).MakeGenericType(outputType),
+        name: "Object", group: "Casts"
+      );
+    }
+    else
+    {
+      yield return new MenuItem(
+        typeof(ProtoFlux.Runtimes.Execution.Nodes.Casts.ObjectCast<,>).MakeGenericType(outputType, typeof(object)),
+        name: "Object", group: "Casts"
+      );
+    }
+    
 
     if (outputType == typeof(IWorldElement))
     {
