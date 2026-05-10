@@ -319,6 +319,7 @@ internal static partial class ContextualSwapActionsPatch
       .. RoundGroupItems(context),
       .. StringIncludesGroupItems(context),
       .. TransformVectorGroupItems(context),
+      .. ArithmeticConstantsGroupItems(context),
     ];
 
     foreach (var menuItem in menuItems)
