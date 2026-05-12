@@ -1411,25 +1411,25 @@ internal static class ContextualSelectionActionsPatch
     }
 
     if (typeof(ITool).IsAssignableFrom(outputType))
-		{
-			yield return new(typeof(EquipTool));
-			yield return new(typeof(ToolEquippingSide));
-			yield return new(typeof(ToolEquippingSlot));
-			yield return new(typeof(IsToolEquipped));
-			yield return new(typeof(IsToolInUse));
-		}
+    {
+      yield return new(typeof(EquipTool));
+      yield return new(typeof(ToolEquippingSide));
+      yield return new(typeof(ToolEquippingSlot));
+      yield return new(typeof(IsToolEquipped));
+      yield return new(typeof(IsToolInUse));
+    }
     if (outputType == typeof(RawDataTool))
-		{
-			yield return new(typeof(GetRawDataToolHit));
-		}
+    {
+      yield return new(typeof(GetRawDataToolHit));
+    }
 
     if (typeof(IAvatarAnchor).IsAssignableFrom(outputType))
-		{
-			yield return new(typeof(AnchorUser));
-			yield return new(typeof(AnchoredUser));
-			yield return new(typeof(IsAnchorOccupied));
-			yield return new(typeof(ReleaseUser));
-		}
+    {
+      yield return new(typeof(AnchorUser));
+      yield return new(typeof(AnchoredUser));
+      yield return new(typeof(IsAnchorOccupied));
+      yield return new(typeof(ReleaseUser));
+    }
 
     if (outputType == typeof(bool) || outputType == typeof(bool2) || outputType == typeof(bool3) || outputType == typeof(bool4))
     {
@@ -1818,9 +1818,9 @@ internal static class ContextualSelectionActionsPatch
     }
 
     if (typeof(IAvatarAnchor).IsAssignableFrom(inputType))
-		{
-			yield return new(typeof(GetUserAnchor));
-		}
+    {
+      yield return new(typeof(GetUserAnchor));
+    }
 
     if (inputProxy.ElementName == nameof(LocalScreenPointToDirection.NormalizedScreenPoint))
     {
