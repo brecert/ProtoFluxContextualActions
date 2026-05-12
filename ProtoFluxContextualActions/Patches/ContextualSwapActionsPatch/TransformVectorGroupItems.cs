@@ -16,6 +16,18 @@ static partial class ContextualSwapActionsPatch
     typeof(TransformVector),
     typeof(TransformScale),
   ];
+  static readonly HashSet<Type> GlobalToLocalTransformGroup = [
+    typeof(GlobalPointToLocal),
+    typeof(GlobalDirectionToLocal),
+    typeof(GlobalVectorToLocal),
+    typeof(GlobalScaleToLocal),
+  ];
+  static readonly HashSet<Type> LocalToGlobalTransformGroup = [
+    typeof(GlobalPointToLocal),
+    typeof(GlobalDirectionToLocal),
+    typeof(GlobalVectorToLocal),
+    typeof(GlobalScaleToLocal),
+  ];
   static readonly BiDictionary<Type, Type> VectorGlobalLocalGroup = new() {
     { typeof(GlobalPointToLocal), typeof(LocalPointToGlobal) },
     { typeof(GlobalDirectionToLocal), typeof(LocalDirectionToGlobal) },
@@ -41,6 +53,20 @@ static partial class ContextualSwapActionsPatch
   internal static IEnumerable<MenuItem> TransformVectorGroupItems(ContextualContext context)
   {
     if (TransformVectorGroup.Contains(context.NodeType))
+    {
+      foreach (var vecNode in TransformVectorGroup)
+      {
+        yield return new MenuItem(vecNode, connectionTransferType: ConnectionTransferType.ByIndexLossy);
+      }
+    }
+    if (GlobalToLocalTransformGroup.Contains(context.NodeType))
+    {
+      foreach (var vecNode in TransformVectorGroup)
+      {
+        yield return new MenuItem(vecNode, connectionTransferType: ConnectionTransferType.ByIndexLossy);
+      }
+    }
+    if (LocalToGlobalTransformGroup.Contains(context.NodeType))
     {
       foreach (var vecNode in TransformVectorGroup)
       {
