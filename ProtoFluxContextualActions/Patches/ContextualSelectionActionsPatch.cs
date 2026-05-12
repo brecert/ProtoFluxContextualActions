@@ -68,6 +68,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Time;
 using ProtoFlux.Runtimes.Execution.Nodes.Casts;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Locomotion;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Playback;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Avatar.Anchors;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -1409,6 +1410,27 @@ internal static class ContextualSelectionActionsPatch
       yield return new(typeof(PlaybackDrive), group: "Playback");
     }
 
+    if (typeof(ITool).IsAssignableFrom(outputType))
+		{
+			yield return new(typeof(EquipTool));
+			yield return new(typeof(ToolEquippingSide));
+			yield return new(typeof(ToolEquippingSlot));
+			yield return new(typeof(IsToolEquipped));
+			yield return new(typeof(IsToolInUse));
+		}
+    if (outputType == typeof(RawDataTool))
+		{
+			yield return new(typeof(GetRawDataToolHit));
+		}
+
+    if (typeof(IAvatarAnchor).IsAssignableFrom(outputType))
+		{
+			yield return new(typeof(AnchorUser));
+			yield return new(typeof(AnchoredUser));
+			yield return new(typeof(IsAnchorOccupied));
+			yield return new(typeof(ReleaseUser));
+		}
+
     if (outputType == typeof(bool) || outputType == typeof(bool2) || outputType == typeof(bool3) || outputType == typeof(bool4))
     {
       yield return new(psuedoGenericTypes.AND.First(n => n.Types.First() == outputType).Node);
@@ -1794,6 +1816,11 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(ChildrenCount));
       yield return new MenuItem(typeof(CountOccurrences));
     }
+
+    if (typeof(IAvatarAnchor).IsAssignableFrom(inputType))
+		{
+			yield return new(typeof(GetUserAnchor));
+		}
 
     if (inputProxy.ElementName == nameof(LocalScreenPointToDirection.NormalizedScreenPoint))
     {
