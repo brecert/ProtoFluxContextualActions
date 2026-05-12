@@ -107,6 +107,7 @@ class PsuedoGenericTypes(World world)
   public PsuedoGenerics Mask { get => field ??= MapTypes("Mask_"); }
 
   public PsuedoGenerics Repeat01 { get => field ??= MapTypes("Repeat01_"); }
+  public PsuedoGenerics Remap11_01 { get => field ?? MapTypes("Remap11_01_"); }
 
   public PsuedoGenerics Normalized { get => field ??= MapTypes("Normalized_"); }
   public PsuedoGenerics Magnitude { get => field ??= MapTypes("Magnitude_"); }
