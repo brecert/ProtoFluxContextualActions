@@ -324,6 +324,8 @@ internal static partial class ContextualSwapActionsPatch
       .. PlaybackGroupItems(context),
       .. RemapGroupItems(context),
       .. ZeroOneGroupItems(context),
+      .. EventGroupItems(context),
+      .. VectorGroupItems(context),
     ];
 
     foreach (var menuItem in menuItems)
