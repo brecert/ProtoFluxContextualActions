@@ -1111,6 +1111,7 @@ internal static class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(BodyNodeChirality));
       yield return new MenuItem(typeof(OtherSide));
       yield return new MenuItem(typeof(RelativeBodyNode));
+      yield return new MenuItem(typeof(GetSide));
     }
 
     if (outputType == typeof(Grabber))
@@ -1769,6 +1770,7 @@ internal static class ContextualSelectionActionsPatch
     else if (inputType == typeof(BodyNode))
     {
       yield return new MenuItem(typeof(GrabberBodyNode));
+      yield return new MenuItem(typeof(GetSide));
     }
 
     else if (inputType == typeof(Grabber))
