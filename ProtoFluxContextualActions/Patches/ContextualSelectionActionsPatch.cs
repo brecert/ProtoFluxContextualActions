@@ -1023,13 +1023,17 @@ internal static class ContextualSelectionActionsPatch
     if (outputType == typeof(string))
     {
       yield return new MenuItem(typeof(StringLength));
+
       yield return new MenuItem(typeof(IndexOfString));
+
       yield return new MenuItem(typeof(Contains));
       yield return new MenuItem(typeof(Substring));
-      yield return new MenuItem(typeof(FormatString));
-      yield return new MenuItem(typeof(IsStringEmpty));
-      yield return new MenuItem(typeof(ReplaceSubstring));
       yield return new MenuItem(typeof(TrimString));
+      yield return new MenuItem(typeof(IsStringEmpty));
+
+      yield return new MenuItem(typeof(FormatString));
+      yield return new MenuItem(typeof(ReplaceSubstring));
+
       yield return new MenuItem(typeof(ProtoFlux.Runtimes.Execution.Nodes.Strings.ToLower));
 
       yield return new MenuItem(typeof(GetCharacter));
