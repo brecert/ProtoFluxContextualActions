@@ -7,6 +7,7 @@ using ProtoFluxContextualActions.Attributes;
 using HarmonyLib;
 using System.Linq;
 using ProtoFluxContextualActions.Utils;
+using ProtoFlux.Runtimes.Execution.Nodes.Strings;
 
 [HarmonyPatchCategory("ProtoFluxTool Contextual Cast Actions"), TweakCategory("Adds 'Contextual Cast Actions' to the ProtoFlux Tool. Casting certain types to others may suggest extra actions, rather than only allowing explicit casts.")]
 [HarmonyPatch(typeof(ProtoFluxTool), "TryConnect", argumentTypes: [typeof(ProtoFluxNode), typeof(ISyncRef), typeof(INodeOutput)])]
@@ -49,6 +50,56 @@ internal static class ContextualSelectionActionsPatch
       ContextMenuItem zeroOneItem = menu.AddItem("0/1", (Uri)null, new colorX?(colorX.Cyan));
       var nodeBinding = ProtoFluxHelper.GetBindingForNode(zeroOneNode);
       zeroOneItem.Button.LocalPressed += delegate
+      {
+        tool.SpawnNode(nodeBinding, n =>
+        {
+          n.EnsureElementsInDynamicLists();
+          n.GetInput(0).Target = output;
+          input.Target = n.GetOutput(0);
+          menu.Close();
+        });
+      };
+    }
+
+    if (outputType == typeof(string) && inputType == typeof(bool))
+    {
+      ContextMenuItem zeroOneItem = menu.AddItem("String Empty", (Uri)null, new colorX?(colorX.Cyan));
+      var nodeBinding = ProtoFluxHelper.GetBindingForNode(typeof(IsStringEmpty));
+      zeroOneItem.Button.LocalPressed += delegate
+      {
+        tool.SpawnNode(nodeBinding, n =>
+        {
+          n.EnsureElementsInDynamicLists();
+          n.GetInput(0).Target = output;
+          input.Target = n.GetOutput(0);
+          menu.Close();
+        });
+      };
+    }
+
+    if (outputType == typeof(string) && psuedoGenericTypes.Parse.Any(n => n.Types.First() == inputType))
+    {
+      Type parseNode = psuedoGenericTypes.Parse.First(n => n.Types.First() == inputType).Node;
+      ContextMenuItem parseItem = menu.AddItem("Parse", (Uri)null, new colorX?(colorX.Cyan));
+      var nodeBinding = ProtoFluxHelper.GetBindingForNode(parseNode);
+      parseItem.Button.LocalPressed += delegate
+      {
+        tool.SpawnNode(nodeBinding, n =>
+        {
+          n.EnsureElementsInDynamicLists();
+          n.GetInput(0).Target = output;
+          input.Target = n.GetOutput(0);
+          menu.Close();
+        });
+      };
+    }
+
+    if (inputType == typeof(string) && psuedoGenericTypes.ObjToString.Any(n => n.Types.First() == outputType))
+    {
+      Type parseNode = psuedoGenericTypes.ObjToString.First(n => n.Types.First() == outputType).Node;
+      ContextMenuItem parseItem = menu.AddItem("To String", (Uri)null, new colorX?(colorX.Cyan));
+      var nodeBinding = ProtoFluxHelper.GetBindingForNode(parseNode);
+      parseItem.Button.LocalPressed += delegate
       {
         tool.SpawnNode(nodeBinding, n =>
         {
