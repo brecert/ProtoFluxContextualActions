@@ -5,6 +5,8 @@ using FrooxEngine.ProtoFlux;
 
 namespace ProtoFluxContextualActions.Utils.Visuals;
 
+// This is a 'example' visual, but also the main current visual as well.
+// It should be pretty easy to use this to make a different UI
 internal class ContextMenuVisual : IMenuVisual
 {
   ContextMenu? currentMenu;

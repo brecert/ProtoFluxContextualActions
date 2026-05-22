@@ -19,6 +19,13 @@ internal struct GroupItem
   internal MenuItem baseItem;
 }
 
+// To be used by the mod config, as a "What visual do you want to use" setting.
+// Add new entries when making a new visual
+internal enum MenuVisual
+{
+	ContextMenu
+}
+
 internal class GroupManager
 {
   // Page Config
@@ -59,8 +66,14 @@ internal class GroupManager
       else GroupedItems.Add(itemGroup, [item]);
     });
 
-    currentVisual = new ContextMenuVisual();
+    // Would be read from mod config instead of a constant
+    MenuVisual selectedVisual = MenuVisual.ContextMenu;
 
+    currentVisual = selectedVisual switch {
+      MenuVisual.ContextMenu => new ContextMenuVisual(),
+      // add custom visual classes here, with a new enum entry
+      _ => new ContextMenuVisual(),
+    };
     currentVisual.CreateInitialMenu(tool);
 
     currentTool = tool;
