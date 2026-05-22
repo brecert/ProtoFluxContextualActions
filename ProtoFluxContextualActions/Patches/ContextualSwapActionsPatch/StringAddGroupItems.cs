@@ -11,6 +11,8 @@ static partial class ContextualSwapActionsPatch
   static readonly HashSet<Type> StringAddGroup = [
     typeof(ConcatenateString),
     typeof(ConcatenateMultiString),
+    typeof(StringJoin),
+    typeof(StringInsert)
   ];
 
   internal static IEnumerable<MenuItem> StringAddGroupItems(ContextualContext context)
@@ -19,7 +21,7 @@ static partial class ContextualSwapActionsPatch
     {
       foreach (var match in StringAddGroup)
       {
-        yield return new MenuItem(match, connectionTransferType: ConnectionTransferType.ByIndexLossy);
+        yield return new MenuItem(match, connectionTransferType: ConnectionTransferType.ByIndexLossy, name: match == typeof(ConcatenateMultiString) ? "Add Multi" : null);
       }
     }
   }
