@@ -41,7 +41,7 @@ internal static partial class ContextualSwapActionsPatch
     ByIndexLossy
   }
 
-  internal readonly struct MenuItem(Type node, string? name = null, ConnectionTransferType? connectionTransferType = ConnectionTransferType.ByNameLossy)
+  internal readonly struct MenuItem(Type node, string? name = null, ConnectionTransferType? connectionTransferType = ConnectionTransferType.ByNameLossy, Action<ProtoFluxNode>? onSpawn = null)
   {
     internal readonly Type node = node;
 
@@ -50,9 +50,11 @@ internal static partial class ContextualSwapActionsPatch
     internal readonly ConnectionTransferType? connectionTransferType = connectionTransferType;
 
     internal readonly string DisplayName => name ?? NodeMetadataHelper.GetMetadata(node).Name ?? node.GetNiceTypeName();
+
+    internal readonly Action<ProtoFluxNode>? onSpawn = onSpawn;
   }
 
-  internal record ContextualContext(Type NodeType, World World, ProtoFluxElementProxy? proxy, bool selectSwap);
+  internal record ContextualContext(Type NodeType, World World, ProtoFluxElementProxy? proxy, bool selectSwap, ProtoFluxNode hitNode, ProtoFluxTool callingTool);
 
   // additional data we store for the protoflux tool
   internal class ProtoFluxToolData
@@ -218,6 +220,7 @@ internal static partial class ContextualSwapActionsPatch
         var node = nodeMap[intoNode];
         node.CreateSpawnUndoPoint(node.HasActiveVisual() ? ensureVisualDelegate : null);
       }
+      menuItem.onSpawn?.Invoke(newNode);
     }
 
     __instance.World.EndUndoBatch();
@@ -239,7 +242,7 @@ internal static partial class ContextualSwapActionsPatch
   {
     var node = nodeComponent.NodeInstance;
     var nodeType = node.GetType();
-    var context = new ContextualContext(nodeType, __instance.World, proxy, isSelectSwap);
+    var context = new ContextualContext(nodeType, __instance.World, proxy, isSelectSwap, nodeComponent, __instance);
 
     IEnumerable<MenuItem> menuItems = [
       .. UserRootSwapGroups(nodeType),

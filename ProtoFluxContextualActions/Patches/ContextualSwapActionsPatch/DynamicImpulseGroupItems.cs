@@ -1,5 +1,7 @@
 using Elements.Core;
+using FrooxEngine;
 using FrooxEngine.ProtoFlux;
+using HarmonyLib;
 using ProtoFlux.Core;
 using ProtoFlux.Runtimes.Execution.Nodes.Actions;
 using System;
@@ -31,8 +33,12 @@ static partial class ContextualSwapActionsPatch
   {
     if (DynamicImpulseGroup.Any(t => context.NodeType.IsGenericType ? t == context.NodeType.GetGenericTypeDefinition() : t == context.NodeType))
     {
-      bool IsTrigger = context.NodeType.GetNiceTypeName().Contains("DynamicImpulseTrigger");
-      bool IsAsync = context.NodeType.GetNiceTypeName().StartsWith("Async");
+      bool isGeneric = context.NodeType.IsGenericType;
+      Type baseType = isGeneric ? context.NodeType.GetGenericTypeDefinition() : context.NodeType;
+      Type innerType = isGeneric ? context.NodeType.GenericTypeArguments.First() : context.NodeType;
+
+      bool IsTrigger = innerType.GetNiceTypeName().Contains("DynamicImpulseTrigger");
+      bool IsAsync = innerType.GetNiceTypeName().StartsWith("Async");
 
       Type? dynTrigData = null, dynRecData = null, asyncDynTrigData = null, asyncDynRecData = null;
 
@@ -40,16 +46,18 @@ static partial class ContextualSwapActionsPatch
       bool hasProxyHeld = false;
       bool hasDynData = false;
 
+      string? receiverTag = null;
+
       if (context.proxy is ProtoFluxInputProxy)
       {
-        ProtoFluxInputProxy inputType = (ProtoFluxInputProxy)(context.proxy);
+        ProtoFluxInputProxy inputType = (ProtoFluxInputProxy)context.proxy;
         Type targetType = inputType.InputType;
         target = targetType;
         hasProxyHeld = true;
       }
       if (context.proxy is ProtoFluxOutputProxy)
       {
-        ProtoFluxOutputProxy outputType = (ProtoFluxOutputProxy)(context.proxy);
+        ProtoFluxOutputProxy outputType = (ProtoFluxOutputProxy)context.proxy;
         Type targetType = outputType.OutputType;
         target = targetType;
         hasProxyHeld = true;
@@ -60,6 +68,20 @@ static partial class ContextualSwapActionsPatch
         var opType = context.NodeType.GenericTypeArguments[opCount - 1];
         target = opType;
       }
+
+      if (baseType.GetNiceTypeName().Contains("Receiver"))
+      {
+        var trav = Traverse.Create(context.hitNode);
+        var field = trav.Field("Tag");
+        UniLog.Warning($"--- possibly has field");
+        if (field.FieldExists())
+        {
+          UniLog.Warning($"--- Field Exists!!!");
+          receiverTag = field.GetValue<SyncRef<IGlobalValueProxy<string>>>().Target.Value;
+          UniLog.Warning($"--- Found tag: '{receiverTag}'");
+				}
+      }
+
 
       if (target != null)
       {
@@ -120,29 +142,58 @@ static partial class ContextualSwapActionsPatch
         .ToList();
 
       string? NodeNameSelector(Type input)
-			{
+      {
         string constructedName = "";
-        bool isGeneric = input.IsGenericType; 
+        bool isGeneric = input.IsGenericType;
         Type baseType = isGeneric ? input.GetGenericTypeDefinition() : input;
         Type innerType = isGeneric ? input.GenericTypeArguments.First() : input;
         if (isGeneric)
-				{
-					constructedName += innerType.GetNiceName();
-				}
+        {
+          constructedName += innerType.GetNiceName();
+        }
         string niceTypeName = baseType.GetNiceTypeName().ToLower();
         if (niceTypeName.Contains("trigger")) constructedName += " Trigger";
         else constructedName += " Receiver";
         if (niceTypeName.Contains("async")) constructedName += " (Async)";
-				return constructedName;
-			}
+        return constructedName;
+      }
+
+      void OnNodeSpawn(Type inputType, ProtoFluxNode newNode)
+      {
+        UniLog.Warning($"--- On Node Spawn: checking tag '{receiverTag}'");
+        if (receiverTag == null) return;
+        UniLog.Warning($"--- On Node Spawn: tag not null!");
+
+        bool isGeneric = context.NodeType.IsGenericType;
+        Type baseType = isGeneric ? context.NodeType.GetGenericTypeDefinition() : context.NodeType;
+        UniLog.Warning($"--- On Node Spawn: base type is '{baseType.GetNiceTypeName()}'");
+        if (!baseType.GetNiceTypeName().Contains("Receiver")) return;
+        UniLog.Warning($"--- On Node Spawn: earlier node is a receiver!");
+        UniLog.Warning($"--- On Node Spawn: spawning node.");
+        context.callingTool.SpawnNode(ProtoFluxHelper.GetInputNode(typeof(string)), inputNode =>
+        {
+          UniLog.Warning($"--- Input node has spawned!");
+          inputNode.EnsureVisual();
+          var casted = (FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ValueObjectInput<string>)inputNode;
+          newNode.GetInput(0).Target = casted.GetOutput(0);
+          UniLog.Warning($"--- set input/output");
+          Slot newNodeSlot = newNode.Slot;
+          casted.Value.Value = receiverTag;
+          casted.Slot.Parent = newNodeSlot.Parent;
+          casted.Slot.CopyTransform(newNodeSlot);
+          casted.Slot.LocalPosition += newNodeSlot.Left * 0.18f + newNodeSlot.Up * (baseType.GetNiceTypeName().Contains("With") ? 0.03f : 0.015f);
+          UniLog.Warning($"--- set transforms");
+        });
+        UniLog.Warning($"--- Main Execution Finished.");
+      }
 
       foreach (var imp in IsAsync ? sortedAsyncImpulses : sortedImpulses)
       {
-        if (imp != null) yield return new(imp, name: NodeNameSelector(imp));
+        if (imp != null) yield return new(imp, name: NodeNameSelector(imp), onSpawn: (node) => OnNodeSpawn(imp, node));
       }
       foreach (var imp in IsAsync ? sortedImpulses : sortedAsyncImpulses)
       {
-        if (imp != null) yield return new(imp, name: NodeNameSelector(imp));
+        if (imp != null) yield return new(imp, name: NodeNameSelector(imp), onSpawn: (node) => OnNodeSpawn(imp, node));
       }
     }
   }

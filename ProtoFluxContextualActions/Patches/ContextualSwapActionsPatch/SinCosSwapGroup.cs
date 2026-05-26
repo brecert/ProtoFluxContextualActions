@@ -16,60 +16,60 @@ static partial class ContextualSwapActionsPatch
 
     // Normal
     if (psuedoGenerics.Sin.Any(n => n.Node == context.NodeType))
-		{
+    {
       var types = psuedoGenerics.Sin.First(n => n.Node == context.NodeType).Types;
-			yield return new MenuItem(psuedoGenerics.Cos.First(n => n.Types.SequenceEqual(types)).Node);
-			yield return new MenuItem(psuedoGenerics.Tan.First(n => n.Types.SequenceEqual(types)).Node);
-			yield return new MenuItem(psuedoGenerics.Asin.First(n => n.Types.SequenceEqual(types)).Node);
-		}
+      yield return new MenuItem(psuedoGenerics.Cos.First(n => n.Types.SequenceEqual(types)).Node);
+      yield return new MenuItem(psuedoGenerics.Tan.First(n => n.Types.SequenceEqual(types)).Node);
+      yield return new MenuItem(psuedoGenerics.Asin.First(n => n.Types.SequenceEqual(types)).Node);
+    }
     if (psuedoGenerics.Cos.Any(n => n.Node == context.NodeType))
-		{
+    {
       var types = psuedoGenerics.Cos.First(n => n.Node == context.NodeType).Types;
-			yield return new MenuItem(psuedoGenerics.Sin.First(n => n.Types.SequenceEqual(types)).Node);
-			yield return new MenuItem(psuedoGenerics.Tan.First(n => n.Types.SequenceEqual(types)).Node);
-			yield return new MenuItem(psuedoGenerics.Acos.First(n => n.Types.SequenceEqual(types)).Node);
-		}
+      yield return new MenuItem(psuedoGenerics.Sin.First(n => n.Types.SequenceEqual(types)).Node);
+      yield return new MenuItem(psuedoGenerics.Tan.First(n => n.Types.SequenceEqual(types)).Node);
+      yield return new MenuItem(psuedoGenerics.Acos.First(n => n.Types.SequenceEqual(types)).Node);
+    }
     if (psuedoGenerics.Tan.Any(n => n.Node == context.NodeType))
-		{
+    {
       var types = psuedoGenerics.Tan.First(n => n.Node == context.NodeType).Types;
-			yield return new MenuItem(psuedoGenerics.Sin.First(n => n.Types.SequenceEqual(types)).Node);
-			yield return new MenuItem(psuedoGenerics.Cos.First(n => n.Types.SequenceEqual(types)).Node);
-			yield return new MenuItem(psuedoGenerics.Atan.First(n => n.Types.SequenceEqual(types)).Node);
-			yield return new MenuItem(psuedoGenerics.Atan2.First(n => n.Types.SequenceEqual(types)).Node);
-		}
+      yield return new MenuItem(psuedoGenerics.Sin.First(n => n.Types.SequenceEqual(types)).Node);
+      yield return new MenuItem(psuedoGenerics.Cos.First(n => n.Types.SequenceEqual(types)).Node);
+      yield return new MenuItem(psuedoGenerics.Atan.First(n => n.Types.SequenceEqual(types)).Node);
+      yield return new MenuItem(psuedoGenerics.Atan2.First(n => n.Types.SequenceEqual(types)).Node);
+    }
 
     // Inverse
     if (psuedoGenerics.Asin.Any(n => n.Node == context.NodeType))
-		{
+    {
       var types = psuedoGenerics.Asin.First(n => n.Node == context.NodeType).Types;
-			yield return new MenuItem(psuedoGenerics.Sin.First(n => n.Types.SequenceEqual(types)).Node);
-			yield return new MenuItem(psuedoGenerics.Acos.First(n => n.Types.SequenceEqual(types)).Node);
-			yield return new MenuItem(psuedoGenerics.Atan.First(n => n.Types.SequenceEqual(types)).Node);
-			yield return new MenuItem(psuedoGenerics.Atan2.First(n => n.Types.SequenceEqual(types)).Node);
-		}
+      yield return new MenuItem(psuedoGenerics.Sin.First(n => n.Types.SequenceEqual(types)).Node);
+      yield return new MenuItem(psuedoGenerics.Acos.First(n => n.Types.SequenceEqual(types)).Node);
+      yield return new MenuItem(psuedoGenerics.Atan.First(n => n.Types.SequenceEqual(types)).Node);
+      yield return new MenuItem(psuedoGenerics.Atan2.First(n => n.Types.SequenceEqual(types)).Node);
+    }
     if (psuedoGenerics.Acos.Any(n => n.Node == context.NodeType))
-		{
+    {
       var types = psuedoGenerics.Acos.First(n => n.Node == context.NodeType).Types;
-			yield return new MenuItem(psuedoGenerics.Cos.First(n => n.Types.SequenceEqual(types)).Node);
-			yield return new MenuItem(psuedoGenerics.Asin.First(n => n.Types.SequenceEqual(types)).Node);
-			yield return new MenuItem(psuedoGenerics.Atan.First(n => n.Types.SequenceEqual(types)).Node);
-			yield return new MenuItem(psuedoGenerics.Atan2.First(n => n.Types.SequenceEqual(types)).Node);
-		}
+      yield return new MenuItem(psuedoGenerics.Cos.First(n => n.Types.SequenceEqual(types)).Node);
+      yield return new MenuItem(psuedoGenerics.Asin.First(n => n.Types.SequenceEqual(types)).Node);
+      yield return new MenuItem(psuedoGenerics.Atan.First(n => n.Types.SequenceEqual(types)).Node);
+      yield return new MenuItem(psuedoGenerics.Atan2.First(n => n.Types.SequenceEqual(types)).Node);
+    }
     if (psuedoGenerics.Atan.Any(n => n.Node == context.NodeType))
-		{
+    {
       var types = psuedoGenerics.Atan.First(n => n.Node == context.NodeType).Types;
-			yield return new MenuItem(psuedoGenerics.Atan2.First(n => n.Types.SequenceEqual(types)).Node);
-			yield return new MenuItem(psuedoGenerics.Tan.First(n => n.Types.SequenceEqual(types)).Node);
-			yield return new MenuItem(psuedoGenerics.Asin.First(n => n.Types.SequenceEqual(types)).Node);
-			yield return new MenuItem(psuedoGenerics.Acos.First(n => n.Types.SequenceEqual(types)).Node);
-		}
+      yield return new MenuItem(psuedoGenerics.Atan2.First(n => n.Types.SequenceEqual(types)).Node);
+      yield return new MenuItem(psuedoGenerics.Tan.First(n => n.Types.SequenceEqual(types)).Node);
+      yield return new MenuItem(psuedoGenerics.Asin.First(n => n.Types.SequenceEqual(types)).Node);
+      yield return new MenuItem(psuedoGenerics.Acos.First(n => n.Types.SequenceEqual(types)).Node);
+    }
     if (psuedoGenerics.Atan2.Any(n => n.Node == context.NodeType))
-		{
+    {
       var types = psuedoGenerics.Atan2.First(n => n.Node == context.NodeType).Types;
-			yield return new MenuItem(psuedoGenerics.Atan.First(n => n.Types.SequenceEqual(types)).Node);
-			yield return new MenuItem(psuedoGenerics.Tan.First(n => n.Types.SequenceEqual(types)).Node);
-			yield return new MenuItem(psuedoGenerics.Asin.First(n => n.Types.SequenceEqual(types)).Node);
-			yield return new MenuItem(psuedoGenerics.Acos.First(n => n.Types.SequenceEqual(types)).Node);
-		}
+      yield return new MenuItem(psuedoGenerics.Atan.First(n => n.Types.SequenceEqual(types)).Node);
+      yield return new MenuItem(psuedoGenerics.Tan.First(n => n.Types.SequenceEqual(types)).Node);
+      yield return new MenuItem(psuedoGenerics.Asin.First(n => n.Types.SequenceEqual(types)).Node);
+      yield return new MenuItem(psuedoGenerics.Acos.First(n => n.Types.SequenceEqual(types)).Node);
+    }
   }
 }
