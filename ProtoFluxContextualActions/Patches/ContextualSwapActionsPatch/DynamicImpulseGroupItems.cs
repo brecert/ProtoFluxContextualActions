@@ -107,6 +107,7 @@ static partial class ContextualSwapActionsPatch
         .Where(kv => !kv.Key.x)
         .OrderBy(kv => hasProxyHeld ? !kv.Key.z : false)
         .OrderBy(kv => IsTrigger ? !kv.Key.y : false)
+        .OrderBy(kv => hasDynData ? !kv.Key.z : false)
         .Select(kv => kv.Value)
         .ToList();
 
@@ -114,16 +115,34 @@ static partial class ContextualSwapActionsPatch
         .Where(kv => kv.Key.x)
         .OrderBy(kv => hasProxyHeld ? !kv.Key.z : false)
         .OrderBy(kv => IsTrigger ? !kv.Key.y : false)
+        .OrderBy(kv => hasDynData ? !kv.Key.z : false)
         .Select(kv => kv.Value)
         .ToList();
 
+      string? NodeNameSelector(Type input)
+			{
+        string constructedName = "";
+        bool isGeneric = input.IsGenericType; 
+        Type baseType = isGeneric ? input.GetGenericTypeDefinition() : input;
+        Type innerType = isGeneric ? input.GenericTypeArguments.First() : input;
+        if (isGeneric)
+				{
+					constructedName += innerType.GetNiceName();
+				}
+        string niceTypeName = baseType.GetNiceTypeName().ToLower();
+        if (niceTypeName.Contains("trigger")) constructedName += " Trigger";
+        else constructedName += " Receiver";
+        if (niceTypeName.Contains("async")) constructedName += " (Async)";
+				return constructedName;
+			}
+
       foreach (var imp in IsAsync ? sortedAsyncImpulses : sortedImpulses)
       {
-        if (imp != null) yield return new(imp);
+        if (imp != null) yield return new(imp, name: NodeNameSelector(imp));
       }
       foreach (var imp in IsAsync ? sortedImpulses : sortedAsyncImpulses)
       {
-        if (imp != null) yield return new(imp);
+        if (imp != null) yield return new(imp, name: NodeNameSelector(imp));
       }
     }
   }
