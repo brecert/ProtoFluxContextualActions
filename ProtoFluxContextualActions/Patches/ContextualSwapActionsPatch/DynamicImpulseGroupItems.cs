@@ -155,6 +155,7 @@ static partial class ContextualSwapActionsPatch
         Type oldBaseType = isGeneric ? context.NodeType.GetGenericTypeDefinition() : context.NodeType;
         Type newBaseType = isGeneric ? inputType.GetGenericTypeDefinition() : inputType;
         if (!oldBaseType.GetNiceTypeName().Contains("Receiver")) return;
+        if (!newBaseType.GetNiceTypeName().Contains("Trigger")) return;
         context.callingTool.SpawnNode(ProtoFluxHelper.GetInputNode(typeof(string)), inputNode =>
         {
           inputNode.EnsureVisual();
