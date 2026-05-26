@@ -31,7 +31,7 @@ internal static partial class ContextualSelectionActionsPatch
     Type node, Type? binding = null, string? name = null, bool overload = false,
     string group = "", Func<ProtoFluxNode, ProtoFluxElementProxy, ProtoFluxTool, bool>? onNodeSpawn = null,
     int orderOffset = 0,
-    bool isSwap = false, ProtoFluxNode? swapNode = null, ContextualSwapActionsPatch.ConnectionTransferType? swapType = null)
+    bool isSwap = false, ProtoFluxNode? swapNode = null, ContextualSwapActionsPatch.ConnectionTransferType? swapType = null, Action<ProtoFluxNode>? onSwapSpawn = null)
   {
     internal readonly Type node = node;
 
@@ -51,6 +51,7 @@ internal static partial class ContextualSelectionActionsPatch
     internal readonly bool isSwap = isSwap;
     internal readonly ProtoFluxNode? swapNode = swapNode;
     internal readonly ContextualSwapActionsPatch.ConnectionTransferType? swapType = swapType;
+    internal readonly Action<ProtoFluxNode>? onSwapSpawn = onSwapSpawn;
 
     internal readonly Func<ProtoFluxNode, ProtoFluxElementProxy, ProtoFluxTool, bool>? onNodeSpawn = onNodeSpawn;
 
@@ -107,7 +108,7 @@ internal static partial class ContextualSelectionActionsPatch
       hasSwaps = hitNode != null;
       swapRoot = hitNode;
     }
-    var swapItems = hasSwaps ? ContextualSwapActionsPatch.GetMenuItems(__instance, swapRoot!, elementProxy, true).Select((item) => new MenuItem(item.node, group: "Swaps", name: item.name, isSwap: true, swapNode: swapRoot, swapType: item.connectionTransferType)) : [];
+    var swapItems = hasSwaps ? ContextualSwapActionsPatch.GetMenuItems(__instance, swapRoot!, elementProxy, true).Select((item) => new MenuItem(item.node, group: "Swaps", name: item.name, isSwap: true, swapNode: swapRoot, swapType: item.connectionTransferType, onSwapSpawn: item.onSpawn)) : [];
     var items = selectionItems.Concat(swapItems)
       .Where(i => (i.binding ?? i.node).IsValidGenericType(validForInstantiation: true)) // this isn't great, we should instead catch errors before they propigate to here.
       .ToList();
@@ -172,7 +173,7 @@ internal static partial class ContextualSelectionActionsPatch
   {
     if (item.isSwap)
     {
-      ContextualSwapActionsPatch.OnSwapNode(tool, item.swapNode!, new(item.node, item.name, item.swapType));
+      ContextualSwapActionsPatch.OnSwapNode(tool, item.swapNode!, new(item.node, item.name, item.swapType, item.onSwapSpawn));
       return;
     }
     var nodeBinding = item.binding ?? ProtoFluxHelper.GetBindingForNode(item.node);

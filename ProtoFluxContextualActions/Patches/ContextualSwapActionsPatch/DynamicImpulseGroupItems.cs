@@ -73,13 +73,10 @@ static partial class ContextualSwapActionsPatch
       {
         var trav = Traverse.Create(context.hitNode);
         var field = trav.Field("Tag");
-        UniLog.Warning($"--- possibly has field");
         if (field.FieldExists())
         {
-          UniLog.Warning($"--- Field Exists!!!");
           receiverTag = field.GetValue<SyncRef<IGlobalValueProxy<string>>>().Target.Value;
-          UniLog.Warning($"--- Found tag: '{receiverTag}'");
-				}
+        }
       }
 
 
@@ -126,15 +123,7 @@ static partial class ContextualSwapActionsPatch
       };
 
       List<Type?> sortedImpulses = keyedImpulses
-        .Where(kv => !kv.Key.x)
-        .OrderBy(kv => hasProxyHeld ? !kv.Key.z : false)
-        .OrderBy(kv => IsTrigger ? !kv.Key.y : false)
-        .OrderBy(kv => hasDynData ? !kv.Key.z : false)
-        .Select(kv => kv.Value)
-        .ToList();
-
-      List<Type?> sortedAsyncImpulses = keyedImpulses
-        .Where(kv => kv.Key.x)
+        .OrderBy(kv => !kv.Key.x == IsAsync)
         .OrderBy(kv => hasProxyHeld ? !kv.Key.z : false)
         .OrderBy(kv => IsTrigger ? !kv.Key.y : false)
         .OrderBy(kv => hasDynData ? !kv.Key.z : false)
@@ -160,38 +149,27 @@ static partial class ContextualSwapActionsPatch
 
       void OnNodeSpawn(Type inputType, ProtoFluxNode newNode)
       {
-        UniLog.Warning($"--- On Node Spawn: checking tag '{receiverTag}'");
         if (receiverTag == null) return;
-        UniLog.Warning($"--- On Node Spawn: tag not null!");
 
         bool isGeneric = context.NodeType.IsGenericType;
-        Type baseType = isGeneric ? context.NodeType.GetGenericTypeDefinition() : context.NodeType;
-        UniLog.Warning($"--- On Node Spawn: base type is '{baseType.GetNiceTypeName()}'");
-        if (!baseType.GetNiceTypeName().Contains("Receiver")) return;
-        UniLog.Warning($"--- On Node Spawn: earlier node is a receiver!");
-        UniLog.Warning($"--- On Node Spawn: spawning node.");
+        Type oldBaseType = isGeneric ? context.NodeType.GetGenericTypeDefinition() : context.NodeType;
+        Type newBaseType = isGeneric ? inputType.GetGenericTypeDefinition() : inputType;
+        if (!oldBaseType.GetNiceTypeName().Contains("Receiver")) return;
         context.callingTool.SpawnNode(ProtoFluxHelper.GetInputNode(typeof(string)), inputNode =>
         {
-          UniLog.Warning($"--- Input node has spawned!");
           inputNode.EnsureVisual();
           var casted = (FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ValueObjectInput<string>)inputNode;
           newNode.GetInput(0).Target = casted.GetOutput(0);
-          UniLog.Warning($"--- set input/output");
           Slot newNodeSlot = newNode.Slot;
           casted.Value.Value = receiverTag;
           casted.Slot.Parent = newNodeSlot.Parent;
           casted.Slot.CopyTransform(newNodeSlot);
-          casted.Slot.LocalPosition += newNodeSlot.Left * 0.18f + newNodeSlot.Up * (baseType.GetNiceTypeName().Contains("With") ? 0.03f : 0.015f);
-          UniLog.Warning($"--- set transforms");
+          // Dynamic Impulses with data are slightly taller, so increase the vertical offset by that amount
+          casted.Slot.LocalPosition += newNodeSlot.Left * 0.18f + newNodeSlot.Up * (newBaseType.GetNiceTypeName().Contains("With") ? 0.03f : 0.015f);
         });
-        UniLog.Warning($"--- Main Execution Finished.");
       }
 
-      foreach (var imp in IsAsync ? sortedAsyncImpulses : sortedImpulses)
-      {
-        if (imp != null) yield return new(imp, name: NodeNameSelector(imp), onSpawn: (node) => OnNodeSpawn(imp, node));
-      }
-      foreach (var imp in IsAsync ? sortedImpulses : sortedAsyncImpulses)
+      foreach (var imp in sortedImpulses)
       {
         if (imp != null) yield return new(imp, name: NodeNameSelector(imp), onSpawn: (node) => OnNodeSpawn(imp, node));
       }

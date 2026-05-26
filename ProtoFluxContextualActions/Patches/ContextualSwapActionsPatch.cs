@@ -152,6 +152,7 @@ internal static partial class ContextualSwapActionsPatch
       {
         hitNode.UndoableDestroy();
       }
+
       __instance.LocalUser.CloseContextMenu(__instance);
     }
   }
@@ -220,6 +221,11 @@ internal static partial class ContextualSwapActionsPatch
         var node = nodeMap[intoNode];
         node.CreateSpawnUndoPoint(node.HasActiveVisual() ? ensureVisualDelegate : null);
       }
+
+      // May be a good idea to look at removing the components from the old node.
+      // Dynamic Impulses give a "+Proxy" component and a GlobalValue, which will not be cleaned up.
+
+      // Run custom function if provided
       menuItem.onSpawn?.Invoke(newNode);
     }
 
