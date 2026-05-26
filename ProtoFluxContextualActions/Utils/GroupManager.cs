@@ -23,7 +23,7 @@ internal struct GroupItem
 // Add new entries when making a new visual
 internal enum MenuVisual
 {
-	ContextMenu
+  ContextMenu
 }
 
 internal class GroupManager
@@ -69,7 +69,8 @@ internal class GroupManager
     // Would be read from mod config instead of a constant
     MenuVisual selectedVisual = MenuVisual.ContextMenu;
 
-    currentVisual = selectedVisual switch {
+    currentVisual = selectedVisual switch
+    {
       MenuVisual.ContextMenu => new ContextMenuVisual(),
       // add custom visual classes here, with a new enum entry
       _ => new ContextMenuVisual(),

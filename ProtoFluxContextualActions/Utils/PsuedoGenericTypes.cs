@@ -72,6 +72,7 @@ class PsuedoGenericTypes(World world)
 
   public PsuedoGenerics Sin { get => field ??= MapTypes("Sin_"); }
   public PsuedoGenerics Cos { get => field ??= MapTypes("Cos_"); }
+  public PsuedoGenerics Tan { get => field ??= MapTypes("Tan_"); }
 
 
   public PsuedoGenerics Unpack { get => field ??= MapTypes("Unpack_"); }
