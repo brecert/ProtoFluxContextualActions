@@ -562,7 +562,7 @@ static partial class ContextualSelectionActionsPatch
       {
         yield return new MenuItem(typeof(NullableToObjectCast<>).MakeGenericType(Nullable.GetUnderlyingType(outputType) ?? outputType), name: "Object", group: "Casts");
       }
-      else if (outputType.IsClass)
+      else
       {
         yield return new MenuItem(
           typeof(ObjectCast<,>).MakeGenericType(outputType, typeof(object)),
