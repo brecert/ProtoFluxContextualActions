@@ -112,6 +112,8 @@ static partial class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(GetActiveUser));
       yield return new MenuItem(typeof(GetActiveUserSelf));
 
+      yield return new MenuItem(typeof(NearestUserHead));
+
       yield return new MenuItem(
         typeof(AllocatingUser),
         name: "Allocating User",
