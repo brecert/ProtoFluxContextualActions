@@ -22,6 +22,7 @@ static partial class ContextualSwapActionsPatch
 
   static readonly HashSet<Type> PlayableMetaGroup = [
     typeof(ClipLengthFloat),
+    typeof(ClipLengthDouble),
     typeof(SetLoop),
     typeof(IsLooped),
     typeof(IsPlaying),
