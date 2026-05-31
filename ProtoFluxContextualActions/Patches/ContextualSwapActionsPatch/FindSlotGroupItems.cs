@@ -9,6 +9,8 @@ static partial class ContextualSwapActionsPatch
   static readonly HashSet<Type> FindSlotGroup = [
     typeof(FindChildByName),
     typeof(FindChildByTag),
+    typeof(FindParentByName),
+    typeof(FindParentByTag),
   ];
 
   internal static IEnumerable<MenuItem> FindSlotGroupItems(ContextualContext context)
