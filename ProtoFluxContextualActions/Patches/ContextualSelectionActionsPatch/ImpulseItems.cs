@@ -9,6 +9,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.Actions;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Rendering;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Assets;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Variables;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Debugging;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -37,6 +38,14 @@ static partial class ContextualSelectionActionsPatch
     yield return new MenuItem(typeof(AsyncDynamicImpulseTrigger), group: "Async");
 
     yield return new MenuItem(typeof(DataModelBooleanToggle), group: "Variables");
+
+    yield return new MenuItem(typeof(DebugSphere), group: "Debug");
+    yield return new MenuItem(typeof(DebugVector), group: "Debug");
+    yield return new MenuItem(typeof(DebugAxes), group: "Debug");
+    yield return new MenuItem(typeof(DebugLine), group: "Debug");
+    yield return new MenuItem(typeof(DebugText), group: "Debug");
+    yield return new MenuItem(typeof(DebugTriangle), group: "Debug");
+    yield return new MenuItem(typeof(DebugBox), group: "Debug");
 
     if (IsIterationNode(nodeType))
     {
