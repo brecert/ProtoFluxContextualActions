@@ -1,9 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Elements.Core;
+using ProtoFlux.Core;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Time;
 using ProtoFlux.Runtimes.Execution.Nodes.Math;
+using ProtoFlux.Runtimes.Execution.Nodes.Math.Quaternions;
 using ProtoFluxContextualActions.Utils;
+using static ProtoFluxContextualActions.Utils.PsuedoGenericUtils;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -21,24 +25,49 @@ static partial class ContextualSwapActionsPatch
     typeof(ValueConstantLerp<>),
   ];
 
+  static readonly HashSet<Type> SmoothSlerpGroup = [
+    typeof(SmoothSlerp_floatQ),
+    typeof(SmoothSlerp_doubleQ),
+    typeof(ConstantSlerp_floatQ),
+    typeof(ConstantSlerp_doubleQ),
+  ];
+
   internal static IEnumerable<MenuItem> LerpGroupItems(ContextualContext context)
   {
-    if (LerpGroup.Any(t => context.NodeType.IsGenericType ? t == context.NodeType.GetGenericTypeDefinition() : t == context.NodeType))
+    var world = context.hitNode.World;
+    var psuedoGenericTypes = world.GetPsuedoGenericTypesForWorld();
+    
+    Type nodeValueType = GetTypesFromNode(world, context.NodeType).First();
+    
+    var SlerpNodes = psuedoGenericTypes.Slerp;
+    
+    if (
+        LerpGroup.Any(t => context.NodeType.IsGenericType ? t == context.NodeType.GetGenericTypeDefinition() : t == context.NodeType)
+        || SlerpNodes.Any(t => t.Node == context.NodeType)
+      )
     {
       foreach (var match in LerpGroup)
       {
         yield return new MenuItem(
-          match.MakeGenericType(context.NodeType.GenericTypeArguments),
+          match.MakeGenericType(nodeValueType),
           name: match == typeof(ValueMultiLerp<>) ? "Multi Lerp" : null,
           connectionTransferType: match == typeof(ValueMultiLerp<>) ? ConnectionTransferType.ByMappingsLossy : ConnectionTransferType.ByNameLossy);
       }
+      if (SlerpNodes.Any(t => t.Types.SequenceEqual([nodeValueType])))
+			{
+				yield return new MenuItem(SlerpNodes.First(t => t.Types.SequenceEqual([nodeValueType])).Node);
+			}
     }
-    if (SmoothLerpGroup.Any(t => context.NodeType.IsGenericType ? t == context.NodeType.GetGenericTypeDefinition() : t == context.NodeType))
+    if (SmoothLerpGroup.Concat(SmoothSlerpGroup).Any(t => context.NodeType.IsGenericType ? t == context.NodeType.GetGenericTypeDefinition() : t == context.NodeType))
     {
       foreach (var match in SmoothLerpGroup)
       {
-        yield return new MenuItem(match.MakeGenericType(context.NodeType.GenericTypeArguments));
+        yield return new MenuItem(match.MakeGenericType(nodeValueType));
       }
+      foreach (var match2 in SmoothSlerpGroup.Where(t => GetTypesFromNode(world, t).First() == nodeValueType))
+			{
+        yield return new MenuItem(match2);
+			}
     }
   }
 }

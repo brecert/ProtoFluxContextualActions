@@ -40,11 +40,6 @@ static partial class ContextualSelectionActionsPatch
 
           if (isQuaternion)
           {
-            if (TryGetPsuedoGenericForType(world, "Slerp_", outputType) is Type slerpType)
-            {
-              yield return new MenuItem(slerpType, group: "Math/Lerping");
-            }
-
             if (TryGetPsuedoGenericForType(world, "Pow_", outputType) is Type powType)
             {
               yield return new MenuItem(powType);
@@ -129,10 +124,6 @@ static partial class ContextualSelectionActionsPatch
           {
             yield return new MenuItem(typeof(ValueSmoothLerp<>).MakeGenericType(outputType), group: "Math/Lerping");
           }
-          if (coder.Property<bool>("SupportsConstantLerp").Value)
-          {
-            yield return new MenuItem(typeof(ValueConstantLerp<>).MakeGenericType(outputType), group: "Math/Lerping");
-          }
 
           if (coder.Property<bool>("SupportsMinMax").Value)
           {
@@ -166,6 +157,11 @@ static partial class ContextualSelectionActionsPatch
             {
               yield return new(node.Node, group: "Zero One");
             }
+          }
+
+          if (psuedoGenericTypes.Sin.Any(n => n.Types.First() == outputType))
+          {
+            yield return new(psuedoGenericTypes.Sin.First(n => n.Types.First() == outputType).Node, group: "Math");
           }
 
           if (outputType == typeof(float))

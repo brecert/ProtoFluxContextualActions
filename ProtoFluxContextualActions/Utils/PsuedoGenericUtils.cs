@@ -40,4 +40,7 @@ public static class PsuedoGenericUtils
 
   static Dictionary<string, Type> GetProtoFluxNodes() =>
     Traverse.Create(typeof(ProtoFluxHelper)).Field<Dictionary<string, Type>>("protoFluxNodes").Value;
+
+  public static IEnumerable<Type> GetTypesFromNode(World world, Type nodeType) =>
+      nodeType.IsGenericType ? nodeType.GenericTypeArguments : ParseUnderscoreGenerics(world, string.Join("_", nodeType.GetNiceTypeName().Split("_")[1..]));
 }
