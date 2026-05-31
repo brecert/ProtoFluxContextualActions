@@ -38,6 +38,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.Utility.Uris;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Variables;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Time;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Avatar.Anchors;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Avatar;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -197,6 +198,11 @@ static partial class ContextualSelectionActionsPatch
     {
       yield return new MenuItem(typeof(GetUserGrabber));
       yield return new MenuItem(typeof(GrabbableGrabber));
+    }
+
+    else if (typeof(IFingerPoseSourceComponent).IsAssignableFrom(inputType))
+    {
+      yield return new MenuItem(typeof(UserFingerPoseSource));
     }
 
     else if (inputType == typeof(Uri))

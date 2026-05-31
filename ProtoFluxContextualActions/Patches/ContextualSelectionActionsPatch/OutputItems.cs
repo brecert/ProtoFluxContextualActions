@@ -456,13 +456,15 @@ static partial class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(UserUserID), group: "Info");
       yield return new MenuItem(typeof(IsLocalUser), group: "Info");
       yield return new MenuItem(typeof(UserVR_Active), group: "Info");
-      yield return new MenuItem(typeof(UserRootSlot), group: "");
-      yield return new MenuItem(typeof(UserUserRoot), group: "");
+      yield return new MenuItem(typeof(UserRootSlot));
+      yield return new MenuItem(typeof(UserUserRoot));
 
 
       yield return new MenuItem(typeof(FindCharacterControllerFromUser));
 
       yield return new MenuItem(typeof(GetActiveLocomotionModule));
+
+      yield return new MenuItem(typeof(UserFingerPoseSource));
 
       yield return new MenuItem(typeof(StandardController), group: "Input");
       Type controllerType = GetUserControllerType(Engine.Current.WorldManager.FocusedWorld.LocalUser);
@@ -509,6 +511,11 @@ static partial class ContextualSelectionActionsPatch
     if (outputType == typeof(Key))
     {
       yield return new MenuItem(typeof(KeyHeld));
+    }
+
+    if (typeof(IFingerPoseSourceComponent).IsAssignableFrom(outputType))
+    {
+      yield return new MenuItem(typeof(FingerPose));
     }
 
     if (outputType == typeof(object))

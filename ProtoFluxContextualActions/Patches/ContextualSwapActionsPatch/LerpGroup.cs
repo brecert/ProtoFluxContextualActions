@@ -36,11 +36,11 @@ static partial class ContextualSwapActionsPatch
   {
     var world = context.hitNode.World;
     var psuedoGenericTypes = world.GetPsuedoGenericTypesForWorld();
-    
+
     Type nodeValueType = GetTypesFromNode(world, context.NodeType).First();
-    
+
     var SlerpNodes = psuedoGenericTypes.Slerp;
-    
+
     if (
         LerpGroup.Any(t => context.NodeType.IsGenericType ? t == context.NodeType.GetGenericTypeDefinition() : t == context.NodeType)
         || SlerpNodes.Any(t => t.Node == context.NodeType)
@@ -54,9 +54,9 @@ static partial class ContextualSwapActionsPatch
           connectionTransferType: match == typeof(ValueMultiLerp<>) ? ConnectionTransferType.ByMappingsLossy : ConnectionTransferType.ByNameLossy);
       }
       if (SlerpNodes.Any(t => t.Types.SequenceEqual([nodeValueType])))
-			{
-				yield return new MenuItem(SlerpNodes.First(t => t.Types.SequenceEqual([nodeValueType])).Node);
-			}
+      {
+        yield return new MenuItem(SlerpNodes.First(t => t.Types.SequenceEqual([nodeValueType])).Node);
+      }
     }
     if (SmoothLerpGroup.Concat(SmoothSlerpGroup).Any(t => context.NodeType.IsGenericType ? t == context.NodeType.GetGenericTypeDefinition() : t == context.NodeType))
     {
@@ -65,9 +65,9 @@ static partial class ContextualSwapActionsPatch
         yield return new MenuItem(match.MakeGenericType(nodeValueType));
       }
       foreach (var match2 in SmoothSlerpGroup.Where(t => GetTypesFromNode(world, t).First() == nodeValueType))
-			{
+      {
         yield return new MenuItem(match2);
-			}
+      }
     }
   }
 }
