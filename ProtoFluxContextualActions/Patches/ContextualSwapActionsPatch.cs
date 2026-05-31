@@ -335,6 +335,7 @@ internal static partial class ContextualSwapActionsPatch
       .. ZeroOneGroupItems(context),
       .. EventGroupItems(context),
       .. VectorGroupItems(context),
+      .. SlotTagGroupItems(context)
     ];
 
     foreach (var menuItem in menuItems)
