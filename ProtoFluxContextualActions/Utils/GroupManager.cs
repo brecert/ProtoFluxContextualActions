@@ -35,6 +35,7 @@ internal class GroupManager
   // Folder Config
   // - 'White 128' version of the folder icon from resonite
   static readonly Uri FolderIcon = new("resdb:///c8628c05dc2c5a047d90455da53ada83d3d4a2279662efbe156e2147f893f5b0.png");
+  static readonly Uri CollapsedGroupIcon = new("resdb:///cf7390db8e2686e8fdf18cc4526ef82113b002e07254eb925c5e69ba6ef27e59.png");
 
   // Instance Variables
   readonly Dictionary<string, List<GroupItem>> GroupedItems = [];
@@ -153,19 +154,58 @@ internal class GroupManager
 
     foreach (var subgroup in subgroups)
     {
-      string path = string.IsNullOrEmpty(prefix) ? subgroup : $"{prefix}/{subgroup}";
-      combined.Add(new()
-      {
-        name = subgroup,
-        color = RadiantUI_Constants.Neutrals.LIGHT,
-        onClick = () => RenderGroup(path, 0, false),
-        iconUri = FolderIcon
-      });
+      string path = string.IsNullOrEmpty(prefix)
+        ? subgroup
+        : $"{prefix}/{subgroup}";
+
+      combined.Add(BuildFolderEntry(path, subgroup));
     }
 
     combined.AddRange(items);
 
     return SplitGroups2(combined);
+  }
+
+  GroupItem BuildFolderEntry(string path, string displayName)
+  {
+    string currentPath = path;
+    string currentName = displayName;
+
+    // This should never run out
+    for (int i = 0; i < 8; i++)
+    {
+      var items = GetLevelItems(currentPath, out var subgroups);
+
+      int childCount = items.Count + subgroups.Count;
+
+      if (childCount != 1)
+      {
+        return new()
+        {
+          name = currentName,
+          color = RadiantUI_Constants.Neutrals.LIGHT,
+          onClick = () => RenderGroup(currentPath, 0, false),
+          iconUri = FolderIcon
+        };
+      }
+
+      if (items.Count == 1)
+      {
+        GroupItem item = items[0];
+
+        item.name = $"{currentName} > {item.name}";
+        item.iconUri = CollapsedGroupIcon;
+        item.color = RadiantUI_Constants.Neutrals.LIGHT;
+        return item;
+      }
+
+      string nextGroup = subgroups[0];
+
+      currentName += " > " + nextGroup;
+      currentPath += "/" + nextGroup;
+    }
+    // If it does run out however..
+    return new() { name = "Something Broke!", color = colorX.Red };
   }
 
   internal List<List<T>> SplitGroups2<T>(List<T> items)
@@ -196,14 +236,11 @@ internal class GroupManager
       foreach (var subgroup in subgroups)
       {
         string path = subgroup;
-        if (string.IsNullOrEmpty(path)) continue;
-        currentRootItems.Add(new()
-        {
-          name = subgroup,
-          color = RadiantUI_Constants.Neutrals.LIGHT,
-          onClick = () => RenderGroup(path, 0, false, initialMenu),
-          iconUri = FolderIcon
-        });
+
+        if (string.IsNullOrEmpty(path))
+          continue;
+
+        currentRootItems.Add(BuildFolderEntry(path, subgroup));
       }
 
       currentRootItems.AddRange(items);
