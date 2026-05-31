@@ -90,7 +90,7 @@ static partial class ContextualSelectionActionsPatch
       new NodeTypeRecord(typeof(ValueConditional<>), null, null),
       new NodeTypeRecord(typeof(ObjectConditional<>), null, null),
     ]);
-    yield return new MenuItem(conditionalNode, group: "Comparisons");
+    yield return new MenuItem(outputType == typeof(bool) ? typeof(ValueConditional<int>) : conditionalNode, group: "Comparisons");
 
     if (outputType == typeof(Slot))
     {
@@ -143,10 +143,10 @@ static partial class ContextualSelectionActionsPatch
               newNode.EnsureVisual();
             });
             tool.SpawnNode(relayNode, newNode =>
-          {
-            thisRelayNode = newNode;
-            newNode.EnsureVisual();
-          });
+            {
+              thisRelayNode = newNode;
+              newNode.EnsureVisual();
+            });
           }
           tool.SpawnNode(forNode, newNode =>
           {
