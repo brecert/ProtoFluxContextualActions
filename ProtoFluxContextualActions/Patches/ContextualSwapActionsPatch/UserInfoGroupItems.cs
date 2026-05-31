@@ -7,6 +7,9 @@ namespace ProtoFluxContextualActions.Patches;
 static partial class ContextualSwapActionsPatch
 {
   static readonly HashSet<Type> UserInfoGroup = [
+    typeof(UserUserID),
+    typeof(UserUsername),
+    typeof(UserMachineID),
     typeof(UserVR_Active),
     typeof(UserFPS),
     typeof(UserTime),

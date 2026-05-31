@@ -339,9 +339,14 @@ internal static partial class ContextualSwapActionsPatch
       .. IPlayableGroupItems(context),
     ];
 
-    foreach (var menuItem in menuItems)
+    var indexedItems = menuItems.Index();
+
+    foreach (var menuItem in indexedItems)
     {
-      if (menuItem.node != context.NodeType) yield return menuItem;
+      if (menuItem.Item.node == context.NodeType) continue;
+      // prevents items being doubled up. if everything works as expected, this shouldnt need to exist.
+      if (indexedItems.First(v => v.Item.node == menuItem.Item.node).Index != menuItem.Index) continue;
+      yield return menuItem.Item;
     }
   }
 
