@@ -10,6 +10,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Rendering;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Assets;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Variables;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Debugging;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Audio;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -46,6 +47,8 @@ static partial class ContextualSelectionActionsPatch
     yield return new MenuItem(typeof(DebugText), group: "Debug");
     yield return new MenuItem(typeof(DebugTriangle), group: "Debug");
     yield return new MenuItem(typeof(DebugBox), group: "Debug");
+
+    yield return new MenuItem(typeof(PlayOneShot));
 
     if (IsIterationNode(nodeType))
     {

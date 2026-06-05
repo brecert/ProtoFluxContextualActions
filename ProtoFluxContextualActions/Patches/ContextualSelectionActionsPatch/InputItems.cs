@@ -322,6 +322,12 @@ static partial class ContextualSelectionActionsPatch
     yield return new MenuItem(dynVariableInput);
     yield return new MenuItem(spatialVariableInput);
 
+    var pickRandomNode = GetNodeForType(inputType, [
+      new NodeTypeRecord(typeof(PickRandomValue<>), null, null),
+      new NodeTypeRecord(typeof(PickRandomObject<>), null, null),
+    ]);
+    yield return new MenuItem(pickRandomNode);
+
     if (psuedoGenericTypes.Parse.Any(n => n.Types.First() == inputType))
     {
       yield return new(psuedoGenericTypes.Parse.First(n => n.Types.First() == inputType).Node);
