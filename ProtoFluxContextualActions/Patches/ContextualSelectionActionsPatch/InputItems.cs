@@ -295,11 +295,6 @@ static partial class ContextualSelectionActionsPatch
       }
     }
 
-    // todo: playoneshot group
-    if ((nodeType == typeof(PlayOneShot) || nodeType == typeof(PlayOneShotAndWait)) && inputProxy.ElementName == "Speed")
-    {
-      yield return new MenuItem(typeof(RandomFloat));
-    }
 
     // Can be swapped to Local or Store at any point
     var variableInput = GetNodeForType(inputType, [
@@ -321,6 +316,39 @@ static partial class ContextualSelectionActionsPatch
 
     yield return new MenuItem(dynVariableInput);
     yield return new MenuItem(spatialVariableInput);
+
+    if (psuedoGenericTypes.Random.Any(t => t.Types.First() == inputType))
+    {
+      yield return new MenuItem(psuedoGenericTypes.Random.First(t => t.Types.First() == inputType).Node);
+    }
+    if (inputType == typeof(floatQ))
+    {
+      yield return new MenuItem(typeof(RandomRotation));
+    }
+    if (psuedoGenericTypes.RandomLerp.Any(t => t.Types.First() == inputType))
+    {
+      yield return new MenuItem(psuedoGenericTypes.RandomLerp.First(t => t.Types.First() == inputType).Node);
+    }
+    if (psuedoGenericTypes.RandomSlerp.Any(t => t.Types.First() == inputType))
+    {
+      yield return new MenuItem(psuedoGenericTypes.RandomSlerp.First(t => t.Types.First() == inputType).Node);
+    }
+    if (psuedoGenericTypes.RandomHue.Any(t => t.Types.First() == inputType))
+    {
+      yield return new MenuItem(psuedoGenericTypes.RandomHue.First(t => t.Types.First() == inputType).Node);
+    }
+    if (psuedoGenericTypes.RandomRGBA.Any(t => t.Types.First() == inputType))
+    {
+      yield return new MenuItem(psuedoGenericTypes.RandomRGBA.First(t => t.Types.First() == inputType).Node);
+    }
+    if (psuedoGenericTypes.RandomGrayscale.Any(t => t.Types.First() == inputType))
+    {
+      yield return new MenuItem(psuedoGenericTypes.RandomGrayscale.First(t => t.Types.First() == inputType).Node);
+    }
+    if (inputType.IsEnum)
+    {
+      yield return new MenuItem(typeof(RandomEnum<>).MakeGenericType(inputType), name: "Random Enum");
+    }
 
     var pickRandomNode = GetNodeForType(inputType, [
       new NodeTypeRecord(typeof(PickRandomValue<>), null, null),

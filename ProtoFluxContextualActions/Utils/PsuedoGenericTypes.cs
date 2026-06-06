@@ -118,6 +118,14 @@ class PsuedoGenericTypes(World world)
   public PsuedoGenerics Reflect { get => field ??= MapTypes("Reflect_"); }
   public PsuedoGenerics Project { get => field ??= MapTypes("Project_"); }
 
+  public PsuedoGenerics Random { get => field ?? MapTypes("Random"); }
+  public PsuedoGenerics RandomLerp { get => field ?? MapTypes("RandomLerp"); }
+  public PsuedoGenerics RandomSlerp { get => field ?? MapTypes("RandomSlerp"); }
+
+  public PsuedoGenerics RandomHue { get => field ?? MapTypes("RandomHue_"); }
+  public PsuedoGenerics RandomGrayscale { get => field ?? MapTypes("RandomGrayscale_"); }
+  public PsuedoGenerics RandomRGBA { get => field ?? MapTypes("RandomRGBA_"); }
+
   public PsuedoGenerics PackTangentPoint
   {
     get => field ??= [
