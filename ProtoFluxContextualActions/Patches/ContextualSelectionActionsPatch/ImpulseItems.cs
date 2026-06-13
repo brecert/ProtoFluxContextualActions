@@ -27,9 +27,11 @@ static partial class ContextualSelectionActionsPatch
     yield return new MenuItem(typeof(ValueWrite<int>), group: "Variables"); // while using dummy works, having int be the default is better (and its more consistent)
     yield return new MenuItem(typeof(Sequence));
     yield return new MenuItem(typeof(While), group: "Loops");
+
+    yield return new MenuItem(typeof(ImpulseMultiplexer), name: "Impulse Multiplex");
     yield return new MenuItem(typeof(ImpulseDemultiplexer), name: "Impulse Demultiplex");
 
-    yield return new MenuItem(typeof(DynamicImpulseTrigger));
+    yield return new MenuItem(typeof(DynamicImpulseTrigger), name: "Dynamic Impulse Trigger");
     yield return new MenuItem(typeof(StartAsyncTask), group: "Async");
     yield return new MenuItem(typeof(AsyncFor), group: "Async/Loops");
     yield return new MenuItem(typeof(AsyncWhile), group: "Async/Loops");
@@ -47,6 +49,7 @@ static partial class ContextualSelectionActionsPatch
     yield return new MenuItem(typeof(DebugText), group: "Debug");
     yield return new MenuItem(typeof(DebugTriangle), group: "Debug");
     yield return new MenuItem(typeof(DebugBox), group: "Debug");
+
 
     yield return new MenuItem(typeof(PlayOneShot));
 

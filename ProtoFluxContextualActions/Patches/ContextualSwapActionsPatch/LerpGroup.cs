@@ -40,10 +40,11 @@ static partial class ContextualSwapActionsPatch
     Type nodeValueType = GetTypesFromNode(world, context.NodeType).First();
 
     var SlerpNodes = psuedoGenericTypes.Slerp;
+    var SlerpUnclampedNodes = psuedoGenericTypes.SlerpUnclamped;
 
     if (
         LerpGroup.Any(t => context.NodeType.IsGenericType ? t == context.NodeType.GetGenericTypeDefinition() : t == context.NodeType)
-        || SlerpNodes.Any(t => t.Node == context.NodeType)
+        || SlerpNodes.Any(t => t.Node == context.NodeType) || SlerpUnclampedNodes.Any(t => t.Node == context.NodeType)
       )
     {
       foreach (var match in LerpGroup)
@@ -56,6 +57,10 @@ static partial class ContextualSwapActionsPatch
       if (SlerpNodes.Any(t => t.Types.SequenceEqual([nodeValueType])))
       {
         yield return new MenuItem(SlerpNodes.First(t => t.Types.SequenceEqual([nodeValueType])).Node);
+      }
+      if (SlerpUnclampedNodes.Any(t => t.Types.SequenceEqual([nodeValueType])))
+      {
+        yield return new MenuItem(SlerpUnclampedNodes.First(t => t.Types.SequenceEqual([nodeValueType])).Node);
       }
     }
     if (SmoothLerpGroup.Concat(SmoothSlerpGroup).Any(t => context.NodeType.IsGenericType ? t == context.NodeType.GetGenericTypeDefinition() : t == context.NodeType))

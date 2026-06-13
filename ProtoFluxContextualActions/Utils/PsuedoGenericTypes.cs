@@ -75,6 +75,7 @@ class PsuedoGenericTypes(World world)
   public PsuedoGenerics Tan { get => field ??= MapTypes("Tan_"); }
 
   public PsuedoGenerics Slerp { get => field ??= MapTypes("Slerp_"); }
+  public PsuedoGenerics SlerpUnclamped { get => field ??= MapTypes("SlerpUnclamped_"); }
 
   public PsuedoGenerics Unpack { get => field ??= MapTypes("Unpack_"); }
   public PsuedoGenerics EulerAngles { get => field ??= MapTypes("EulerAngles_"); }
