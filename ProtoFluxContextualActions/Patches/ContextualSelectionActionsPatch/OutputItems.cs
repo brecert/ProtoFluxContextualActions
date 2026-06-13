@@ -108,6 +108,7 @@ static partial class ContextualSelectionActionsPatch
 
       yield return new MenuItem(typeof(DuplicateSlot));
       yield return new MenuItem(typeof(DestroySlot), group: "Slots");
+      yield return new MenuItem(typeof(DestroySlotChildren), group: "Slots");
 
       yield return new MenuItem(typeof(GetParentSlot), group: "Slots");
       yield return new MenuItem(typeof(SetParent), group: "Slots");
