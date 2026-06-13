@@ -356,6 +356,12 @@ static partial class ContextualSelectionActionsPatch
     ]);
     yield return new MenuItem(pickRandomNode);
 
+    var multiplexNode = GetNodeForType(inputType, [
+      new NodeTypeRecord(typeof(ValueMultiplex<>), null, null),
+      new NodeTypeRecord(typeof(ObjectMultiplex<>), null, null),
+    ]);
+    yield return new MenuItem(multiplexNode);
+
     if (psuedoGenericTypes.Parse.Any(n => n.Types.First() == inputType))
     {
       yield return new(psuedoGenericTypes.Parse.First(n => n.Types.First() == inputType).Node);
