@@ -19,14 +19,14 @@ static partial class ContextualSwapActionsPatch
   ];
 
   static readonly HashSet<Type> DelayDataGroup = [
-	  typeof(DelayWithValueSecondsFloat<>),
-	  typeof(DelayUpdatesWithValue<>),
+    typeof(DelayWithValueSecondsFloat<>),
+    typeof(DelayUpdatesWithValue<>),
     typeof(DelayUpdatesOrTimeWithValueSecondsFloat<>),
     typeof(DelayWithValueTimeSpan<>),
 
 
-	  typeof(DelayWithObjectSecondsFloat<>),
-	  typeof(DelayUpdatesWithObject<>),
+    typeof(DelayWithObjectSecondsFloat<>),
+    typeof(DelayUpdatesWithObject<>),
     typeof(DelayUpdatesOrTimeWithObjectSecondsFloat<>),
     typeof(DelayWithObjectTimeSpan<>),
   ];
