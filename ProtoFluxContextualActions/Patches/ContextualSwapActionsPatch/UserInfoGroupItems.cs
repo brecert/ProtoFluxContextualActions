@@ -10,7 +10,6 @@ static partial class ContextualSwapActionsPatch
   static readonly HashSet<Type> UserInfoGroup = [
     typeof(UserUserID),
     typeof(UserUsername),
-    typeof(UserMachineID),
     typeof(UserVR_Active),
     typeof(IsLocalUser),
     typeof(IsContextMenuOpen),
@@ -18,8 +17,13 @@ static partial class ContextualSwapActionsPatch
     typeof(UserTime),
     typeof(UserVoiceMode),
     typeof(UserHeadOutputDevice),
-    typeof(UserActiveViewTargettingController),
     typeof(UserPrimaryHand),
+    typeof(UserTimeOffset),
+    typeof(UserMachineID),
+    typeof(UserActiveViewTargettingController),
+    typeof(UserEngineVersion),
+    typeof(UserRendererName),
+    typeof(UserRuntimeVersion),
   ];
 
   internal static IEnumerable<MenuItem> UserInfoGroupItems(ContextualContext context)
