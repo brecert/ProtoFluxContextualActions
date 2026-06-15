@@ -8,6 +8,9 @@ using HarmonyLib;
 using System.Linq;
 using ProtoFluxContextualActions.Utils;
 using ProtoFlux.Runtimes.Execution.Nodes.Strings;
+using ProtoFlux.Runtimes.Execution.Nodes.ParsingFormatting;
+using ProtoFlux.Runtimes.Execution.Nodes.Casts;
+using ProtoFlux.Core;
 
 [HarmonyPatchCategory("ProtoFluxTool Contextual Cast Actions"), TweakCategory("Adds 'Contextual Cast Actions' to the ProtoFlux Tool. Casting certain types to others may suggest extra actions, rather than only allowing explicit casts.")]
 [HarmonyPatch(typeof(ProtoFluxTool), "TryConnect", argumentTypes: [typeof(ProtoFluxNode), typeof(ISyncRef), typeof(INodeOutput)])]
@@ -94,21 +97,65 @@ internal static class ContextualSelectionActionsPatch
       };
     }
 
-    if (inputType == typeof(string) && psuedoGenericTypes.ObjToString.Any(n => n.Types.First() == outputType))
+    if (inputType == typeof(string))
     {
-      Type parseNode = psuedoGenericTypes.ObjToString.First(n => n.Types.First() == outputType).Node;
-      ContextMenuItem parseItem = menu.AddItem("To String", (Uri)null, new colorX?(colorX.Cyan));
-      var nodeBinding = ProtoFluxHelper.GetBindingForNode(parseNode);
-      parseItem.Button.LocalPressed += delegate
+      if (psuedoGenericTypes.ObjToString.Any(n => n.Types.First() == outputType))
       {
-        tool.SpawnNode(nodeBinding, n =>
+        Type toStringNode = psuedoGenericTypes.ObjToString.First(n => n.Types.First() == outputType).Node;
+        ContextMenuItem parseItem = menu.AddItem("To String", (Uri)null, new colorX?(colorX.Cyan));
+        var nodeBinding = ProtoFluxHelper.GetBindingForNode(toStringNode);
+        parseItem.Button.LocalPressed += delegate
         {
-          n.EnsureElementsInDynamicLists();
-          n.GetInput(0).Target = output;
-          input.Target = n.GetOutput(0);
-          menu.Close();
-        });
-      };
+          tool.SpawnNode(nodeBinding, n =>
+          {
+            n.EnsureElementsInDynamicLists();
+            n.GetInput(0).Target = output;
+            input.Target = n.GetOutput(0);
+            menu.Close();
+          });
+        };
+      }
+      else
+      {
+        // type has no direct cast. use T->object->ToString
+
+
+        Type? castNode = null;
+        if (outputType.IsUnmanaged())
+        {
+          castNode = typeof(ValueToObjectCast<>).MakeGenericType(outputType);
+        }
+        else if (ReflectionHelper.IsNullable(outputType))
+        {
+          castNode = typeof(NullableToObjectCast<>).MakeGenericType(Nullable.GetUnderlyingType(outputType) ?? outputType);
+        }
+        else
+        {
+          castNode = typeof(ObjectCast<,>).MakeGenericType(outputType, typeof(object));
+        }
+        if (castNode != null)
+        {
+          Type toStringNode = typeof(ToString_object);
+          ContextMenuItem parseItem = menu.AddItem("To String", (Uri)null, new colorX?(colorX.Cyan));
+          var toStringBinding = ProtoFluxHelper.GetBindingForNode(toStringNode);
+          var castBinding = ProtoFluxHelper.GetBindingForNode(castNode);
+          parseItem.Button.LocalPressed += delegate
+          {
+            tool.SpawnNode(castBinding, cast =>
+            {
+              cast.EnsureElementsInDynamicLists();
+              cast.GetInput(0).Target = output;
+              tool.SpawnNode(toStringBinding, toString =>
+              {
+                toString.EnsureElementsInDynamicLists();
+                toString.GetInput(0).Target = cast.GetOutput(0);
+                input.Target = toString.GetOutput(0);
+              });
+              menu.Close();
+            });
+          };
+        }
+      }
     }
   }
 }
