@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Interaction;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users;
 
 namespace ProtoFluxContextualActions.Patches;
@@ -11,6 +12,8 @@ static partial class ContextualSwapActionsPatch
     typeof(UserUsername),
     typeof(UserMachineID),
     typeof(UserVR_Active),
+    typeof(IsLocalUser),
+    typeof(IsContextMenuOpen),
     typeof(UserFPS),
     typeof(UserTime),
     typeof(UserVoiceMode),
