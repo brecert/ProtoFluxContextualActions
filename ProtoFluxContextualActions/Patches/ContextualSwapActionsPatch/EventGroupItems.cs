@@ -20,9 +20,9 @@ static partial class ContextualSwapActionsPatch
 
   internal static IEnumerable<MenuItem> EventGroupItems(ContextualContext context)
   {
-    if (UserInfoGroup.Contains(context.NodeType))
+    if (EventGroup.Contains(context.NodeType))
     {
-      foreach (var match in UserInfoGroup)
+      foreach (var match in EventGroup)
       {
         yield return new MenuItem(match);
       }

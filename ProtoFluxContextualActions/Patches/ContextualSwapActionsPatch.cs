@@ -330,13 +330,13 @@ internal static partial class ContextualSwapActionsPatch
       .. TransformVectorGroupItems(context),
       .. ArithmeticConstantsGroupItems(context),
       .. UserReferenceGroupItems(context),
-      .. PlaybackGroupItems(context),
       .. RemapGroupItems(context),
       .. ZeroOneGroupItems(context),
       .. EventGroupItems(context),
       .. VectorGroupItems(context),
       .. SlotTagGroupItems(context),
       .. IPlayableGroupItems(context),
+      .. DelayGroupItems(context),
     ];
 
     var indexedItems = menuItems.Index();
