@@ -438,6 +438,19 @@ static partial class ContextualSelectionActionsPatch
       yield return new(typeof(RenderToTextureAsset));
     }
 
+    else if (typeof(ITexture2D).IsAssignableFrom(outputType))
+    {
+      yield return new(typeof(GetTexture2D_Pixel));
+      yield return new(typeof(SampleTexture2D_UV));
+      yield return new(typeof(Texture2D_Format));
+    }
+    else if (typeof(Texture3D).IsAssignableFrom(outputType))
+    {
+      yield return new(typeof(GetTexture3D_Pixel));
+      yield return new(typeof(SampleTexture3D_UVW));
+      yield return new(typeof(Texture3D_Format));
+    }
+
     /*else if (outputType == typeof(int) && (IsIterationNode(nodeType) || nodeType == typeof(IndexOfString)))
     {
       yield return new MenuItem(typeof(ValueInc<int>));
