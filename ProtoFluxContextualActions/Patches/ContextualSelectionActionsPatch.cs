@@ -27,11 +27,10 @@ namespace ProtoFluxContextualActions.Patches;
 internal static partial class ContextualSelectionActionsPatch
 {
 
-  internal readonly struct MenuItem(
+  internal struct MenuItem(
     Type node, Type? binding = null, string? name = null, bool overload = false,
     string group = "", Func<ProtoFluxNode, ProtoFluxElementProxy, ProtoFluxTool, bool>? onNodeSpawn = null,
-    int orderOffset = 0,
-    bool isSwap = false, ProtoFluxNode? swapNode = null, ContextualSwapActionsPatch.ConnectionTransferType? swapType = null, Action<ProtoFluxNode>? onSwapSpawn = null)
+    int orderOffset = 0) : IGroupItem
   {
     internal readonly Type node = node;
 
@@ -47,15 +46,16 @@ internal static partial class ContextualSelectionActionsPatch
     // allows for items to be placed before/after others, without needing to reorder the code itself.
     internal readonly int orderOffset = orderOffset;
 
-    // including this here sucks, but it isnt like i can currently put this anywhere else, considering how everything is structured
-    internal readonly bool isSwap = isSwap;
-    internal readonly ProtoFluxNode? swapNode = swapNode;
-    internal readonly ContextualSwapActionsPatch.ConnectionTransferType? swapType = swapType;
-    internal readonly Action<ProtoFluxNode>? onSwapSpawn = onSwapSpawn;
-
     internal readonly Func<ProtoFluxNode, ProtoFluxElementProxy, ProtoFluxTool, bool>? onNodeSpawn = onNodeSpawn;
 
     internal readonly string DisplayName => name ?? NodeMetadataHelper.GetMetadata(node).Name ?? node.GetNiceTypeName();
+
+    internal Action<ProtoFluxTool, IGroupItem>? currentAction = null;
+
+    string IGroupItem.Name => DisplayName;
+    colorX IGroupItem.Color => node.GetTypeColor();
+    string IGroupItem.Group => group;
+    Action<ProtoFluxTool, IGroupItem> IGroupItem.OnClick => currentAction!;
   }
 
   [HarmonyPostfix]
@@ -98,7 +98,9 @@ internal static partial class ContextualSelectionActionsPatch
       return true;
     }
 
-    var selectionItems = MenuItems(elementProxy);
+    IEnumerable<MenuItem> selectionItems = MenuItems(elementProxy)
+      .Where(i => (i.binding ?? i.node)
+      .IsValidGenericType(validForInstantiation: true)); // this isn't great, we should instead catch errors before they propigate to here.
     bool hasSwaps = false;
     ProtoFluxNode? swapRoot = null;
     var hit = GetHit(__instance);
@@ -108,9 +110,9 @@ internal static partial class ContextualSelectionActionsPatch
       hasSwaps = hitNode != null;
       swapRoot = hitNode;
     }
-    var swapItems = hasSwaps ? ContextualSwapActionsPatch.GetMenuItems(__instance, swapRoot!, elementProxy, true).Select((item) => new MenuItem(item.node, group: "Swaps", name: item.name, isSwap: true, swapNode: swapRoot, swapType: item.connectionTransferType, onSwapSpawn: item.onSpawn)) : [];
-    var items = selectionItems.Concat(swapItems)
-      .Where(i => (i.binding ?? i.node).IsValidGenericType(validForInstantiation: true)) // this isn't great, we should instead catch errors before they propigate to here.
+    IEnumerable<IGroupItem> swapItems = hasSwaps ? (IEnumerable<IGroupItem>)ContextualSwapActionsPatch.GetMenuItems(__instance, swapRoot!, elementProxy, true).Select(item => item) : [];
+    List<IGroupItem> items = selectionItems.Select<MenuItem, IGroupItem>(item => item)
+      .Concat(swapItems)
       .ToList();
     // todo: pages / menu
 
@@ -158,9 +160,17 @@ internal static partial class ContextualSelectionActionsPatch
           throw new Exception("found items for unsupported protoflux contextual action type");
       }
 
+      selectionItems = selectionItems.Select(item => {
+        item.currentAction = (tool, item) => OnMenuItemClicked(tool, (MenuItem)item, (node) => currentAction(__instance, elementProxy, (MenuItem)item, node));
+        return item;
+      });
+
+      items = selectionItems.Select<MenuItem, IGroupItem>(item => item).Concat(swapItems).ToList();
+
       // the idea behind this would have worked, but i must have written it wrong as this breaks all ordering of everything
       //items.Sort((a, b) => a.orderOffset - b.orderOffset);
-      GroupManager grouper = new(__instance, items, targetColor, (item) => OnMenuItemClicked(__instance, item, (node) => currentAction(__instance, elementProxy, item, node)));
+
+      GroupManager grouper = new(__instance, items, targetColor);
       bool success = grouper.RenderRoot(true);
 
       return !success;
@@ -171,11 +181,6 @@ internal static partial class ContextualSelectionActionsPatch
 
   private static void OnMenuItemClicked(ProtoFluxTool tool, MenuItem item, Action<ProtoFluxNode> setup)
   {
-    if (item.isSwap)
-    {
-      ContextualSwapActionsPatch.OnSwapNode(tool, item.swapNode!, new(item.node, item.name, item.swapType, item.onSwapSpawn));
-      return;
-    }
     var nodeBinding = item.binding ?? ProtoFluxHelper.GetBindingForNode(item.node);
     tool.SpawnNode(nodeBinding, n =>
     {

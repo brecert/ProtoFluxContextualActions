@@ -41,7 +41,7 @@ internal static partial class ContextualSwapActionsPatch
     ByIndexLossy
   }
 
-  internal readonly struct MenuItem(Type node, string? name = null, ConnectionTransferType? connectionTransferType = ConnectionTransferType.ByNameLossy, Action<ProtoFluxNode>? onSpawn = null)
+  internal struct MenuItem(Type node, string? name = null, ConnectionTransferType? connectionTransferType = ConnectionTransferType.ByNameLossy, Action<ProtoFluxNode>? onSpawn = null) : IGroupItem
   {
     internal readonly Type node = node;
 
@@ -52,6 +52,17 @@ internal static partial class ContextualSwapActionsPatch
     internal readonly string DisplayName => name ?? NodeMetadataHelper.GetMetadata(node).Name ?? node.GetNiceTypeName();
 
     internal readonly Action<ProtoFluxNode>? onSpawn = onSpawn;
+    
+    internal Action<ProtoFluxTool, IGroupItem>? currentAction = null;
+
+    string IGroupItem.Name => DisplayName;
+
+    colorX IGroupItem.Color => node.GetTypeColor();
+
+    string IGroupItem.Group => "";
+
+    Action<ProtoFluxTool, IGroupItem> IGroupItem.OnClick => currentAction!;
+
   }
 
   internal record ContextualContext(Type NodeType, World World, ProtoFluxElementProxy? proxy, bool selectSwap, ProtoFluxNode hitNode, ProtoFluxTool callingTool);
@@ -86,12 +97,12 @@ internal static partial class ContextualSwapActionsPatch
         {
           if (data.SecondsSinceLastSecondaryPress() < DoublePressTime && data.lastSecondaryPressNode != null && !data.lastSecondaryPressNode.IsRemoved && data.lastSecondaryPressNode == hitNode)
           {
-            CreateMenu(__instance, hitNode, null);
+            bool success = CreateMenu(__instance, hitNode, null);
             data.lastSecondaryPressNode = null;
             data.lastSecondaryPressNode = null;
             data.lastSpawnNodeType = null;
             // skip rest
-            return false;
+            return success;
           }
           else
           {
@@ -112,31 +123,24 @@ internal static partial class ContextualSwapActionsPatch
     return true;
   }
 
-  private static void CreateMenu(ProtoFluxTool __instance, ProtoFluxNode hitNode, ProtoFluxElementProxy? proxy)
+  private static bool CreateMenu(ProtoFluxTool __instance, ProtoFluxNode hitNode, ProtoFluxElementProxy? proxy)
   {
-    __instance.StartTask(async () =>
+    List<IGroupItem> items = GetMenuItems(__instance, hitNode, proxy).Where(m => m.node != hitNode.NodeType).Select<MenuItem, IGroupItem>(item => item).ToList();
+
+    var query = new NodeQueryAcceleration(hitNode.NodeInstance.Runtime.Group);
+
+    if (items.Count > 0)
     {
-      var items = GetMenuItems(__instance, hitNode, proxy).Where(m => m.node != hitNode.NodeType).Take(10).ToArray();
+      // restore previous spawn node
+      __instance.SpawnNodeType.Value = additionalData.GetOrCreateValue(__instance).lastSpawnNodeType;
 
-      var query = new NodeQueryAcceleration(hitNode.NodeInstance.Runtime.Group);
+      GroupManager grouper = new(__instance, items, colorX.White);
+      bool success = grouper.RenderRoot(true);
 
-      if (items.Length > 0)
-      {
-        // restore previous spawn node
-        __instance.SpawnNodeType.Value = additionalData.GetOrCreateValue(__instance).lastSpawnNodeType;
+      return !success;
+    }
 
-        var menu = await __instance.LocalUser.OpenContextMenu(__instance, __instance.Slot);
-        // TODO: pages / custom menus
-
-        foreach (var menuItem in items)
-        {
-          AddMenuItem(__instance, menu, colorX.White, menuItem, () =>
-          {
-            OnSwapNode(__instance, hitNode, menuItem);
-          });
-        }
-      }
-    });
+    return true;
   }
 
   internal static void OnSwapNode(ProtoFluxTool __instance, ProtoFluxNode hitNode, MenuItem menuItem)
@@ -346,7 +350,12 @@ internal static partial class ContextualSwapActionsPatch
       if (menuItem.Item.node == context.NodeType) continue;
       // prevents items being doubled up. if everything works as expected, this shouldnt need to exist.
       if (indexedItems.First(v => v.Item.node == menuItem.Item.node).Index != menuItem.Index) continue;
-      yield return menuItem.Item;
+      var item = menuItem.Item;
+      item.currentAction = (_, _) =>
+      {
+        OnSwapNode(__instance, nodeComponent, item);
+      };
+      yield return item;
     }
   }
 

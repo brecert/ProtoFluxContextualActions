@@ -16,7 +16,15 @@ internal struct GroupItem
   internal colorX? color;
   internal Action onClick;
   internal Uri? iconUri;
-  internal MenuItem baseItem;
+  internal IGroupItem baseItem;
+}
+
+internal interface IGroupItem
+{
+	internal string Name { get; }
+	internal colorX Color { get; }
+	internal string Group { get; }
+	internal Action<ProtoFluxTool, IGroupItem> OnClick { get; }
 }
 
 // To be used by the mod config, as a "What visual do you want to use" setting.
@@ -39,30 +47,28 @@ internal class GroupManager
 
   // Instance Variables
   readonly Dictionary<string, List<GroupItem>> GroupedItems = [];
-  readonly Action<MenuItem> onItemClicked;
   readonly ProtoFluxTool currentTool;
 
   readonly IMenuVisual currentVisual;
 
-  internal GroupManager(ProtoFluxTool tool, List<MenuItem> items, colorX? targetColor, Action<MenuItem> onClicked)
+  internal GroupManager(ProtoFluxTool tool, List<IGroupItem> items, colorX? targetColor)
   {
-    onItemClicked = onClicked;
 
     List<GroupItem> contextItems = [.. items.Select((item) =>
     {
-      colorX itemColor = targetColor ?? item.node.GetTypeColor();
+      colorX itemColor = targetColor ?? item.Color;
       return new GroupItem()
       {
-        name = item.DisplayName,
+        name = item.Name,
         color = targetColor,
-        onClick = () => onItemClicked(item),
+        onClick = () => item.OnClick(tool, item),
         baseItem = item,
       };
     })];
 
     contextItems.ForEach((item) =>
     {
-      string itemGroup = item.baseItem.group;
+      string itemGroup = item.baseItem.Group;
       if (GroupedItems.TryGetValue(itemGroup, out List<GroupItem>? list)) list.Add(item);
       else GroupedItems.Add(itemGroup, [item]);
     });
