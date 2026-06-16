@@ -469,6 +469,7 @@ static partial class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(HeadSlot));
       yield return new MenuItem(typeof(HeadPosition));
       yield return new MenuItem(typeof(HeadRotation));
+      yield return new MenuItem(typeof(DefaultUserRootScale));
     }
 
     if (outputType == typeof(User))
@@ -482,14 +483,15 @@ static partial class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(UserRootSlot));
       yield return new MenuItem(typeof(UserUserRoot));
 
+      yield return new MenuItem(typeof(FindCharacterControllerFromUser), group: "Info/Sources");
 
-      yield return new MenuItem(typeof(FindCharacterControllerFromUser), group: "Sources");
+      yield return new MenuItem(typeof(GetActiveLocomotionModule), group: "Info/Sources");
 
-      yield return new MenuItem(typeof(GetActiveLocomotionModule), group: "Sources");
-
-      yield return new MenuItem(typeof(UserFingerPoseSource), group: "Sources");
+      yield return new MenuItem(typeof(UserFingerPoseSource), group: "Info/Sources");
 
       yield return new MenuItem(typeof(SwitchLocomotionModule));
+
+      yield return new MenuItem(typeof(DefaultUserScale));
 
       yield return new MenuItem(typeof(StandardController), group: "Input");
       Type controllerType = GetUserControllerType(Engine.Current.WorldManager.FocusedWorld.LocalUser);
