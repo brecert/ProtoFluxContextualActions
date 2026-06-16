@@ -54,6 +54,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.Math.Quaternions;
 using ProtoFlux.Runtimes.Execution.Nodes.Math.Rects;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Interaction.Focusing;
 using ProtoFlux.Runtimes.Execution;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Haptics;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -833,6 +834,10 @@ static partial class ContextualSelectionActionsPatch
     {
       yield return new(typeof(EncapsulateRect));
       yield return new(typeof(TranslateRect));
+    }
+    if (outputType == typeof(Chirality))
+    {
+      yield return new(typeof(TriggerHapticsOnController));
     }
 
     if (typeof(IAvatarAnchor).IsAssignableFrom(outputType))
