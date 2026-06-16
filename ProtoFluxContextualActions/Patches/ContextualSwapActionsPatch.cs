@@ -41,7 +41,7 @@ internal static partial class ContextualSwapActionsPatch
     ByIndexLossy
   }
 
-  internal struct MenuItem(Type node, string? name = null, ConnectionTransferType? connectionTransferType = ConnectionTransferType.ByNameLossy, Action<ProtoFluxNode>? onSpawn = null) : IGroupItem
+  internal struct MenuItem(Type node, string? name = null, ConnectionTransferType? connectionTransferType = ConnectionTransferType.ByNameLossy, Action<ProtoFluxNode>? onSpawn = null, string group = "") : IGroupItem
   {
     internal readonly Type node = node;
 
@@ -52,14 +52,14 @@ internal static partial class ContextualSwapActionsPatch
     internal readonly string DisplayName => name ?? NodeMetadataHelper.GetMetadata(node).Name ?? node.GetNiceTypeName();
 
     internal readonly Action<ProtoFluxNode>? onSpawn = onSpawn;
-    
+
     internal Action<ProtoFluxTool, IGroupItem>? currentAction = null;
 
     string IGroupItem.Name => DisplayName;
 
     colorX IGroupItem.Color => node.GetTypeColor();
 
-    string IGroupItem.Group => "";
+    string IGroupItem.Group => group;
 
     Action<ProtoFluxTool, IGroupItem> IGroupItem.OnClick => currentAction!;
 

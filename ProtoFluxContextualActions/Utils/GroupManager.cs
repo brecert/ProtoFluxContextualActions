@@ -21,10 +21,10 @@ internal struct GroupItem
 
 internal interface IGroupItem
 {
-	internal string Name { get; }
-	internal colorX Color { get; }
-	internal string Group { get; }
-	internal Action<ProtoFluxTool, IGroupItem> OnClick { get; }
+  internal string Name { get; }
+  internal colorX Color { get; }
+  internal string Group { get; }
+  internal Action<ProtoFluxTool, IGroupItem> OnClick { get; }
 }
 
 // To be used by the mod config, as a "What visual do you want to use" setting.

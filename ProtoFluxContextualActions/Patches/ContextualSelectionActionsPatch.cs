@@ -160,7 +160,8 @@ internal static partial class ContextualSelectionActionsPatch
           throw new Exception("found items for unsupported protoflux contextual action type");
       }
 
-      selectionItems = selectionItems.Select(item => {
+      selectionItems = selectionItems.Select(item =>
+      {
         item.currentAction = (tool, item) => OnMenuItemClicked(tool, (MenuItem)item, (node) => currentAction(__instance, elementProxy, (MenuItem)item, node));
         return item;
       });
