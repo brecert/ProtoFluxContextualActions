@@ -238,18 +238,6 @@ internal static partial class ContextualSwapActionsPatch
     __instance.World.EndUndoBatch();
   }
 
-  private static void AddMenuItem(ProtoFluxTool __instance, ContextMenu menu, colorX color, MenuItem item, Action setup)
-  {
-    var nodeMetadata = NodeMetadataHelper.GetMetadata(item.node);
-    var label = (LocaleString)item.DisplayName;
-    var menuItem = menu.AddItem(in label, (Uri?)null, color);
-    menuItem.Button.LocalPressed += (button, data) =>
-    {
-      setup();
-      __instance.LocalUser.CloseContextMenu(__instance);
-    };
-  }
-
   internal static IEnumerable<MenuItem> GetMenuItems(ProtoFluxTool __instance, ProtoFluxNode nodeComponent, ProtoFluxElementProxy? proxy, bool isSelectSwap = false)
   {
     var node = nodeComponent.NodeInstance;
