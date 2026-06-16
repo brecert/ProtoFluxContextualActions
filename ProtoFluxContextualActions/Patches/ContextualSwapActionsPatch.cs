@@ -53,6 +53,8 @@ internal static partial class ContextualSwapActionsPatch
 
     internal readonly Action<ProtoFluxNode>? onSpawn = onSpawn;
 
+    internal string group = group;
+
     internal Action<ProtoFluxTool, IGroupItem>? currentAction = null;
 
     string IGroupItem.Name => DisplayName;
