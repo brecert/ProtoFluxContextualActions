@@ -39,6 +39,8 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Variables;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Time;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Avatar.Anchors;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Avatar;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Display;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Keyboard;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -137,7 +139,30 @@ static partial class ContextualSelectionActionsPatch
 
       // Sometimes this can be really helpful to have around
       yield return new MenuItem(typeof(DataModelBooleanToggle));
+
+      yield return new MenuItem(typeof(LeftMousePressed), group: "Input");
+      yield return new MenuItem(typeof(LeftMouseHeld), group: "Input");
+      yield return new MenuItem(typeof(RightMousePressed), group: "Input");
+      yield return new MenuItem(typeof(RightMouseHeld), group: "Input");
+
+      yield return new MenuItem(typeof(KeyHeld), group: "Input");
     }
+
+    else if (inputType == typeof(float))
+		{
+      yield return new MenuItem(typeof(MouseScrollDelta), group: "Input");
+      yield return new MenuItem(typeof(LocalWindowAspectRatio), group: "Input");
+		}
+    else if (inputType == typeof(float2))
+		{
+      yield return new MenuItem(typeof(MouseScrollDelta2D), group: "Input");
+      yield return new MenuItem(typeof(MousePosition), group: "Input");
+		}
+    else if (inputType == typeof(int2))
+		{
+      yield return new MenuItem(typeof(LocalWindowResolution), group: "Input");
+      yield return new MenuItem(typeof(LocalPrimaryResolution), group: "Input");
+		}
 
     else if (inputType == typeof(DateTime))
     {
