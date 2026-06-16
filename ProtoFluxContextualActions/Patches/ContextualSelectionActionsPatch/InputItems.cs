@@ -317,50 +317,34 @@ static partial class ContextualSelectionActionsPatch
     yield return new MenuItem(dynVariableInput);
     yield return new MenuItem(spatialVariableInput);
 
-    if (psuedoGenericTypes.Random.Any(t => t.Types.First() == inputType))
+    IEnumerable<(Type Node, IEnumerable<Type> Types)> randomLerp = [.. psuedoGenericTypes.RandomLerp, .. psuedoGenericTypes.RandomSlerp];
+    IEnumerable<(Type Node, IEnumerable<Type> Types)> randomColor = [.. psuedoGenericTypes.RandomHue, .. psuedoGenericTypes.RandomRGBA, .. psuedoGenericTypes.RandomGrayscale];
+
+    IEnumerable<(Type Node, IEnumerable<Type> Types)> allRandom = [.. psuedoGenericTypes.Random, new(typeof(RandomRotation), [typeof(floatQ)]), .. randomLerp, .. randomColor];
+
+    if (allRandom.Any(t => t.Types.First() == inputType))
     {
-      yield return new MenuItem(psuedoGenericTypes.Random.First(t => t.Types.First() == inputType).Node);
-    }
-    if (inputType == typeof(floatQ))
-    {
-      yield return new MenuItem(typeof(RandomRotation));
-    }
-    if (psuedoGenericTypes.RandomLerp.Any(t => t.Types.First() == inputType))
-    {
-      yield return new MenuItem(psuedoGenericTypes.RandomLerp.First(t => t.Types.First() == inputType).Node);
-    }
-    if (psuedoGenericTypes.RandomSlerp.Any(t => t.Types.First() == inputType))
-    {
-      yield return new MenuItem(psuedoGenericTypes.RandomSlerp.First(t => t.Types.First() == inputType).Node);
-    }
-    if (psuedoGenericTypes.RandomHue.Any(t => t.Types.First() == inputType))
-    {
-      yield return new MenuItem(psuedoGenericTypes.RandomHue.First(t => t.Types.First() == inputType).Node);
-    }
-    if (psuedoGenericTypes.RandomRGBA.Any(t => t.Types.First() == inputType))
-    {
-      yield return new MenuItem(psuedoGenericTypes.RandomRGBA.First(t => t.Types.First() == inputType).Node);
-    }
-    if (psuedoGenericTypes.RandomGrayscale.Any(t => t.Types.First() == inputType))
-    {
-      yield return new MenuItem(psuedoGenericTypes.RandomGrayscale.First(t => t.Types.First() == inputType).Node);
+      foreach (var node in allRandom.Where(t => t.Types.First() == inputType))
+      {
+        yield return new MenuItem(node.Node, group: "Selection");
+      }
     }
     if (inputType.IsEnum)
     {
-      yield return new MenuItem(typeof(RandomEnum<>).MakeGenericType(inputType), name: "Random Enum");
+      yield return new MenuItem(typeof(RandomEnum<>).MakeGenericType(inputType), name: "Random Enum", group: "Selection");
     }
 
     var pickRandomNode = GetNodeForType(inputType, [
       new NodeTypeRecord(typeof(PickRandomValue<>), null, null),
       new NodeTypeRecord(typeof(PickRandomObject<>), null, null),
     ]);
-    yield return new MenuItem(pickRandomNode);
+    yield return new MenuItem(pickRandomNode, group: "Selection");
 
     var multiplexNode = GetNodeForType(inputType, [
       new NodeTypeRecord(typeof(ValueMultiplex<>), null, null),
       new NodeTypeRecord(typeof(ObjectMultiplex<>), null, null),
     ]);
-    yield return new MenuItem(multiplexNode);
+    yield return new MenuItem(multiplexNode, group: "Selection");
 
     if (psuedoGenericTypes.Parse.Any(n => n.Types.First() == inputType))
     {
