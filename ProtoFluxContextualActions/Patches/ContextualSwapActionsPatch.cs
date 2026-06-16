@@ -343,6 +343,7 @@ internal static partial class ContextualSwapActionsPatch
       .. FocusableGroupItems(context),
       .. GrabbableEventGroupItems(context),
       .. DesktopInputGroupItems(context),
+      .. ColorGroupItems(context),
     ];
 
     var indexedItems = menuItems.Index();
