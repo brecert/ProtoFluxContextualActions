@@ -55,6 +55,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.Math.Rects;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Interaction.Focusing;
 using ProtoFlux.Runtimes.Execution;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Haptics;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Components;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -843,6 +844,13 @@ static partial class ContextualSelectionActionsPatch
       yield return new(typeof(HasLocalFocus));
       yield return new(typeof(FocusFocusable));
       yield return new(typeof(DefocusFocusable));
+    }
+
+    if (typeof(IComponent).IsAssignableFrom(outputType))
+    {
+      yield return new(typeof(GetComponentEnabled));
+      yield return new(typeof(SetComponentEnabled));
+      yield return new(typeof(GetUserFromComponent));
     }
 
     if (outputType == typeof(Rect))
