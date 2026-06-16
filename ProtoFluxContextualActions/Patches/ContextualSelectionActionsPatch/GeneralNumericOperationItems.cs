@@ -125,6 +125,12 @@ static partial class ContextualSelectionActionsPatch
           {
             yield return new MenuItem(typeof(ValueSmoothLerp<>).MakeGenericType(outputType), group: "Math/Lerping");
           }
+          if (psuedoGenericTypes.PackTangentPoint2.Any(t => t.Types.First() == outputType))
+          {
+            Type packTangentNode = psuedoGenericTypes.PackTangentPoint2.First(t => t.Types.First() == outputType).Node;
+
+            yield return new MenuItem(packTangentNode, group: "Math/Lerping");
+          }
 
           if (coder.Property<bool>("SupportsMinMax").Value)
           {
@@ -199,10 +205,6 @@ static partial class ContextualSelectionActionsPatch
             {
               yield return new(node.Node, group: "Vectors");
             }
-          }
-          if (nodeType == typeof(float3))
-          {
-            yield return new(typeof(FromEuler_floatQ), group: "Vectors");
           }
         }
         if (target is ProtoFluxInputProxy { InputType.Value: var inputType } && (inputType.IsUnmanaged() || typeof(ISphericalHarmonics).IsAssignableFrom(inputType)))

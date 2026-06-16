@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Elements.Core;
+using FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.Math.Constants;
 using HarmonyLib;
 using ProtoFlux.Runtimes.Execution.Nodes.Actions;
 using ProtoFlux.Runtimes.Execution.Nodes.Operators;
@@ -33,8 +34,14 @@ static partial class ContextualSwapActionsPatch
     typeof(ValueReciprocal<>),
   ];
 
+  static readonly HashSet<Type> ArithmeticSquareGroup = [
+    typeof(ValueSquare<>),
+    typeof(ValueCube<>)
+  ];
+
   internal static IEnumerable<MenuItem> ArithmeticOneGroupItems(ContextualContext context)
   {
+    var psuedoGenerics = context.World.GetPsuedoGenericTypesForWorld();
     if (TypeUtils.TryGetGenericTypeDefinition(context.NodeType, out var genericType))
     {
       var opCount = context.NodeType.GenericTypeArguments.Length;
@@ -68,6 +75,48 @@ static partial class ContextualSwapActionsPatch
             yield return new(match.MakeGenericType(opType), connectionTransferType: ConnectionTransferType.ByIndexLossy);
           }
         }
+
+        if (ArithmeticSquareGroup.Contains(genericType))
+        {
+          foreach (var match in ArithmeticSquareGroup)
+          {
+            yield return new(match.MakeGenericType(opType), connectionTransferType: ConnectionTransferType.ByIndexLossy);
+          }
+          if (psuedoGenerics.Sqrt.Any(t => t.Types.First() == opType))
+          {
+            yield return new(psuedoGenerics.Sqrt.First(t => t.Types.First() == opType).Node);
+          }
+          if (psuedoGenerics.NthRoot.Any(t => t.Types.First() == opType))
+          {
+            yield return new(psuedoGenerics.NthRoot.First(t => t.Types.First() == opType).Node);
+          }
+        }
+      }
+    }
+
+    Type? psuedoGenericType = null;
+    if (psuedoGenerics.Sqrt.Any(t => t.Node == context.NodeType))
+    {
+      psuedoGenericType = psuedoGenerics.Sqrt.First(t => t.Node == context.NodeType).Types.First();
+    }
+    if (psuedoGenerics.NthRoot.Any(t => t.Node == context.NodeType))
+    {
+      psuedoGenericType = psuedoGenerics.NthRoot.First(t => t.Node == context.NodeType).Types.First();
+    }
+
+    if (psuedoGenericType != null)
+    {
+      foreach (var match in ArithmeticSquareGroup)
+      {
+        yield return new(match.MakeGenericType(psuedoGenericType), connectionTransferType: ConnectionTransferType.ByIndexLossy);
+      }
+      if (psuedoGenerics.Sqrt.Any(t => t.Types.First() == psuedoGenericType))
+      {
+        yield return new(psuedoGenerics.Sqrt.First(t => t.Types.First() == psuedoGenericType).Node);
+      }
+      if (psuedoGenerics.NthRoot.Any(t => t.Types.First() == psuedoGenericType))
+      {
+        yield return new(psuedoGenerics.NthRoot.First(t => t.Types.First() == psuedoGenericType).Node);
       }
     }
   }

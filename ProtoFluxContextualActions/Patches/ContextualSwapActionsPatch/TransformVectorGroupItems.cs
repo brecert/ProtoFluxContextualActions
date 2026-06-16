@@ -23,10 +23,10 @@ static partial class ContextualSwapActionsPatch
     typeof(GlobalScaleToLocal),
   ];
   static readonly HashSet<Type> LocalToGlobalTransformGroup = [
-    typeof(GlobalPointToLocal),
-    typeof(GlobalDirectionToLocal),
-    typeof(GlobalVectorToLocal),
-    typeof(GlobalScaleToLocal),
+    typeof(LocalPointToGlobal),
+    typeof(LocalDirectionToGlobal),
+    typeof(LocalVectorToGlobal),
+    typeof(LocalScaleToGlobal),
   ];
   static readonly BiDictionary<Type, Type> VectorGlobalLocalGroup = new() {
     { typeof(GlobalPointToLocal), typeof(LocalPointToGlobal) },

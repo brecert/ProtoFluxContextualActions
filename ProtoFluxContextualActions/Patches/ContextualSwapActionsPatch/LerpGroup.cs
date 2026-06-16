@@ -39,12 +39,21 @@ static partial class ContextualSwapActionsPatch
 
     Type nodeValueType = GetTypesFromNode(world, context.NodeType).First();
 
+    var CosineLerpNodes = psuedoGenericTypes.CosineLerp;
+    var MultiCosineLerpNodes = psuedoGenericTypes.MultiCosineLerp;
+
+    var BezierCurveNodes = psuedoGenericTypes.BezierCurve;
+    var MultiBezierCurveNodes = psuedoGenericTypes.MultiBezierCurve;
+
     var SlerpNodes = psuedoGenericTypes.Slerp;
     var SlerpUnclampedNodes = psuedoGenericTypes.SlerpUnclamped;
 
+    var SlerpWithMagnitudeNodes = psuedoGenericTypes.SlerpWithMagnitude;
+
     if (
         LerpGroup.Any(t => context.NodeType.IsGenericType ? t == context.NodeType.GetGenericTypeDefinition() : t == context.NodeType)
-        || SlerpNodes.Any(t => t.Node == context.NodeType) || SlerpUnclampedNodes.Any(t => t.Node == context.NodeType)
+        || SlerpNodes.Any(t => t.Node == context.NodeType) || SlerpUnclampedNodes.Any(t => t.Node == context.NodeType) || SlerpWithMagnitudeNodes.Any(t => t.Node == context.NodeType)
+        || CosineLerpNodes.Any(t => t.Node == context.NodeType) || MultiCosineLerpNodes.Any(t => t.Node == context.NodeType)
       )
     {
       foreach (var match in LerpGroup)
@@ -62,6 +71,18 @@ static partial class ContextualSwapActionsPatch
       {
         yield return new MenuItem(SlerpUnclampedNodes.First(t => t.Types.SequenceEqual([nodeValueType])).Node);
       }
+      if (SlerpWithMagnitudeNodes.Any(t => t.Types.SequenceEqual([nodeValueType])))
+      {
+        yield return new MenuItem(SlerpWithMagnitudeNodes.First(t => t.Types.SequenceEqual([nodeValueType])).Node);
+      }
+      if (CosineLerpNodes.Any(t => t.Types.SequenceEqual([nodeValueType])))
+      {
+        yield return new MenuItem(CosineLerpNodes.First(t => t.Types.SequenceEqual([nodeValueType])).Node);
+      }
+      if (MultiCosineLerpNodes.Any(t => t.Types.SequenceEqual([nodeValueType])))
+      {
+        yield return new MenuItem(MultiCosineLerpNodes.First(t => t.Types.SequenceEqual([nodeValueType])).Node, name: "Multi Cosine Lerp");
+      }
     }
     if (SmoothLerpGroup.Concat(SmoothSlerpGroup).Any(t => context.NodeType.IsGenericType ? t == context.NodeType.GetGenericTypeDefinition() : t == context.NodeType))
     {
@@ -72,6 +93,17 @@ static partial class ContextualSwapActionsPatch
       foreach (var match2 in SmoothSlerpGroup.Where(t => GetTypesFromNode(world, t).First() == nodeValueType))
       {
         yield return new MenuItem(match2);
+      }
+    }
+    if (BezierCurveNodes.Any(t => t.Node == context.NodeType) || MultiBezierCurveNodes.Any(t => t.Node == context.NodeType))
+    {
+      if (BezierCurveNodes.Any(t => t.Types.SequenceEqual([nodeValueType])))
+      {
+        yield return new MenuItem(BezierCurveNodes.First(t => t.Types.SequenceEqual([nodeValueType])).Node);
+      }
+      if (MultiBezierCurveNodes.Any(t => t.Types.SequenceEqual([nodeValueType])))
+      {
+        yield return new MenuItem(MultiBezierCurveNodes.First(t => t.Types.SequenceEqual([nodeValueType])).Node);
       }
     }
   }

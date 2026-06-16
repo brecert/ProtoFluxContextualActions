@@ -50,6 +50,9 @@ using ProtoFlux.Runtimes.Execution.Nodes.Casts;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Locomotion;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Playback;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Avatar.Anchors;
+using ProtoFlux.Runtimes.Execution.Nodes.Math.Quaternions;
+using ProtoFlux.Runtimes.Execution.Nodes.Math.Rects;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Interaction.Focusing;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -344,6 +347,8 @@ static partial class ContextualSelectionActionsPatch
     if (outputType == typeof(float3))
     {
       yield return new(typeof(TransformPoint), group: "Vectors");
+      yield return new(typeof(FromEuler_floatQ), group: "Vectors");
+      yield return new(typeof(AxisAngle_floatQ), group: "Vectors");
     }
     if (outputType == typeof(floatQ))
     {
@@ -457,21 +462,30 @@ static partial class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(UserUserID), group: "Info");
       yield return new MenuItem(typeof(IsLocalUser), group: "Info");
       yield return new MenuItem(typeof(UserVR_Active), group: "Info");
+      yield return new MenuItem(typeof(IsContextMenuOpen), group: "Info");
       yield return new MenuItem(typeof(UserRootSlot));
       yield return new MenuItem(typeof(UserUserRoot));
 
 
-      yield return new MenuItem(typeof(FindCharacterControllerFromUser));
+      yield return new MenuItem(typeof(FindCharacterControllerFromUser), group: "Sources");
 
-      yield return new MenuItem(typeof(GetActiveLocomotionModule));
+      yield return new MenuItem(typeof(GetActiveLocomotionModule), group: "Sources");
 
-      yield return new MenuItem(typeof(UserFingerPoseSource));
+      yield return new MenuItem(typeof(UserFingerPoseSource), group: "Sources");
+
+      yield return new MenuItem(typeof(SwitchLocomotionModule));
 
       yield return new MenuItem(typeof(StandardController), group: "Input");
       Type controllerType = GetUserControllerType(Engine.Current.WorldManager.FocusedWorld.LocalUser);
       if (controllerType != typeof(StandardController)) yield return new MenuItem(controllerType, group: "Input");
       // todo: find a way to get the user from the output flux node?
       // if the user isnt null, add the controller type of the user to the list
+    }
+
+    if (psuedoGenericTypes.PackTangentPoint2.Any(t => t.Node == nodeType))
+    {
+      Type tangentType = psuedoGenericTypes.PackTangentPoint2.First(t => t.Node == nodeType).Types.First();
+      yield return new MenuItem(psuedoGenericTypes.BezierCurve.First(t => t.Types.First() == tangentType).Node);
     }
 
     if (outputType == typeof(BodyNode))
@@ -481,6 +495,8 @@ static partial class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(OtherSide));
       yield return new MenuItem(typeof(RelativeBodyNode));
       yield return new MenuItem(typeof(GetSide));
+
+      yield return new MenuItem(typeof(ReleaseAllGrabbed));
     }
 
     if (outputType == typeof(Grabber))
@@ -493,6 +509,12 @@ static partial class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(CharacterLinearVelocity), group: "Velocity");
       yield return new MenuItem(typeof(IsCharacterOnGround), group: "State");
       yield return new MenuItem(typeof(CharacterControllerUser), group: "State");
+
+      yield return new MenuItem(typeof(CharacterGravity), group: "Gravity");
+      yield return new MenuItem(typeof(SetCharacterGravity), group: "Gravity");
+
+
+      yield return new MenuItem(typeof(CharacterGroundCollider), group: "State");
 
       yield return new MenuItem(typeof(SetCharacterVelocity), group: "Velocity");
       yield return new MenuItem(typeof(ApplyCharacterImpulse), group: "Velocity");
@@ -796,6 +818,19 @@ static partial class ContextualSelectionActionsPatch
     if (outputType == typeof(RawDataTool))
     {
       yield return new(typeof(GetRawDataToolHit));
+    }
+
+    if (typeof(IFocusable).IsAssignableFrom(outputType))
+    {
+      yield return new(typeof(HasLocalFocus));
+      yield return new(typeof(FocusFocusable));
+      yield return new(typeof(DefocusFocusable));
+    }
+
+    if (outputType == typeof(Rect))
+    {
+      yield return new(typeof(EncapsulateRect));
+      yield return new(typeof(TranslateRect));
     }
 
     if (typeof(IAvatarAnchor).IsAssignableFrom(outputType))

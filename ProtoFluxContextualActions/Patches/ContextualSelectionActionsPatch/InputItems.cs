@@ -320,7 +320,9 @@ static partial class ContextualSelectionActionsPatch
     IEnumerable<(Type Node, IEnumerable<Type> Types)> randomLerp = [.. psuedoGenericTypes.RandomLerp, .. psuedoGenericTypes.RandomSlerp];
     IEnumerable<(Type Node, IEnumerable<Type> Types)> randomColor = [.. psuedoGenericTypes.RandomHue, .. psuedoGenericTypes.RandomRGBA, .. psuedoGenericTypes.RandomGrayscale];
 
-    IEnumerable<(Type Node, IEnumerable<Type> Types)> allRandom = [.. psuedoGenericTypes.Random, new(typeof(RandomRotation), [typeof(floatQ)]), .. randomLerp, .. randomColor];
+    IEnumerable<(Type Node, IEnumerable<Type> Types)> randomPoint = [new(typeof(RandomPointInCircle), [typeof(float2)]), new(typeof(RandomPointInSphere), [typeof(float3)])];
+
+    IEnumerable<(Type Node, IEnumerable<Type> Types)> allRandom = [.. psuedoGenericTypes.Random, new(typeof(RandomRotation), [typeof(floatQ)]), .. randomLerp, .. randomPoint, .. randomColor];
 
     if (allRandom.Any(t => t.Types.First() == inputType))
     {

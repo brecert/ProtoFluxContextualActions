@@ -33,6 +33,7 @@ class PsuedoGenericTypes(World world)
   public PsuedoGenerics Avg { get => field ??= MapTypes("Avg_"); }
   public PsuedoGenerics AvgMulti { get => field ??= MapTypes("AvgMulti_"); }
   public PsuedoGenerics BezierCurve { get => field ??= MapTypes("BezierCurve_"); }
+  public PsuedoGenerics MultiBezierCurve { get => field ??= MapTypes("MultiBezierCurve_"); }
   public PsuedoGenerics Ceil { get => field ??= MapTypes("Ceil_"); }
   public PsuedoGenerics CeilToInt { get => field ??= MapTypes("CeilToInt_"); }
   public PsuedoGenerics Round { get => field ??= MapTypes("Round_"); }
@@ -46,6 +47,9 @@ class PsuedoGenericTypes(World world)
   public PsuedoGenerics Log { get => field ??= MapTypes("Log_"); }
   public PsuedoGenerics Log10 { get => field ??= MapTypes("Log10_"); }
   public PsuedoGenerics LogN { get => field ??= MapTypes("LogN_"); }
+
+  public PsuedoGenerics Sqrt { get => field ??= MapTypes("Sqrt_"); }
+  public PsuedoGenerics NthRoot { get => field ??= MapTypes("NthRoot_"); }
 
   public PsuedoGenerics Parse { get => field ??= MapTypes("Parse_"); }
   public PsuedoGenerics ObjToString { get => field ??= MapTypes("ToString_"); }
@@ -76,6 +80,10 @@ class PsuedoGenericTypes(World world)
 
   public PsuedoGenerics Slerp { get => field ??= MapTypes("Slerp_"); }
   public PsuedoGenerics SlerpUnclamped { get => field ??= MapTypes("SlerpUnclamped_"); }
+  public PsuedoGenerics SlerpWithMagnitude { get => field ??= MapTypes("SlerpWithMagnitude_"); }
+
+  public PsuedoGenerics CosineLerp { get => field ??= MapTypes("CosineLerp_"); }
+  public PsuedoGenerics MultiCosineLerp { get => field ??= MapTypes("MultiCosineLerp_"); }
 
   public PsuedoGenerics Unpack { get => field ??= MapTypes("Unpack_"); }
   public PsuedoGenerics EulerAngles { get => field ??= MapTypes("EulerAngles_"); }
@@ -144,4 +152,6 @@ class PsuedoGenericTypes(World world)
       (typeof(PackTangentPointDouble3), [typeof(TangentPointDouble4)]),
     ];
   }
+
+  public PsuedoGenerics PackTangentPoint2 { get => field ?? MapTypes("PackTangentPoint"); }
 }

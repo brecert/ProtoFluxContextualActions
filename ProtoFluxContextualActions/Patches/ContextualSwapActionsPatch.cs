@@ -331,6 +331,17 @@ internal static partial class ContextualSwapActionsPatch
       .. SlotTagGroupItems(context),
       .. IPlayableGroupItems(context),
       .. DelayGroupItems(context),
+      .. DebugGroupItems(context),
+      .. IWorldElementGroupItems(context),
+      .. NetworkGroupItems(context),
+      .. StringConvertGroupItems(context),
+      .. ProtoFluxPackingGroupItems(context),
+      .. RaycastGroupItems(context),
+      .. RandomPointGroupItems(context),
+      .. RectGroupItems(context),
+      .. UserLocomotionGroupItems(context),
+      .. FocusableGroupItems(context),
+      .. GrabbableEventGroupItems(context),
     ];
 
     var indexedItems = menuItems.Index();

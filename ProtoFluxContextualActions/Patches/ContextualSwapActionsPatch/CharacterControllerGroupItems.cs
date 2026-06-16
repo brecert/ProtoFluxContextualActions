@@ -18,6 +18,11 @@ static partial class ContextualSwapActionsPatch
     typeof(FindCharacterControllerFromUser),
   ];
 
+  static readonly HashSet<Type> CharacterControllerGravityGroup = [
+    typeof(CharacterGravity),
+    typeof(SetCharacterGravity),
+  ];
+
   internal static IEnumerable<MenuItem> CharacterControllerGroupItems(ContextualContext context)
   {
     if (CharacterControllerGroup.Contains(context.NodeType))
@@ -31,6 +36,14 @@ static partial class ContextualSwapActionsPatch
     if (FindCharacterControllerGroup.Contains(context.NodeType))
     {
       foreach (var match in FindCharacterControllerGroup)
+      {
+        yield return new MenuItem(match);
+      }
+    }
+
+    if (CharacterControllerGravityGroup.Contains(context.NodeType))
+    {
+      foreach (var match in CharacterControllerGravityGroup)
       {
         yield return new MenuItem(match);
       }
