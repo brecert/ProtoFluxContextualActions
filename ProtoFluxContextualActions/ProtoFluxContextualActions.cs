@@ -43,6 +43,9 @@ public class ProtoFluxContextualActions : ResoniteMod
   [AutoRegisterConfigKey]
   private static readonly ModConfigurationKey<int> maxItemsPerPage = new("Max Items Per Page", "The maximum amount of items per page", () => 10);
 
+  [AutoRegisterConfigKey]
+  private static readonly ModConfigurationKey<MenuVisual> currentMenuVisual = new("Current Menu Visual", "The visual to use when rendering a menu.\t<b><color=hero.red>NOTE: No other visuals exist currently!</color></b> This setting can be ignored for now.", () => MenuVisual.ContextMenu);
+
   static ProtoFluxContextualActions()
   {
     DebugFunc(() => $"Static Initializing {nameof(ProtoFluxContextualActions)}...");
@@ -142,13 +145,15 @@ public class ProtoFluxContextualActions : ResoniteMod
     }
   }
 
-  public static bool ShouldUseRelays() => fluxStructureRelays.Value;
+  internal static bool ShouldUseRelays() => fluxStructureRelays.Value;
 
-  public static bool ShouldTryFixFlick() => tryFixFlick.Value;
+  internal static bool ShouldTryFixFlick() => tryFixFlick.Value;
 
-  public static bool ShouldTryKeepContextPosition() => tryKeepContextPosition.Value;
+  internal static bool ShouldTryKeepContextPosition() => tryKeepContextPosition.Value;
 
-  public static int GetMaxItemsPerPage() => maxItemsPerPage.Value;
+  internal static int GetMaxItemsPerPage() => maxItemsPerPage.Value;
 
-  public static bool ShouldDoDefaultActionOnPrimaryRelease() => defaultActionOnPrimaryRelease.Value;
+  internal static bool ShouldDoDefaultActionOnPrimaryRelease() => defaultActionOnPrimaryRelease.Value;
+
+  internal static MenuVisual GetMenuVisual() => currentMenuVisual.Value;
 }

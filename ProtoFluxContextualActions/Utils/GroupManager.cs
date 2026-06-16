@@ -51,7 +51,7 @@ internal class GroupManager
 
   readonly IMenuVisual currentVisual;
 
-  internal GroupManager(ProtoFluxTool tool, List<IGroupItem> items, colorX? targetColor)
+  internal GroupManager(ProtoFluxTool tool, List<IGroupItem> items, colorX? targetColor, MenuVisual? overrideVisual = null)
   {
 
     List<GroupItem> contextItems = [.. items.Select((item) =>
@@ -74,7 +74,7 @@ internal class GroupManager
     });
 
     // Would be read from mod config instead of a constant
-    MenuVisual selectedVisual = MenuVisual.ContextMenu;
+    MenuVisual selectedVisual = overrideVisual ?? ProtoFluxContextualActions.GetMenuVisual();
 
     currentVisual = selectedVisual switch
     {

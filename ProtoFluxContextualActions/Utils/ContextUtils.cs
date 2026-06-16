@@ -6,7 +6,6 @@ using HarmonyLib;
 using Elements.Core;
 using FrooxEngine;
 using System.Threading.Tasks;
-using System.ComponentModel;
 
 namespace ProtoFluxContextualActions.Utils;
 
