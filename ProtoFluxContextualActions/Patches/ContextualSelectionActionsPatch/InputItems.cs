@@ -149,20 +149,20 @@ static partial class ContextualSelectionActionsPatch
     }
 
     else if (inputType == typeof(float))
-		{
+    {
       yield return new MenuItem(typeof(MouseScrollDelta), group: "Input");
       yield return new MenuItem(typeof(LocalWindowAspectRatio), group: "Input");
-		}
+    }
     else if (inputType == typeof(float2))
-		{
+    {
       yield return new MenuItem(typeof(MouseScrollDelta2D), group: "Input");
       yield return new MenuItem(typeof(MousePosition), group: "Input");
-		}
+    }
     else if (inputType == typeof(int2))
-		{
+    {
       yield return new MenuItem(typeof(LocalWindowResolution), group: "Input");
       yield return new MenuItem(typeof(LocalPrimaryResolution), group: "Input");
-		}
+    }
 
     else if (inputType == typeof(DateTime))
     {

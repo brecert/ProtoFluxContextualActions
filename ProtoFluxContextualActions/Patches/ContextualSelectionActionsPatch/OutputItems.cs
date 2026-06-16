@@ -53,6 +53,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Avatar.Anchors;
 using ProtoFlux.Runtimes.Execution.Nodes.Math.Quaternions;
 using ProtoFlux.Runtimes.Execution.Nodes.Math.Rects;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Interaction.Focusing;
+using ProtoFlux.Runtimes.Execution;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -1005,16 +1006,32 @@ static partial class ContextualSelectionActionsPatch
           group: "Variables"
         );
       }
-      var variableInput = GetNodeForType(nodeVariable, [
-        new NodeTypeRecord(typeof(ValueWrite<>), null, null),
-        new NodeTypeRecord(typeof(ObjectWrite<>), null, null),
-      ]);
-      var variableLatchInput = GetNodeForType(nodeVariable, [
-        new NodeTypeRecord(typeof(ValueWriteLatch<>), null, null),
-        new NodeTypeRecord(typeof(ObjectWriteLatch<>), null, null),
-      ]);
-      yield return createVariableNode(variableInput, "Write");
-      yield return createVariableNode(variableLatchInput, "Write Latch");
+      if (outputType.TryGetGenericTypeDefinition(out var nodeVarType) && nodeVarType == typeof(IVariable<,>))
+      {
+        if (nodeVariable.IsUnmanaged())
+        {
+          yield return new MenuItem(typeof(ValueIndirectWrite<,>).MakeGenericType(outputType.GenericTypeArguments), name: "Indirect Write");
+          yield return new MenuItem(typeof(ValueIndirectWriteLatch<,>).MakeGenericType(outputType.GenericTypeArguments), name: "Indirect Write Latch");
+        }
+        else
+        {
+          yield return new MenuItem(typeof(ObjectIndirectWrite<,>).MakeGenericType(outputType.GenericTypeArguments), name: "Indirect Write");
+          yield return new MenuItem(typeof(ObjectIndirectWriteLatch<,>).MakeGenericType(outputType.GenericTypeArguments), name: "Indirect Write Latch");
+        }
+      }
+      else
+      {
+        var variableInput = GetNodeForType(nodeVariable, [
+          new NodeTypeRecord(typeof(ValueWrite<>), null, null),
+          new NodeTypeRecord(typeof(ObjectWrite<>), null, null),
+        ]);
+        var variableLatchInput = GetNodeForType(nodeVariable, [
+          new NodeTypeRecord(typeof(ValueWriteLatch<>), null, null),
+          new NodeTypeRecord(typeof(ObjectWriteLatch<>), null, null),
+        ]);
+        yield return createVariableNode(variableInput, "Write");
+        yield return createVariableNode(variableLatchInput, "Write Latch");
+      }
 
       // todo: figure out ValueIncrement<> and ValueDecrement<> and why they never spawn properly
     }
