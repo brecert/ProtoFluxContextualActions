@@ -111,9 +111,9 @@ internal static partial class ContextualSelectionActionsPatch
       swapRoot = hitNode;
     }
     IEnumerable<IGroupItem> swapItems = hasSwaps
-      ? 
+      ?
         ContextualSwapActionsPatch.GetMenuItems(__instance, swapRoot!, elementProxy, true)
-        .Select<ContextualSwapActionsPatch.MenuItem, IGroupItem>(item => {item.group = string.IsNullOrEmpty(item.group) ? "Swaps" : "Swaps/" + item.group; return item; })
+        .Select<ContextualSwapActionsPatch.MenuItem, IGroupItem>(item => { item.group = string.IsNullOrEmpty(item.group) ? "Swaps" : "Swaps/" + item.group; return item; })
       :
         [];
     List<IGroupItem> items = selectionItems.Select<MenuItem, IGroupItem>(item => item)

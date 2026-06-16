@@ -13,6 +13,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.Math;
 using ProtoFluxContextualActions.Utils;
 using ProtoFlux.Runtimes.Execution.Nodes.Binary;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Operators;
+using ProtoFlux.Runtimes.Execution.Nodes.Math.Quaternions;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -191,6 +192,18 @@ static partial class ContextualSelectionActionsPatch
 
             yield return new(psuedoGenericTypes.ExtractBits.First(n => n.Types.First() == outputType).Node, group: "Math/Binary");
           }
+
+          if (psuedoGenericTypes.Pack.Any(t => t.Types.First().BaseVectorType(out _) == nodeType))
+          {
+            foreach (var node in psuedoGenericTypes.Pack.Where(t => t.Types.First().BaseVectorType(out _) == nodeType))
+            {
+              yield return new(node.Node, group: "Vectors");
+            }
+          }
+          if (nodeType == typeof(float3))
+          {
+            yield return new(typeof(FromEuler_floatQ), group: "Vectors");
+          }
         }
         if (target is ProtoFluxInputProxy { InputType.Value: var inputType } && (inputType.IsUnmanaged() || typeof(ISphericalHarmonics).IsAssignableFrom(inputType)))
         {
@@ -212,6 +225,14 @@ static partial class ContextualSelectionActionsPatch
           {
 
             yield return new(psuedoGenericTypes.ComposeBits.First(n => n.Types.First() == nodeType).Node, group: "Math/Binary");
+          }
+
+          if (psuedoGenericTypes.Unpack.Any(t => t.Types.First().BaseVectorType(out _) == nodeType))
+          {
+            foreach (var node in psuedoGenericTypes.Unpack.Where(t => t.Types.First().BaseVectorType(out _) == nodeType))
+            {
+              yield return new(node.Node, group: "Vectors");
+            }
           }
         }
         if (nodeType != null)
