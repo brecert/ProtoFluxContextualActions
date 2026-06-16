@@ -12,6 +12,7 @@ static partial class ContextualSwapActionsPatch
     typeof(GetObjectRoot),
     typeof(GetParentSlot),
     typeof(IsChildOf), // doesn't really fit with the rest but the issue requests this.
+    typeof(SetParent), // this is stupid (but it allows GetParent<->SetParent so its ok)
   ];
 
   internal static IEnumerable<MenuItem> SlotChildGroupItems(ContextualContext context) =>
