@@ -57,13 +57,13 @@ internal static partial class ContextualSwapActionsPatch
 
     internal Action<ProtoFluxTool, IGroupItem>? currentAction = null;
 
-    string IGroupItem.Name => DisplayName;
+    readonly string IGroupItem.Name => DisplayName;
 
-    colorX IGroupItem.Color => node.GetTypeColor();
+    readonly colorX IGroupItem.Color => node.GetTypeColor();
 
-    string IGroupItem.Group => group;
+    readonly string IGroupItem.Group => group;
 
-    Action<ProtoFluxTool, IGroupItem> IGroupItem.OnClick => currentAction!;
+    readonly Action<ProtoFluxTool, IGroupItem> IGroupItem.OnClick => currentAction!;
 
   }
 

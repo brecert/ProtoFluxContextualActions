@@ -52,10 +52,10 @@ internal static partial class ContextualSelectionActionsPatch
 
     internal Action<ProtoFluxTool, IGroupItem>? currentAction = null;
 
-    string IGroupItem.Name => DisplayName;
-    colorX IGroupItem.Color => node.GetTypeColor();
-    string IGroupItem.Group => group;
-    Action<ProtoFluxTool, IGroupItem> IGroupItem.OnClick => currentAction!;
+    readonly string IGroupItem.Name => DisplayName;
+    readonly colorX IGroupItem.Color => node.GetTypeColor();
+    readonly string IGroupItem.Group => group;
+    readonly Action<ProtoFluxTool, IGroupItem> IGroupItem.OnClick => currentAction!;
   }
 
   [HarmonyPostfix]
