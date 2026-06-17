@@ -186,6 +186,7 @@ static partial class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(RootSlot));
       yield return new MenuItem(typeof(LocalUserSlot));
       yield return new MenuItem(typeof(LocalUserSpace));
+      yield return new MenuItem(typeof(UserRootSlot));
     }
 
     else if (inputType == typeof(BoundingBox))
