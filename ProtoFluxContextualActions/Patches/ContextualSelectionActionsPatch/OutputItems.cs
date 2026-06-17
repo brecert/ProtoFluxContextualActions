@@ -104,30 +104,26 @@ static partial class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(GetForward));
       yield return new MenuItem(typeof(GetChild));
       yield return new MenuItem(typeof(ChildrenCount));
-      yield return new MenuItem(typeof(FindChildByTag), group: "Slots/Children"); // use tag here because it has less inputs which fits better when going to swap.
-      yield return new MenuItem(typeof(GetSlotName), group: "Slots");
-
       yield return new MenuItem(typeof(SetSlotActiveSelf));
+      yield return new MenuItem(typeof(GetSlotName));
+
       yield return new MenuItem(typeof(SetSlotPersistentSelf), group: "Slots");
 
-      yield return new MenuItem(typeof(SetGlobalTransform), group: "Slots/Transforms"); // swappable, but still useful to have right there
-
       yield return new MenuItem(typeof(DuplicateSlot));
-      yield return new MenuItem(typeof(DestroySlot), group: "Slots");
-      yield return new MenuItem(typeof(DestroySlotChildren), group: "Slots/Children");
+      yield return new MenuItem(typeof(DestroySlot));
 
       yield return new MenuItem(typeof(GetParentSlot), group: "Slots");
-      yield return new MenuItem(typeof(SetParent), group: "Slots");
+      yield return new MenuItem(typeof(SetParent));
 
-      yield return new MenuItem(typeof(GetActiveUser), group: "Slots");
+      yield return new MenuItem(typeof(FindChildByTag), group: "Slots"); // use tag here because it has less inputs which fits better when going to swap.
+      yield return new MenuItem(typeof(DestroySlotChildren), group: "Slots");
+      yield return new MenuItem(typeof(GetActiveUser));
 
       yield return new MenuItem(typeof(DynamicImpulseTrigger), group: "Events");
 
-      yield return new MenuItem(typeof(SetForward), group: "Slots/Transforms");
-
       bool shouldRelay = ProtoFluxContextualActions.ShouldUseRelays();
       Type baseType = shouldRelay ? typeof(ObjectRelay<Slot>) : typeof(ChildrenCount);
-      yield return new MenuItem(baseType, name: "Foreach Child", group: "Slots/Children", onNodeSpawn: (ProtoFluxNode node, ProtoFluxElementProxy proxy, ProtoFluxTool tool) =>
+      yield return new MenuItem(baseType, name: "Foreach Child", group: "Slots", onNodeSpawn: (ProtoFluxNode node, ProtoFluxElementProxy proxy, ProtoFluxTool tool) =>
       {
         tool.StartTask(async () =>
         {

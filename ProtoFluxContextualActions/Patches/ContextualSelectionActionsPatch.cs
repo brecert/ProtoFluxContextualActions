@@ -106,9 +106,12 @@ internal static partial class ContextualSelectionActionsPatch
     var hit = GetHit(__instance);
     if (hit is { Collider.Slot: var hitSlot })
     {
-      var hitNode = hitSlot.GetComponentInParents<ProtoFluxNode>();
-      hasSwaps = hitNode != null;
-      swapRoot = hitNode;
+      if (hitSlot.Name != "<WIRE_POINT>")
+      {
+        var hitNode = hitSlot.GetComponentInParents<ProtoFluxNode>();
+        hasSwaps = hitNode != null;
+        swapRoot = hitNode;
+      }
     }
     IEnumerable<IGroupItem> swapItems = hasSwaps
       ?

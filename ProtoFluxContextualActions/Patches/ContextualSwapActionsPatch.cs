@@ -95,7 +95,7 @@ internal static partial class ContextualSwapActionsPatch
       if (hit is { Collider.Slot: var hitSlot })
       {
         var hitNode = hitSlot.GetComponentInParents<ProtoFluxNode>();
-        if (hitNode != null)
+        if (hitNode != null && hitSlot.Name != "<WIRE_POINT>")
         {
           if (data.SecondsSinceLastSecondaryPress() < DoublePressTime && data.lastSecondaryPressNode != null && !data.lastSecondaryPressNode.IsRemoved && data.lastSecondaryPressNode == hitNode)
           {
