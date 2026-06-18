@@ -13,6 +13,12 @@ static partial class ContextualSwapActionsPatch
     typeof(LocalUser),
     typeof(HostUser),
     typeof(GetActiveUserSelf),
+    typeof(GetActiveUser),
+  ];
+
+  static readonly HashSet<Type> UserSlotReferenceGroup = [
+    typeof(LocalUserSlot),
+    typeof(UserRootSlot)
   ];
 
   static readonly HashSet<Type> NearestUserReferenceGroup = [
@@ -26,6 +32,13 @@ static partial class ContextualSwapActionsPatch
     if (UserReferenceGroup.Contains(context.NodeType))
     {
       foreach (var match in UserReferenceGroup)
+      {
+        yield return new MenuItem(match);
+      }
+    }
+    if (UserSlotReferenceGroup.Contains(context.NodeType))
+    {
+      foreach (var match in UserSlotReferenceGroup)
       {
         yield return new MenuItem(match);
       }
