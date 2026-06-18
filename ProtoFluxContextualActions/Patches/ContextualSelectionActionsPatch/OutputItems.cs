@@ -102,7 +102,7 @@ static partial class ContextualSelectionActionsPatch
       new NodeTypeRecord(typeof(DelayValue<>), null, null),
       new NodeTypeRecord(typeof(DelayObject<>), null, null),
     ]);
-    yield return new MenuItem(delayValueNode, group: "Math/Time");
+    yield return new MenuItem(delayValueNode, group: "Comparisons");
 
     if (outputType == typeof(Slot))
     {
@@ -354,6 +354,7 @@ static partial class ContextualSelectionActionsPatch
       yield return new(typeof(TransformPoint), group: "Vectors");
       yield return new(typeof(FromEuler_floatQ), group: "Vectors");
       yield return new(typeof(AxisAngle_floatQ), group: "Vectors");
+      yield return new(typeof(LookRotation_floatQ), group: "Vectors");
     }
     if (outputType == typeof(floatQ))
     {
