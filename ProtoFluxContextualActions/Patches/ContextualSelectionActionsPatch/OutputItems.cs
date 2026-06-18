@@ -98,6 +98,12 @@ static partial class ContextualSelectionActionsPatch
     ]);
     yield return new MenuItem(outputType == typeof(bool) ? typeof(ValueConditional<int>) : conditionalNode, group: "Comparisons");
 
+    var delayValueNode = GetNodeForType(outputType, [
+      new NodeTypeRecord(typeof(DelayValue<>), null, null),
+      new NodeTypeRecord(typeof(DelayObject<>), null, null),
+    ]);
+    yield return new MenuItem(delayValueNode, group: "Math/Time");
+
     if (outputType == typeof(Slot))
     {
       yield return new MenuItem(typeof(GlobalTransform));
