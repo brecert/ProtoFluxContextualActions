@@ -56,6 +56,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Interaction.Focusing;
 using ProtoFlux.Runtimes.Execution;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Haptics;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Components;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Elements;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -626,6 +627,7 @@ static partial class ContextualSelectionActionsPatch
 
     if (outputType == typeof(IWorldElement))
     {
+      yield return new MenuItem(typeof(IsRemoved));
       yield return new MenuItem(typeof(ReferenceID));
       yield return new MenuItem(
         typeof(ReferenceID),
