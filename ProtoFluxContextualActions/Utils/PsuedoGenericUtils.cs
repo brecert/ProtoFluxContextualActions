@@ -18,9 +18,9 @@ public static class PsuedoGenericUtils
     GetProtoFluxNodes().Values
       .Select(t => (name: t.GetNiceTypeName(), type: t))
       .Where(a => a.name.StartsWith(startingWith) && !a.type.IsGenericType)
-      .Select(a => (a.type, ParseUnderscoreGenerics(world, a.name[startingWith.Length..])))
+      .Select(a => (a.type, ParseUnderscoreGenerics(world, a.name[startingWith.Length..]).Where(t => t != null)))
       // skip non matching
-      .Where(a => a.Item2.All(t => t != null));
+      .Where(a => a.Item2.Count() > 0);
 
   public static Type? TryGetPsuedoGenericForType(World world, string startingWith, params Type[] types)
   {
