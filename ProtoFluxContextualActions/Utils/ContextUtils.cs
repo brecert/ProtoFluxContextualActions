@@ -38,9 +38,9 @@ internal class ContextMenuCreator
 
 internal static class ContextExtensions
 {
-  internal static void AddMenuItem(this ContextMenu menu, string name, colorX? color, Action onClicked, Uri? icon = null)
+  internal static void AddMenuItem(this ContextMenu menu, LocaleString name, colorX? color, Action onClicked, Uri? icon = null)
   {
-    var label = (LocaleString)name;
+    var label = name;
     var menuItem = menu.AddItem(in label, icon, color);
     menuItem.Button.LocalPressed += (button, data) =>
     {

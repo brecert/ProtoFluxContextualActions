@@ -25,13 +25,12 @@ internal static class ContextualSelectionActionsPatch
 
     __instance.StartTask(async delegate
     {
-      ContextMenu menu = await __instance.LocalUser.OpenContextMenu(__instance, __instance.ActiveHandler?.Slot);
-      ContextMenuItem contextMenuItem = menu.AddItem("Tools.ProtoFlux.ExplicitCast".AsLocaleKey(), (Uri)null, new colorX?(colorX.Orange));
-      contextMenuItem.Button.LocalPressed += delegate
+      ContextMenu menu = await __instance.LocalUser.OpenContextMenu(__instance, __instance.ActiveHandler.Slot);
+      menu.AddMenuItem("Tools.ProtoFlux.ExplicitCast".AsLocaleKey(), colorX.Orange, () =>
       {
         node.TryConnectInput(input, output, allowExplicitCast: true, undoable: true);
         menu.Close();
-      };
+      });
       TryGetExtraCasts(__instance, node, input, output, menu);
       menu.AddItem("General.Cancel".AsLocaleKey(), (Uri?)null, new colorX?(colorX.White), (ButtonEventHandler)menu.CloseMenu);
     });
@@ -50,9 +49,8 @@ internal static class ContextualSelectionActionsPatch
     if (outputType == typeof(bool) && psuedoGenericTypes.ZeroOne.Any(n => n.Types.First() == inputType))
     {
       Type zeroOneNode = psuedoGenericTypes.ZeroOne.First(n => n.Types.First() == inputType).Node;
-      ContextMenuItem zeroOneItem = menu.AddItem("0/1", (Uri)null, new colorX?(colorX.Cyan));
       var nodeBinding = ProtoFluxHelper.GetBindingForNode(zeroOneNode);
-      zeroOneItem.Button.LocalPressed += delegate
+      menu.AddMenuItem("0/1", colorX.Cyan, () =>
       {
         tool.SpawnNode(nodeBinding, n =>
         {
@@ -61,14 +59,13 @@ internal static class ContextualSelectionActionsPatch
           input.Target = n.GetOutput(0);
           menu.Close();
         });
-      };
+      });
     }
 
     if (outputType == typeof(string) && inputType == typeof(bool))
     {
-      ContextMenuItem zeroOneItem = menu.AddItem("String Empty", (Uri)null, new colorX?(colorX.Cyan));
       var nodeBinding = ProtoFluxHelper.GetBindingForNode(typeof(IsStringEmpty));
-      zeroOneItem.Button.LocalPressed += delegate
+      menu.AddMenuItem("String Empty", colorX.Cyan, () =>
       {
         tool.SpawnNode(nodeBinding, n =>
         {
@@ -77,15 +74,14 @@ internal static class ContextualSelectionActionsPatch
           input.Target = n.GetOutput(0);
           menu.Close();
         });
-      };
+      });
     }
 
     if (outputType == typeof(string) && psuedoGenericTypes.Parse.Any(n => n.Types.First() == inputType))
     {
       Type parseNode = psuedoGenericTypes.Parse.First(n => n.Types.First() == inputType).Node;
-      ContextMenuItem parseItem = menu.AddItem("Parse", (Uri)null, new colorX?(colorX.Cyan));
       var nodeBinding = ProtoFluxHelper.GetBindingForNode(parseNode);
-      parseItem.Button.LocalPressed += delegate
+      menu.AddMenuItem("Parse", colorX.Cyan, () =>
       {
         tool.SpawnNode(nodeBinding, n =>
         {
@@ -94,7 +90,7 @@ internal static class ContextualSelectionActionsPatch
           input.Target = n.GetOutput(0);
           menu.Close();
         });
-      };
+      });
     }
 
     if (inputType == typeof(string))
@@ -102,9 +98,8 @@ internal static class ContextualSelectionActionsPatch
       if (psuedoGenericTypes.ObjToString.Any(n => n.Types.First() == outputType))
       {
         Type toStringNode = psuedoGenericTypes.ObjToString.First(n => n.Types.First() == outputType).Node;
-        ContextMenuItem parseItem = menu.AddItem("To String", (Uri)null, new colorX?(colorX.Cyan));
         var nodeBinding = ProtoFluxHelper.GetBindingForNode(toStringNode);
-        parseItem.Button.LocalPressed += delegate
+        menu.AddMenuItem("To String", colorX.Cyan, () =>
         {
           tool.SpawnNode(nodeBinding, n =>
           {
@@ -113,7 +108,7 @@ internal static class ContextualSelectionActionsPatch
             input.Target = n.GetOutput(0);
             menu.Close();
           });
-        };
+        });
       }
       else
       {
@@ -136,10 +131,9 @@ internal static class ContextualSelectionActionsPatch
         if (castNode != null)
         {
           Type toStringNode = typeof(ToString_object);
-          ContextMenuItem parseItem = menu.AddItem("To String", (Uri)null, new colorX?(colorX.Cyan));
           var toStringBinding = ProtoFluxHelper.GetBindingForNode(toStringNode);
           var castBinding = ProtoFluxHelper.GetBindingForNode(castNode);
-          parseItem.Button.LocalPressed += delegate
+          menu.AddMenuItem("To String", colorX.Cyan, () =>
           {
             tool.SpawnNode(castBinding, cast =>
             {
@@ -153,9 +147,33 @@ internal static class ContextualSelectionActionsPatch
               });
               menu.Close();
             });
-          };
+          });
         }
       }
     }
+
+    // UniLog.Warning($"here is literally every fucking cast node\n\n\n");
+    // foreach (var v in psuedoGenericTypes.Cast)
+    // {
+    //   UniLog.Warning($"Node: {v.Node}, types: {v.Types.ToArray()}");
+    // }
+    // UniLog.Warning($"yeah\n\n\n");
+
+    if (psuedoGenericTypes.Cast.Any(n => n.Types.SequenceEqual([outputType, inputType])))
+    {
+      Type valueCastNode = psuedoGenericTypes.Cast.First(n => n.Types.SequenceEqual([outputType, inputType])).Node;
+      var nodeBinding = ProtoFluxHelper.GetBindingForNode(valueCastNode);
+      menu.AddMenuItem("Value Cast", colorX.Cyan, () =>
+      {
+        tool.SpawnNode(nodeBinding, n =>
+        {
+          n.EnsureElementsInDynamicLists();
+          n.GetInput(0).Target = output;
+          input.Target = n.GetOutput(0);
+          menu.Close();
+        });
+      });
+    }
+
   }
 }

@@ -54,6 +54,8 @@ class PsuedoGenericTypes(World world)
   public PsuedoGenerics Parse { get => field ??= MapTypes("Parse_"); }
   public PsuedoGenerics ObjToString { get => field ??= MapTypes("ToString_"); }
 
+  public PsuedoGenerics Cast { get => field ??= MapTypes("Cast_"); }
+
   public PsuedoGenerics AND { get => field ??= MapTypes("AND_"); }
   public PsuedoGenerics OR { get => field ??= MapTypes("OR_"); }
   public PsuedoGenerics NAND { get => field ??= MapTypes("NAND_"); }
