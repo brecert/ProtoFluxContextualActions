@@ -5,11 +5,11 @@
 		<AssemblyName>ProtoFluxContextualActions</AssemblyName>
 		<AssemblyTitle>ProtoFlux Contextual Actions</AssemblyTitle>
 		<Description>Adds additional contextual actions for protoflux.</Description>
-		<Authors>bree</Authors>
-		<RepositoryUrl>https://github.com/brecert/ProtoFluxContextualActions</RepositoryUrl>
+		<Authors>bree, IHaveAName2653</Authors>
+		<RepositoryUrl>https://github.com/IHaveAName2653/ProtoFluxContextualActions</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>Resonite,Mod,ResoniteModLoader,Tweaks,ProtoFlux</PackageTags>
-		<Version>1.2.24</Version>
+		<Version>2.0.25</Version>
 		<PackageReadmeFile>../README.md</PackageReadmeFile>
 	</PropertyGroup>
 
