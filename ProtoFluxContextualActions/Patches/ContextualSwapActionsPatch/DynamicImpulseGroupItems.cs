@@ -75,7 +75,8 @@ static partial class ContextualSwapActionsPatch
         var field = trav.Field("Tag");
         if (field.FieldExists())
         {
-          receiverTag = field.GetValue<SyncRef<IGlobalValueProxy<string>>>().Target.Value;
+          var globalField = field.GetValue<SyncRef<IGlobalValueProxy<string>>>().Target;
+          if (globalField != null) receiverTag = globalField.Value;
         }
       }
 
