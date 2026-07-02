@@ -21,6 +21,10 @@ class PsuedoGenericTypes(World world)
     PsuedoGenericUtils.MapPsuedoGenericsToGenericTypes(World, startingWith)
       .Select(a => (NodeUtils.ProtoFluxBindingMapping[a.Node], a.Types));
 
+  internal PsuedoGenerics MapTypes2(string startingWith) =>
+    PsuedoGenericUtils.MapPsuedoGenericsToGenericTypes2(World, startingWith)
+      .Select(a => (NodeUtils.ProtoFluxBindingMapping[a.Node], a.Types));
+
   public PsuedoGenerics Acos { get => field ??= MapTypes("Acos_"); }
   public PsuedoGenerics Add { get => field ??= MapTypes("Add_"); }
   public PsuedoGenerics Angle { get => field ??= MapTypes("Angle_"); }
@@ -54,7 +58,7 @@ class PsuedoGenericTypes(World world)
   public PsuedoGenerics Parse { get => field ??= MapTypes("Parse_"); }
   public PsuedoGenerics ObjToString { get => field ??= MapTypes("ToString_"); }
 
-  public PsuedoGenerics Cast { get => field ??= MapTypes("Cast_"); }
+  public PsuedoGenerics Cast { get => field ??= MapTypes2("Cast_"); }
 
   public PsuedoGenerics AND { get => field ??= MapTypes("AND_"); }
   public PsuedoGenerics OR { get => field ??= MapTypes("OR_"); }
