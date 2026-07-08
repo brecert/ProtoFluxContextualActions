@@ -9,6 +9,7 @@ static partial class ContextualSwapActionsPatch
   public static readonly HashSet<Type> DeltaTimeGroup = [
     typeof(DeltaTime),
     typeof(SmoothDeltaTime),
+    typeof(RawDeltaTime),
     typeof(InvertedDeltaTime),
     typeof(InvertedSmoothDeltaTime),
   ];
