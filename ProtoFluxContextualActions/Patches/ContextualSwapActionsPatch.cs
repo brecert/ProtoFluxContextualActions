@@ -228,8 +228,12 @@ internal static partial class ContextualSwapActionsPatch
         node.CreateSpawnUndoPoint(node.HasActiveVisual() ? ensureVisualDelegate : null);
       }
 
-      // May be a good idea to look at removing the components from the old node.
-      // Dynamic Impulses give a "+Proxy" component and a GlobalValue, which will not be cleaned up.
+      var unusedProxyComponents = hitNode.Slot.GetComponents<ProtoFluxEngineProxy>().Where(comp => comp.Node.Target == null || comp.Node.Target.IsRemoved).ToList();
+      unusedProxyComponents.ForEach(comp =>
+      {
+        comp.UndoableDestroy();
+      });
+      // GlobalValue/Referece/Delegate is not cleaned up, but thats less common compared to proxies
 
       // Run custom function if provided
       menuItem.onSpawn?.Invoke(newNode);

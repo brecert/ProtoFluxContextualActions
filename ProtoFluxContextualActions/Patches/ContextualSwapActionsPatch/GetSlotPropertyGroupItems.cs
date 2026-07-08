@@ -23,7 +23,7 @@ static partial class ContextualSwapActionsPatch
   ];
 
   static readonly FrozenSet<Type> ActivePersistentGroup = [
-	  .. GetSlotActiveGroup,
+    .. GetSlotActiveGroup,
     .. GetSlotPersistentGroup
   ];
 
