@@ -41,6 +41,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Avatar.Anchors;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Avatar;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Display;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Keyboard;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Interaction.Focusing;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -276,6 +277,11 @@ static partial class ContextualSelectionActionsPatch
     if (typeof(IAvatarAnchor).IsAssignableFrom(inputType))
     {
       yield return new(typeof(GetUserAnchor));
+    }
+
+    if (typeof(IFocusable).IsAssignableFrom(inputType))
+    {
+      yield return new(typeof(GetActiveFocus));
     }
 
     if (inputProxy.ElementName == nameof(LocalScreenPointToDirection.NormalizedScreenPoint))

@@ -206,6 +206,12 @@ static partial class ContextualSelectionActionsPatch
               yield return new(node.Node, group: "Vectors");
             }
           }
+
+          if (psuedoGenericTypes.Distance.Any(t => t.Types.First() == nodeType))
+          {
+            bool isSingle = nodeType == typeof(float) || nodeType == typeof(double);
+            yield return new(psuedoGenericTypes.Distance.First(t => t.Types.First() == nodeType).Node, group: isSingle ? "Math" : "Vectors");
+          }
         }
         if (target is ProtoFluxInputProxy { InputType.Value: var inputType } && (inputType.IsUnmanaged() || typeof(ISphericalHarmonics).IsAssignableFrom(inputType)))
         {

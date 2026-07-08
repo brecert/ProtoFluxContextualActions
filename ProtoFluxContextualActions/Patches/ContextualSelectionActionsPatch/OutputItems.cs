@@ -57,6 +57,7 @@ using ProtoFlux.Runtimes.Execution;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Haptics;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Components;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Elements;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Network;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -417,10 +418,17 @@ static partial class ContextualSelectionActionsPatch
 
       yield return new MenuItem(typeof(UnescapeString));
       yield return new MenuItem(typeof(UnescapeUriDataString));
+
+      yield return new MenuItem(typeof(StringToAbsoluteURI));
     }
     else if (outputType == typeof(char))
     {
       yield return new MenuItem(typeof(CharToString));
+    }
+    else if (outputType == typeof(Uri))
+    {
+      yield return new MenuItem(typeof(GET_String));
+      yield return new MenuItem(typeof(FocusWorld));
     }
 
     else if (outputType == typeof(DateTime))
