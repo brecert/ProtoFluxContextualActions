@@ -175,5 +175,53 @@ internal static class ContextualSelectionActionsPatch
       });
     }
 
+    if (inputType == typeof(int))
+    {
+      if (psuedoGenericTypes.RoundToInt.Any(t => t.Types.First() == outputType))
+      {
+        Type valueCastNode = psuedoGenericTypes.RoundToInt.First(t => t.Types.First() == outputType).Node;
+        var nodeBinding = ProtoFluxHelper.GetBindingForNode(valueCastNode);
+        menu.AddMenuItem("Round", colorX.Cyan, () =>
+        {
+          tool.SpawnNode(nodeBinding, n =>
+          {
+            n.EnsureElementsInDynamicLists();
+            n.GetInput(0).Target = output;
+            input.Target = n.GetOutput(0);
+            menu.Close();
+          });
+        });
+      }
+      if (psuedoGenericTypes.FloorToInt.Any(t => t.Types.First() == outputType))
+      {
+        Type valueCastNode = psuedoGenericTypes.FloorToInt.First(t => t.Types.First() == outputType).Node;
+        var nodeBinding = ProtoFluxHelper.GetBindingForNode(valueCastNode);
+        menu.AddMenuItem("Floor To Int", colorX.Cyan, () =>
+        {
+          tool.SpawnNode(nodeBinding, n =>
+          {
+            n.EnsureElementsInDynamicLists();
+            n.GetInput(0).Target = output;
+            input.Target = n.GetOutput(0);
+            menu.Close();
+          });
+        });
+      }
+      if (psuedoGenericTypes.CeilToInt.Any(t => t.Types.First() == outputType))
+      {
+        Type valueCastNode = psuedoGenericTypes.CeilToInt.First(t => t.Types.First() == outputType).Node;
+        var nodeBinding = ProtoFluxHelper.GetBindingForNode(valueCastNode);
+        menu.AddMenuItem("Ceil To Int", colorX.Cyan, () =>
+        {
+          tool.SpawnNode(nodeBinding, n =>
+          {
+            n.EnsureElementsInDynamicLists();
+            n.GetInput(0).Target = output;
+            input.Target = n.GetOutput(0);
+            menu.Close();
+          });
+        });
+      }
+    }
   }
 }
