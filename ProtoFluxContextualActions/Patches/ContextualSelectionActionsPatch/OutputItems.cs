@@ -127,6 +127,8 @@ static partial class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(DestroySlotChildren), group: "Slots");
       yield return new MenuItem(typeof(GetActiveUser));
 
+      yield return new MenuItem(typeof(TransformPoint), group: "Slots");
+
       yield return new MenuItem(typeof(DynamicImpulseTrigger), group: "Events");
 
       bool shouldRelay = ProtoFluxContextualActions.ShouldUseRelays();
