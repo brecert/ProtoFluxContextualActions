@@ -22,12 +22,10 @@ static partial class ContextualSwapActionsPatch
     typeof(SetSlotPersistentSelf),
   ];
 
-  static readonly BiDictionary<Type, Type> GetSlotActivePersistent =
-    GetSlotPersistentGroup.Zip(GetSlotActiveGroup).ToBiDictionary();
-  internal static IEnumerable<MenuItem> GetSlotActiveGroupItems(ContextualContext context) =>
-    [
-      .. MatchNonGenericTypes(GetSlotPersistentGroup, context.NodeType),
-      .. MatchNonGenericTypes(GetSlotActiveGroup, context.NodeType),
-      .. (IEnumerable<MenuItem>)(TryGetSwap(GetSlotActivePersistent, context.NodeType, out var match) ? [new(match, connectionTransferType: ConnectionTransferType.ByIndexLossy)] : []),
-    ];
+  static readonly FrozenSet<Type> ActivePersistentGroup = [
+	  .. GetSlotActiveGroup,
+    .. GetSlotPersistentGroup
+  ];
+
+  internal static IEnumerable<MenuItem> GetSlotActiveGroupItems(ContextualContext context) => MatchNonGenericTypes(ActivePersistentGroup, context.NodeType);
 }
