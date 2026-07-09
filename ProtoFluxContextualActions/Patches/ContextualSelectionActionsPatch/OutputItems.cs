@@ -469,7 +469,17 @@ static partial class ContextualSelectionActionsPatch
 
     if (typeof(IField).IsAssignableFrom(outputType) && outputType.IsGenericType)
     {
-      yield return new(typeof(TweenValue<>).MakeGenericType(outputType.GenericTypeArguments[0]));
+      Type innerType = outputType.GenericTypeArguments[0];
+      if (innerType.IsUnmanaged())
+      {
+        yield return new(typeof(TweenValue<>).MakeGenericType(innerType));
+      }
+      var fieldHookNode = GetNodeForType(innerType, [
+        new NodeTypeRecord(typeof(ValueFieldHook<>), null, null),
+        new NodeTypeRecord(typeof(ObjectFieldHook<>), null, null),
+      ]);
+      yield return new(fieldHookNode);
+      yield return new(typeof(FieldAsVariable<>).MakeGenericType(innerType));
     }
 
     /*else if (outputType == typeof(int) && (IsIterationNode(nodeType) || nodeType == typeof(IndexOfString)))
