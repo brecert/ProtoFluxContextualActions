@@ -59,6 +59,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Components;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Elements;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Network;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Animation;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Security;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -213,7 +214,7 @@ static partial class ContextualSelectionActionsPatch
           INodeOutput? relayOutput = shouldRelay ? thisRelayNode!.GetOutput(0) : null;
 
           // Node Connections
-          childInstance.Target = inputRelay;
+          childInstance.Target = shouldRelay ? inputRelay : node.GetInput(0).Target;
           if (shouldRelay)
           {
             childCountInstance!.Target = inputRelay;
@@ -619,6 +620,13 @@ static partial class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(ColorXMulValue));
       yield return new MenuItem(typeof(ColorXSetAlpha));
       yield return new MenuItem(typeof(ColorXToHexCode));
+    }
+
+    if (outputType == typeof(JoinRequestHandle))
+    {
+      yield return new MenuItem(typeof(AllowJoin));
+      yield return new MenuItem(typeof(DenyJoin));
+      yield return new MenuItem(typeof(AssignRole));
     }
 
     if (typeof(IWorldElement).IsAssignableFrom(outputType) && outputType != typeof(IWorldElement))

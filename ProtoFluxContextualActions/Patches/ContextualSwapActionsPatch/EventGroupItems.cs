@@ -16,6 +16,7 @@ static partial class ContextualSwapActionsPatch
     typeof(OnDestroy),
     typeof(OnDestroying),
     typeof(OnDuplicate),
+    typeof(OnSaving),
     typeof(OnDeactivated),
   ];
 
