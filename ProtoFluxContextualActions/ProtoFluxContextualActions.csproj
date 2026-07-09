@@ -9,13 +9,13 @@
 		<RepositoryUrl>https://github.com/brecert/ProtoFluxContextualActions</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>Resonite,Mod,ResoniteModLoader,Tweaks,ProtoFlux</PackageTags>
-		<Version>0.0.14.0</Version>
+		<Version>0.14.1</Version>
 		<PackageReadmeFile>../README.md</PackageReadmeFile>
 	</PropertyGroup>
 
 	<PropertyGroup>
 		<Product>$(AssemblyTitle)</Product>
-		<Copyright>Copyright (c) 2025 $(Authors)</Copyright>
+		<Copyright>Copyright (c) 2026 $(Authors)</Copyright>
 		<PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<GenerateDocumentationFile>False</GenerateDocumentationFile>
