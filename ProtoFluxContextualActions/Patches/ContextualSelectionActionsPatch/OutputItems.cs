@@ -58,6 +58,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Haptics;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Components;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Elements;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Network;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Animation;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -464,6 +465,11 @@ static partial class ContextualSelectionActionsPatch
       yield return new(typeof(GetTexture3D_Pixel));
       yield return new(typeof(SampleTexture3D_UVW));
       yield return new(typeof(Texture3D_Format));
+    }
+
+    if (typeof(IField).IsAssignableFrom(outputType) && outputType.IsGenericType)
+    {
+      yield return new(typeof(TweenValue<>).MakeGenericType(outputType.GenericTypeArguments[0]));
     }
 
     /*else if (outputType == typeof(int) && (IsIterationNode(nodeType) || nodeType == typeof(IndexOfString)))
