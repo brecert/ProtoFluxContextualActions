@@ -468,19 +468,27 @@ static partial class ContextualSelectionActionsPatch
       yield return new(typeof(Texture3D_Format));
     }
 
-    if (typeof(IField).IsAssignableFrom(outputType) && outputType.IsGenericType)
+    if (typeof(IField).IsAssignableFrom(outputType))
     {
-      Type innerType = outputType.GenericTypeArguments[0];
-      if (innerType.IsUnmanaged())
+      if (outputType.IsGenericType)
       {
-        yield return new(typeof(TweenValue<>).MakeGenericType(innerType));
+        Type innerType = outputType.GenericTypeArguments[0];
+        if (innerType.IsUnmanaged())
+        {
+          yield return new(typeof(TweenValue<>).MakeGenericType(innerType));
+        }
+        var fieldHookNode = GetNodeForType(innerType, [
+          new NodeTypeRecord(typeof(ValueFieldHook<>), null, null),
+          new NodeTypeRecord(typeof(ObjectFieldHook<>), null, null),
+        ]);
+        yield return new(fieldHookNode);
+        yield return new(typeof(FieldAsVariable<>).MakeGenericType(innerType));
       }
-      var fieldHookNode = GetNodeForType(innerType, [
-        new NodeTypeRecord(typeof(ValueFieldHook<>), null, null),
-        new NodeTypeRecord(typeof(ObjectFieldHook<>), null, null),
-      ]);
-      yield return new(fieldHookNode);
-      yield return new(typeof(FieldAsVariable<>).MakeGenericType(innerType));
+      else
+      {
+        // this doesnt automatically cast, but if you have an IField, its probably a float
+        yield return new(typeof(TweenValue<float>));
+      }
     }
 
     /*else if (outputType == typeof(int) && (IsIterationNode(nodeType) || nodeType == typeof(IndexOfString)))
