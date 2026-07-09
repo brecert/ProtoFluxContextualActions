@@ -11,6 +11,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Assets;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Variables;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Debugging;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Audio;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Undo;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -49,6 +50,16 @@ static partial class ContextualSelectionActionsPatch
     yield return new MenuItem(typeof(DebugText), group: "Debug");
     yield return new MenuItem(typeof(DebugTriangle), group: "Debug");
     yield return new MenuItem(typeof(DebugBox), group: "Debug");
+
+    yield return new MenuItem(typeof(BeginUndoBatch), group: "Undo");
+    yield return new MenuItem(typeof(EndUndoBatch), group: "Undo");
+    yield return new MenuItem(typeof(CreateUndoBatch), group: "Undo");
+    yield return new MenuItem(typeof(UndoableDestroy), group: "Undo");
+    yield return new MenuItem(typeof(CreateFieldUndoStep), group: "Undo");
+    yield return new MenuItem(typeof(CreateReferenceUndoStep), group: "Undo");
+    yield return new MenuItem(typeof(CreateSpawnUndoStep), group: "Undo");
+    yield return new MenuItem(typeof(CreateTransformUndoStep), group: "Undo");
+    yield return new MenuItem(typeof(CreateTypeFieldUndoStep), group: "Undo");
 
 
     yield return new MenuItem(typeof(PlayOneShot));
