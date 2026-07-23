@@ -271,8 +271,8 @@ internal class GroupManager
     if (currentTool.IsRemoved) return;
     bool showPreviousButton = pageIndex > 0;
     bool showNextButton = pageIndex < Items.Count - 1;
-    bool showBackButton =
-            GroupedItems.Count != 1
+    bool showBackButton = ProtoFluxContextualActions.ShouldDisplayBackButton()
+            && GroupedItems.Count != 1
             && (ShowBackOnAllPages || pageIndex == 0)
             && !isRoot;
 
