@@ -28,9 +28,13 @@ internal static partial class ContextualSelectionActionsPatch
 {
 
   internal struct MenuItem(
-    Type node, Type? binding = null, string? name = null, bool overload = false,
-    string group = "", Func<ProtoFluxNode, ProtoFluxElementProxy, ProtoFluxTool, bool>? onNodeSpawn = null,
-    int orderOffset = 0) : IGroupItem
+    Type node, Type? binding = null,
+    string? name = null,
+    bool overload = false,
+    string group = "",
+    Func<ProtoFluxNode, ProtoFluxElementProxy, ProtoFluxTool, bool>? onNodeSpawn = null,
+    int orderOffset = 0
+  ) : IGroupItem
   {
     internal readonly Type node = node;
 
@@ -39,7 +43,6 @@ internal static partial class ContextualSelectionActionsPatch
     internal readonly string? name = name;
 
     internal readonly bool overload = overload;
-
 
     internal readonly string group = group;
 

@@ -25,14 +25,18 @@ static partial class ContextualSelectionActionsPatch
     // TODO: convert to while?
     yield return new MenuItem(typeof(For), group: "Loops");
     yield return new MenuItem(typeof(If));
-    yield return new MenuItem(typeof(ValueWrite<int>), group: "Variables"); // while using dummy works, having int be the default is better (and its more consistent)
     yield return new MenuItem(typeof(Sequence));
     yield return new MenuItem(typeof(While), group: "Loops");
 
-    yield return new MenuItem(typeof(ImpulseMultiplexer), name: "Impulse Multiplex");
-    yield return new MenuItem(typeof(ImpulseDemultiplexer), name: "Impulse Demultiplex");
+    yield return new MenuItem(typeof(ValueWrite<int>));
+    yield return new MenuItem(typeof(ValueWrite<int>), group: "Variables"); // while using dummy works, having int be the default is better (and its more consistent)
 
-    yield return new MenuItem(typeof(DynamicImpulseTrigger), name: "Dynamic Impulse Trigger");
+    yield return new MenuItem(typeof(ImpulseMultiplexer), name: "Impulse Multiplex", group: "Selection");
+    yield return new MenuItem(typeof(ImpulseDemultiplexer), name: "Impulse Demultiplex", group: "Selection");
+
+    yield return new MenuItem(typeof(DynamicImpulseTrigger), name: "Dynamic Impulse Trigger", group: "Actions");
+    yield return new MenuItem(typeof(PlayOneShot), group: "Actions");
+
     yield return new MenuItem(typeof(StartAsyncTask), group: "Async");
     yield return new MenuItem(typeof(AsyncFor), group: "Async/Loops");
     yield return new MenuItem(typeof(AsyncWhile), group: "Async/Loops");
@@ -43,26 +47,23 @@ static partial class ContextualSelectionActionsPatch
 
     yield return new MenuItem(typeof(DataModelBooleanToggle), group: "Variables");
 
-    yield return new MenuItem(typeof(DebugSphere), group: "Debug");
-    yield return new MenuItem(typeof(DebugVector), group: "Debug");
-    yield return new MenuItem(typeof(DebugAxes), group: "Debug");
-    yield return new MenuItem(typeof(DebugLine), group: "Debug");
-    yield return new MenuItem(typeof(DebugText), group: "Debug");
-    yield return new MenuItem(typeof(DebugTriangle), group: "Debug");
-    yield return new MenuItem(typeof(DebugBox), group: "Debug");
+    yield return new MenuItem(typeof(DebugSphere), group: "Actions/Debug");
+    yield return new MenuItem(typeof(DebugVector), group: "Actions/Debug");
+    yield return new MenuItem(typeof(DebugAxes), group: "Actions/Debug");
+    yield return new MenuItem(typeof(DebugLine), group: "Actions/Debug");
+    yield return new MenuItem(typeof(DebugText), group: "Actions/Debug");
+    yield return new MenuItem(typeof(DebugTriangle), group: "Actions/Debug");
+    yield return new MenuItem(typeof(DebugBox), group: "Actions/Debug");
 
-    yield return new MenuItem(typeof(BeginUndoBatch), group: "Undo");
-    yield return new MenuItem(typeof(EndUndoBatch), group: "Undo");
-    yield return new MenuItem(typeof(CreateUndoBatch), group: "Undo");
-    yield return new MenuItem(typeof(UndoableDestroy), group: "Undo");
-    yield return new MenuItem(typeof(CreateFieldUndoStep), group: "Undo");
-    yield return new MenuItem(typeof(CreateReferenceUndoStep), group: "Undo");
-    yield return new MenuItem(typeof(CreateSpawnUndoStep), group: "Undo");
-    yield return new MenuItem(typeof(CreateTransformUndoStep), group: "Undo");
-    yield return new MenuItem(typeof(CreateTypeFieldUndoStep), group: "Undo");
-
-
-    yield return new MenuItem(typeof(PlayOneShot));
+    yield return new MenuItem(typeof(BeginUndoBatch), group: "Actions/Undo");
+    yield return new MenuItem(typeof(EndUndoBatch), group: "Actions/Undo");
+    yield return new MenuItem(typeof(CreateUndoBatch), group: "Actions/Undo");
+    yield return new MenuItem(typeof(UndoableDestroy), group: "Actions/Undo");
+    yield return new MenuItem(typeof(CreateFieldUndoStep), group: "Actions/Undo");
+    yield return new MenuItem(typeof(CreateReferenceUndoStep), group: "Actions/Undo");
+    yield return new MenuItem(typeof(CreateSpawnUndoStep), group: "Actions/Undo");
+    yield return new MenuItem(typeof(CreateTransformUndoStep), group: "Actions/Undo");
+    yield return new MenuItem(typeof(CreateTypeFieldUndoStep), group: "Actions/Undo");
 
     if (IsIterationNode(nodeType))
     {
