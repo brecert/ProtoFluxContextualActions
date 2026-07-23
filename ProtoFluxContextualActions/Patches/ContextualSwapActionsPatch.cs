@@ -36,7 +36,7 @@ internal static partial class ContextualSwapActionsPatch
     ByMappingsLossy,
     /// <summary>
     /// Uses names too :)
-    /// Attempts to match inputs of the same type 
+    /// Attempts to match inputs of the same type
     /// </summary>
     ByIndexLossy
   }
@@ -292,6 +292,7 @@ internal static partial class ContextualSwapActionsPatch
       .. ArithmeticRepeatGroupItems(context),
       .. ArithmeticNegateGroupItems(context),
       .. ArithmeticOneGroupItems(context),
+      ..MixedArithmeticOperatorsGroupItems(context),
       .. EnumToNumberGroupItems(context),
       .. NumberToEnumGroupItems(context),
       .. MultiInputMappingGroupItems(context),

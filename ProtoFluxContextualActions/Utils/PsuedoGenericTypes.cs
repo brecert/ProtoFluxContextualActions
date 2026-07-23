@@ -15,7 +15,7 @@ class PsuedoGenericTypes(World world)
 {
   internal World World = world;
 
-  // We will convert the types to protoflux nodes rather than frooxengine ones for convenience 
+  // We will convert the types to protoflux nodes rather than frooxengine ones for convenience
   // this is technically not "correct" behavior, but it saves us trouble right now
   internal PsuedoGenerics MapTypes(string startingWith) =>
     PsuedoGenericUtils.MapPsuedoGenericsToGenericTypes(World, startingWith)
@@ -26,7 +26,7 @@ class PsuedoGenericTypes(World world)
       .Select(a => (NodeUtils.ProtoFluxBindingMapping[a.Node], a.Types));
 
   public PsuedoGenerics Acos { get => field ??= MapTypes("Acos_"); }
-  public PsuedoGenerics Add { get => field ??= MapTypes("Add_"); }
+
   public PsuedoGenerics Angle { get => field ??= MapTypes("Angle_"); }
   public PsuedoGenerics AngularVelocityDelta { get => field ??= MapTypes("AngularVelocityDelta_"); }
   public PsuedoGenerics Approximately { get => field ??= MapTypes("Approximately_"); }
@@ -61,6 +61,11 @@ class PsuedoGenericTypes(World world)
   public PsuedoGenerics ObjToString { get => field ??= MapTypes("ToString_"); }
 
   public PsuedoGenerics Cast { get => field ??= MapTypes2("Cast_"); }
+
+  public PsuedoGenerics Add { get => field ??= MapTypes("Add_"); }
+  public PsuedoGenerics Sub { get => field ??= MapTypes("Sub_"); }
+  public PsuedoGenerics Mul { get => field ??= MapTypes("Mul_"); }
+  public PsuedoGenerics Div { get => field ??= MapTypes("Div_"); }
 
   public PsuedoGenerics AND { get => field ??= MapTypes("AND_"); }
   public PsuedoGenerics OR { get => field ??= MapTypes("OR_"); }

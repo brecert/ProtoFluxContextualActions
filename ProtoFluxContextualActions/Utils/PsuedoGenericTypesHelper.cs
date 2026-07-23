@@ -14,6 +14,14 @@ static class PsuedoGenericTypesHelper
   public static PsuedoGenericTypes GetPsuedoGenericTypesForWorld(this World world) =>
     WorldPsuedoGenericTypes.GetValue(world, (w) => new(w));
 
+  public static PsuedoGenerics MixedArithmeticOperators(this PsuedoGenericTypes psuedoGenerics) =>
+    [
+      .. psuedoGenerics.Add,
+      .. psuedoGenerics.Sub,
+      .. psuedoGenerics.Mul,
+      .. psuedoGenerics.Div,
+    ];
+
   // TODO: move these to tagging?
   // BinaryOperations must be kept in sync with BinaryOperationsMulti in order for zipping
   // operations to remain consistent between the two.
