@@ -1,6 +1,8 @@
 using Elements.Core;
+using FrooxEngine;
 using FrooxEngine.ProtoFlux;
 using ProtoFlux.Core;
+using ProtoFlux.Runtimes.Execution;
 using ProtoFlux.Runtimes.Execution.Nodes.Actions;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Variables;
 using ProtoFluxContextualActions.Utils;
@@ -88,7 +90,15 @@ static partial class ContextualSwapActionsPatch
           new NodeTypeRecord(typeof(DynamicVariableValueInput<>), null, null),
           new NodeTypeRecord(typeof(DynamicVariableObjectInput<>), null, null),
         ]);
-        yield return new(DynInput);
+        yield return new(DynInput, onSpawn: n =>
+        {
+          var variableName = (ISyncRef)(n as dynamic).VariableName;
+          var globalComponent = n.Slot.Components.FirstOrDefault(c => c.GetType().IsAssignableTo(variableName.TargetType));
+          if (globalComponent is not null)
+          {
+            variableName.Target = globalComponent;
+          }
+        });
 
         var CreateDyn = GetNodeForType(target, [
           new NodeTypeRecord(typeof(CreateDynamicValueVariable<>), null, null),
