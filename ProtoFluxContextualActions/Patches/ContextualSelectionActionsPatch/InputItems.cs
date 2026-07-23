@@ -329,13 +329,24 @@ static partial class ContextualSelectionActionsPatch
 
 
     // Can be swapped to Local or Store at any point
-    var variableInput = GetNodeForType(inputType, [
-      new NodeTypeRecord(typeof(DataModelValueFieldStore<>), null, null),
-      new NodeTypeRecord(typeof(DataModelObjectFieldStore<>), null, null),
-      new NodeTypeRecord(typeof(DataModelObjectRefStore<>), null, null),
-      new NodeTypeRecord(typeof(StoredObject<>), null, null),
-    ]);
-    yield return new MenuItem(variableInput);
+    // var variableInput = GetNodeForType(inputType, [
+    //   new NodeTypeRecord(typeof(DataModelValueFieldStore<>), null, null),
+    //   new NodeTypeRecord(typeof(DataModelObjectFieldStore<>), null, null),
+    //   new NodeTypeRecord(typeof(DataModelObjectRefStore<>), null, null),
+    //   new NodeTypeRecord(typeof(StoredObject<>), null, null),
+    // ]);
+    // yield return new MenuItem(variableInput);
+    //
+
+    if (inputType == typeof(string))
+    {
+      var globalOutput = GetNodeForType(inputType, [
+        new NodeTypeRecord(typeof(GlobalToValueOutput<>), null, null),
+        new NodeTypeRecord(typeof(GlobalToObjectOutput<>), null, null),
+      ]);
+      yield return new MenuItem(globalOutput);
+    }
+
 
     var dynVariableInput = GetNodeForType(inputType, [
       new NodeTypeRecord(typeof(DynamicVariableValueInput<>), null, null),
