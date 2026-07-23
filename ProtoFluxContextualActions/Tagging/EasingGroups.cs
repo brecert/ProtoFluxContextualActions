@@ -99,9 +99,9 @@ static class EasingGroups
     || EasingInOutGroupFloat.Contains(type);
 
   public static bool ContainsNodeDouble(Type type) =>
-    EasingInGroupFloat.Contains(type)
-    || EasingOutGroupFloat.Contains(type)
-    || EasingInOutGroupFloat.Contains(type);
+    EasingInGroupDouble.Contains(type)
+    || EasingOutGroupDouble.Contains(type)
+    || EasingInOutGroupDouble.Contains(type);
 
   public static IEnumerable<Type> GetEasingOfSameKindFloat(Type nodeType)
   {

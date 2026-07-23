@@ -8,7 +8,11 @@ static partial class ContextualSwapActionsPatch
 {
   static readonly HashSet<Type> SlotMetaGroup = [
     typeof(GetSlotName),
+    typeof(SetSlotName),
     typeof(GetTag),
+    typeof(ChildrenCount),
+    typeof(IndexOfChild),
+    typeof(GetSlotOrderOffset),
   ];
 
   internal static IEnumerable<MenuItem> SlotMetaGroupItems(ContextualContext context)

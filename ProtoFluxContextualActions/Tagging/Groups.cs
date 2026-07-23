@@ -6,6 +6,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Time;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Transform;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users.LocalScreen;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Users.Roots;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Playback;
 
 namespace ProtoFluxContextualActions.Tagging;
 
@@ -16,6 +17,7 @@ static class Groups
     typeof(WorldTime2Float),
     typeof(WorldTime10Float),
     typeof(WorldTimeTenthFloat),
+    typeof(WorldTimeHalfFloat),
   ];
 
   public static FrozenSet<Type> WorldTimeDoubleGroup = [
@@ -108,7 +110,7 @@ static class Groups
     typeof(SetNormalizedPosition),
     typeof(SetSpeed),
   ];
-  
+
   public static readonly FrozenSet<Type> CommonPlaybackActionsGroup = [
     typeof(Play),
     typeof(Pause),

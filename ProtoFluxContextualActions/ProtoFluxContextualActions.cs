@@ -28,9 +28,23 @@ public class ProtoFluxContextualActions : ResoniteMod
 
   private static readonly Harmony harmony = new(HarmonyId);
 
-  internal static ModConfiguration? Config;
+  public static ModConfiguration? Config;
 
   private static readonly Dictionary<string, ModConfigurationKey<bool>> patchCategoryKeys = [];
+
+  [AutoRegisterConfigKey]
+  private static readonly ModConfigurationKey<bool> fluxStructureRelays = new("Structure Relays", "If \"Flux Structures\" should contain relays", () => true);
+  [AutoRegisterConfigKey]
+  private static readonly ModConfigurationKey<bool> tryFixFlick = new("Try Fix Context Flick", "If the context menu should attempt to fix flicking", () => true);
+  [AutoRegisterConfigKey]
+  private static readonly ModConfigurationKey<bool> tryKeepContextPosition = new("Try Keep Context Menu Position", "If the context menu should attempt to stay in the same position", () => false);
+  [AutoRegisterConfigKey]
+  private static readonly ModConfigurationKey<bool> defaultActionOnPrimaryRelease = new("Default Action On Primary Release", "If a display/input should be created when primary is released", () => false);
+  [AutoRegisterConfigKey]
+  private static readonly ModConfigurationKey<int> maxItemsPerPage = new("Max Items Per Page", "The maximum amount of items per page", () => 10);
+
+  [AutoRegisterConfigKey]
+  private static readonly ModConfigurationKey<MenuVisual> currentMenuVisual = new("Current Menu Visual", "The visual to use when rendering a menu.\t<b><color=hero.red>NOTE: No other visuals exist currently!</color></b> This setting can be ignored for now.", () => MenuVisual.ContextMenu);
 
   static ProtoFluxContextualActions()
   {
@@ -130,4 +144,16 @@ public class ProtoFluxContextualActions : ResoniteMod
       }
     }
   }
+
+  internal static bool ShouldUseRelays() => fluxStructureRelays.Value;
+
+  internal static bool ShouldTryFixFlick() => tryFixFlick.Value;
+
+  internal static bool ShouldTryKeepContextPosition() => tryKeepContextPosition.Value;
+
+  internal static int GetMaxItemsPerPage() => maxItemsPerPage.Value;
+
+  internal static bool ShouldDoDefaultActionOnPrimaryRelease() => defaultActionOnPrimaryRelease.Value;
+
+  internal static MenuVisual GetMenuVisual() => currentMenuVisual.Value;
 }

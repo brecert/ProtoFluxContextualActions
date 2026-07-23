@@ -41,7 +41,7 @@ internal static partial class ContextualSwapActionsPatch
     ByIndexLossy
   }
 
-  internal readonly struct MenuItem(Type node, string? name = null, ConnectionTransferType? connectionTransferType = ConnectionTransferType.ByNameLossy)
+  internal struct MenuItem(Type node, string? name = null, ConnectionTransferType? connectionTransferType = ConnectionTransferType.ByNameLossy, Action<ProtoFluxNode>? onSpawn = null, string group = "") : IGroupItem
   {
     internal readonly Type node = node;
 
@@ -50,9 +50,24 @@ internal static partial class ContextualSwapActionsPatch
     internal readonly ConnectionTransferType? connectionTransferType = connectionTransferType;
 
     internal readonly string DisplayName => name ?? NodeMetadataHelper.GetMetadata(node).Name ?? node.GetNiceTypeName();
+
+    internal readonly Action<ProtoFluxNode>? onSpawn = onSpawn;
+
+    internal string group = group;
+
+    internal Action<ProtoFluxTool, IGroupItem>? currentAction = null;
+
+    readonly string IGroupItem.Name => DisplayName;
+
+    readonly colorX IGroupItem.Color => node.GetTypeColor();
+
+    readonly string IGroupItem.Group => group;
+
+    readonly Action<ProtoFluxTool, IGroupItem> IGroupItem.OnClick => currentAction!;
+
   }
 
-  internal record ContextualContext(Type NodeType, World World);
+  internal record ContextualContext(Type NodeType, World World, ProtoFluxElementProxy? proxy, bool selectSwap, ProtoFluxNode hitNode, ProtoFluxTool callingTool);
 
   // additional data we store for the protoflux tool
   internal class ProtoFluxToolData
@@ -80,16 +95,16 @@ internal static partial class ContextualSwapActionsPatch
       if (hit is { Collider.Slot: var hitSlot })
       {
         var hitNode = hitSlot.GetComponentInParents<ProtoFluxNode>();
-        if (hitNode != null)
+        if (hitNode != null && hitSlot.Name != "<WIRE_POINT>")
         {
           if (data.SecondsSinceLastSecondaryPress() < DoublePressTime && data.lastSecondaryPressNode != null && !data.lastSecondaryPressNode.IsRemoved && data.lastSecondaryPressNode == hitNode)
           {
-            CreateMenu(__instance, hitNode);
+            bool success = CreateMenu(__instance, hitNode, null);
             data.lastSecondaryPressNode = null;
             data.lastSecondaryPressNode = null;
             data.lastSpawnNodeType = null;
             // skip rest
-            return false;
+            return success;
           }
           else
           {
@@ -110,42 +125,42 @@ internal static partial class ContextualSwapActionsPatch
     return true;
   }
 
-  private static void CreateMenu(ProtoFluxTool __instance, ProtoFluxNode hitNode)
+  private static bool CreateMenu(ProtoFluxTool __instance, ProtoFluxNode hitNode, ProtoFluxElementProxy? proxy)
   {
-    __instance.StartTask(async () =>
+    List<IGroupItem> items = GetMenuItems(__instance, hitNode, proxy).Where(m => m.node != hitNode.NodeType).Select<MenuItem, IGroupItem>(item => item).ToList();
+
+    var query = new NodeQueryAcceleration(hitNode.NodeInstance.Runtime.Group);
+
+    if (items.Count > 0)
     {
-      var items = GetMenuItems(__instance, hitNode).Where(m => m.node != hitNode.NodeType).Take(10).ToArray();
+      // restore previous spawn node
+      __instance.SpawnNodeType.Value = additionalData.GetOrCreateValue(__instance).lastSpawnNodeType;
 
-      var query = new NodeQueryAcceleration(hitNode.NodeInstance.Runtime.Group);
+      GroupManager grouper = new(__instance, items, colorX.White);
+      bool success = grouper.RenderRoot(true);
 
-      if (items.Length > 0)
+      return !success;
+    }
+
+    return true;
+  }
+
+  internal static void OnSwapNode(ProtoFluxTool __instance, ProtoFluxNode hitNode, MenuItem menuItem)
+  {
+    try
+    {
+      SwapHitForNode(__instance, hitNode, menuItem);
+    }
+    finally
+    {
+      // if there's somehow an error I do not want evil dangling references that world crash silently.
+      if (hitNode != null && !hitNode.IsRemoved)
       {
-        // restore previous spawn node
-        __instance.SpawnNodeType.Value = additionalData.GetOrCreateValue(__instance).lastSpawnNodeType;
-
-        var menu = await __instance.LocalUser.OpenContextMenu(__instance, __instance.Slot);
-        // TODO: pages / custom menus
-
-        foreach (var menuItem in items)
-        {
-          AddMenuItem(__instance, menu, colorX.White, menuItem, () =>
-          {
-            try
-            {
-              SwapHitForNode(__instance, hitNode, menuItem);
-            }
-            finally
-            {
-              // if there's somehow an error I do not want evil dangling references that world crash silently.
-              if (hitNode != null && !hitNode.IsRemoved)
-              {
-                hitNode.UndoableDestroy();
-              }
-            }
-          });
-        }
+        hitNode.UndoableDestroy();
       }
-    });
+
+      __instance.LocalUser.CloseContextMenu(__instance);
+    }
   }
 
   private static void SwapHitForNode(ProtoFluxTool __instance, ProtoFluxNode hitNode, MenuItem menuItem)
@@ -212,33 +227,31 @@ internal static partial class ContextualSwapActionsPatch
         var node = nodeMap[intoNode];
         node.CreateSpawnUndoPoint(node.HasActiveVisual() ? ensureVisualDelegate : null);
       }
+
+      var unusedProxyComponents = hitNode.Slot.GetComponents<ProtoFluxEngineProxy>().Where(comp => comp.Node.Target == null || comp.Node.Target.IsRemoved).ToList();
+      unusedProxyComponents.ForEach(comp =>
+      {
+        comp.UndoableDestroy();
+      });
+      // GlobalValue/Referece/Delegate is not cleaned up, but thats less common compared to proxies
+
+      // Run custom function if provided
+      menuItem.onSpawn?.Invoke(newNode);
     }
 
     __instance.World.EndUndoBatch();
   }
 
-  private static void AddMenuItem(ProtoFluxTool __instance, ContextMenu menu, colorX color, MenuItem item, Action setup)
-  {
-    var nodeMetadata = NodeMetadataHelper.GetMetadata(item.node);
-    var label = (LocaleString)item.DisplayName;
-    var menuItem = menu.AddItem(in label, (Uri?)null, color);
-    menuItem.Button.LocalPressed += (button, data) =>
-    {
-      setup();
-      __instance.LocalUser.CloseContextMenu(__instance);
-    };
-  }
-
-  internal static IEnumerable<MenuItem> GetMenuItems(ProtoFluxTool __instance, ProtoFluxNode nodeComponent)
+  internal static IEnumerable<MenuItem> GetMenuItems(ProtoFluxTool __instance, ProtoFluxNode nodeComponent, ProtoFluxElementProxy? proxy, bool isSelectSwap = false)
   {
     var node = nodeComponent.NodeInstance;
     var nodeType = node.GetType();
-    var context = new ContextualContext(nodeType, __instance.World);
+    var context = new ContextualContext(nodeType, __instance.World, proxy, isSelectSwap, nodeComponent, __instance);
 
     IEnumerable<MenuItem> menuItems = [
       .. UserRootSwapGroups(nodeType),
       .. GlobalLocalEquivilentSwapGroups(nodeType),
-      .. GetDirectionGroupItems(context),
+      .. DirectionGroupItems(context),
       .. ForLoopGroupItems(context),
       .. EasingOfSameKindFloatItems(context),
       .. EasingOfSameKindDoubleItems(context),
@@ -285,7 +298,6 @@ internal static partial class ContextualSwapActionsPatch
       .. ApproximatelyNodesGroupItems(context),
       .. GrabbableValuePropertyGroupItems(context),
       .. SinCosSwapGroup(context),
-      .. SampleSpatialVariableGroupItems(context),
       .. KeyStateGroupItems(context),
       .. FireOnBoolGroupItems(context),
       .. WriteGroupItems(context),
@@ -297,11 +309,61 @@ internal static partial class ContextualSwapActionsPatch
       .. SlotChildGroupItems(context),
       .. GetSlotActiveGroupItems(context),
       .. RepeatGroupItems(context),
+      .. TweenGroupItems(context),
+      .. DynamicVariableGroupItems(context),
+      .. SpatialVariableGroupItems(context),
+      .. ClampGroupItems(context),
+      .. LerpGroupItems(context),
+      .. SampleAnimationGroupItems(context),
+      .. CloudVariableGroupItems(context),
+      .. TimeoutGroupItems(context),
+      .. WorldTimeGroupItems(context),
+      .. CharacterControllerGroupItems(context),
+      .. OrderOffsetGroupItems(context),
+      .. StringAddGroupItems(context),
+      .. LoopGroupItems(context),
+      .. InputGroupItems(context),
+      .. RoundGroupItems(context),
+      .. StringIncludesGroupItems(context),
+      .. TransformVectorGroupItems(context),
+      .. ArithmeticConstantsGroupItems(context),
+      .. UserReferenceGroupItems(context),
+      .. RemapGroupItems(context),
+      .. ZeroOneGroupItems(context),
+      .. EventGroupItems(context),
+      .. VectorGroupItems(context),
+      .. SlotTagGroupItems(context),
+      .. IPlayableGroupItems(context),
+      .. DelayGroupItems(context),
+      .. DebugGroupItems(context),
+      .. IWorldElementGroupItems(context),
+      .. NetworkGroupItems(context),
+      .. StringConvertGroupItems(context),
+      .. ProtoFluxPackingGroupItems(context),
+      .. RaycastGroupItems(context),
+      .. RandomPointGroupItems(context),
+      .. RectGroupItems(context),
+      .. UserLocomotionGroupItems(context),
+      .. FocusableGroupItems(context),
+      .. GrabbableEventGroupItems(context),
+      .. DesktopInputGroupItems(context),
+      .. ColorGroupItems(context),
+      .. ImpulseRelayGroupItems(context),
     ];
 
-    foreach (var menuItem in menuItems)
+    var indexedItems = menuItems.Index();
+
+    foreach (var menuItem in indexedItems)
     {
-      yield return menuItem;
+      if (menuItem.Item.node == context.NodeType) continue;
+      // prevents items being doubled up. if everything works as expected, this shouldnt need to exist.
+      if (indexedItems.First(v => v.Item.node == menuItem.Item.node).Index != menuItem.Index) continue;
+      var item = menuItem.Item;
+      item.currentAction = (_, _) =>
+      {
+        OnSwapNode(__instance, nodeComponent, item);
+      };
+      yield return item;
     }
   }
 

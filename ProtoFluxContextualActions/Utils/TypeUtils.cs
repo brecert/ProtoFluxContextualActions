@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Elements.Core;
+using HarmonyLib;
 
 namespace ProtoFluxContextualActions.Utils;
 
@@ -70,5 +71,17 @@ static class TypeUtils
     }
 
     return matchedType != null;
+  }
+
+  public static Type BaseVectorType(this Type type, out bool isVector)
+  {
+    isVector = false;
+    var traverse = Traverse.Create(type).Field("BASE_TYPE");
+    if (traverse.FieldExists())
+    {
+      isVector = true;
+      return traverse.GetValue<Type>();
+    }
+    return type;
   }
 }

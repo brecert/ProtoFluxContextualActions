@@ -10,6 +10,7 @@ static partial class ContextualSwapActionsPatch
   static readonly HashSet<Type> FireOnBoolGroup = [
     typeof(FireOnTrue),
     typeof(FireOnFalse),
+    typeof(FireOnValueChange<bool>),
   ];
 
   internal static IEnumerable<MenuItem> FireOnBoolGroupItems(ContextualContext context)
@@ -18,7 +19,7 @@ static partial class ContextualSwapActionsPatch
     {
       foreach (var match in FireOnBoolGroup)
       {
-        yield return new MenuItem(match);
+        yield return new MenuItem(match, connectionTransferType: ConnectionTransferType.ByIndexLossy);
       }
     }
   }
