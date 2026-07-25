@@ -40,6 +40,12 @@ static partial class ContextualSwapActionsPatch
       bool IsTrigger = innerType.GetNiceTypeName().Contains("DynamicImpulseTrigger");
       bool IsAsync = innerType.GetNiceTypeName().StartsWith("Async");
 
+      bool allowSyncReceiver = true;
+      if (IsAsync && !IsTrigger)
+      {
+        if (context.hitNode.NodeInstance.GetImpulseTarget(0) is IAsyncOperation) allowSyncReceiver = false;
+      }
+
       Type? dynTrigData = null, dynRecData = null, asyncDynTrigData = null, asyncDynRecData = null;
 
       Type? target = null;
@@ -95,11 +101,14 @@ static partial class ContextualSwapActionsPatch
         ]);
         asyncDynTrigData = AsyncDynTrigger;
 
-        var DynReceiver = GetNodeForType(target, [
-          new NodeTypeRecord(typeof(DynamicImpulseReceiverWithValue<>), null, null),
-          new NodeTypeRecord(typeof(DynamicImpulseReceiverWithObject<>), null, null),
-        ]);
-        dynRecData = DynReceiver;
+        if (allowSyncReceiver)
+        {
+          var DynReceiver = GetNodeForType(target, [
+            new NodeTypeRecord(typeof(DynamicImpulseReceiverWithValue<>), null, null),
+            new NodeTypeRecord(typeof(DynamicImpulseReceiverWithObject<>), null, null),
+          ]);
+          dynRecData = DynReceiver;
+        }
 
         var AsyncDynReceiver = GetNodeForType(target, [
           new NodeTypeRecord(typeof(AsyncDynamicImpulseReceiverWithValue<>), null, null),
@@ -113,7 +122,7 @@ static partial class ContextualSwapActionsPatch
       Dictionary<bool3, Type?> keyedImpulses = new()
       {
         { new(false, true, false), typeof(DynamicImpulseTrigger) },
-        { new(false, false, false), typeof(DynamicImpulseReceiver) },
+        { new(false, false, false), allowSyncReceiver ? typeof(DynamicImpulseReceiver) : null },
         { new(true, true, false), typeof(AsyncDynamicImpulseTrigger) },
         { new(true, false, false), typeof(AsyncDynamicImpulseReceiver) },
 
