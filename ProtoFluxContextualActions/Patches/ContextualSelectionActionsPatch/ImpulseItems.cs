@@ -64,6 +64,8 @@ static partial class ContextualSelectionActionsPatch
 
     yield return new MenuItem(typeof(PlayOneShot));
 
+    yield return new MenuItem(typeof(LocalImpulseTimeoutSeconds));
+
     if (IsIterationNode(nodeType))
     {
       yield return new MenuItem(typeof(ValueIncrement<int>), group: "Variables");
@@ -83,20 +85,6 @@ static partial class ContextualSelectionActionsPatch
     {
       yield return new MenuItem(typeof(AttachTexture2D));
       yield return new MenuItem(typeof(AttachSprite));
-    }
-
-    else if (nodeType.IsGenericType)
-    {
-      var typeDef = nodeType.GetGenericTypeDefinition();
-      if (typeDef == typeof(FireOnValueChange<>) || typeDef == typeof(FireOnObjectValueChange<>) || typeDef == typeof(FireOnLocalValueChange<>) || typeDef == typeof(FireOnLocalObjectChange<>))
-      {
-        yield return new MenuItem(typeof(LocalImpulseTimeoutSeconds));
-      }
-    }
-
-    else if (nodeType == typeof(ImpulseDemultiplexer))
-    {
-      yield return new MenuItem(typeof(ImpulseMultiplexer), name: "Impulse Multiplex");
     }
   }
 }
