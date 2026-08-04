@@ -3,7 +3,10 @@ using FrooxEngine;
 using FrooxEngine.ProtoFlux;
 using HarmonyLib;
 using ProtoFlux.Core;
+using ProtoFlux.Runtimes.Execution;
 using ProtoFlux.Runtimes.Execution.Nodes.Actions;
+using ProtoFluxContextualActions.Extensions;
+using ProtoFluxContextualActions.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,169 +15,165 @@ namespace ProtoFluxContextualActions.Patches;
 
 static partial class ContextualSwapActionsPatch
 {
-  static readonly HashSet<Type> DynamicImpulseGroup = [
-    typeof(DynamicImpulseReceiver),
+  static readonly HashSet<Type> DynamicImpulseTriggerGroup = [
     typeof(DynamicImpulseTrigger),
-    typeof(DynamicImpulseReceiverWithValue<>),
-    typeof(DynamicImpulseReceiverWithObject<>),
     typeof(DynamicImpulseTriggerWithValue<>),
     typeof(DynamicImpulseTriggerWithObject<>),
+  ];
 
-    typeof(AsyncDynamicImpulseReceiver),
+  static readonly HashSet<Type> AsyncDynamicImpulseTriggerGroup = [
     typeof(AsyncDynamicImpulseTrigger),
-    typeof(AsyncDynamicImpulseReceiverWithValue<>),
-    typeof(AsyncDynamicImpulseReceiverWithObject<>),
     typeof(AsyncDynamicImpulseTriggerWithValue<>),
     typeof(AsyncDynamicImpulseTriggerWithObject<>),
   ];
 
+  static readonly BiDictionary<Type, Type> AsyncDynamicImpulseTriggerMap =
+    DynamicImpulseTriggerGroup.Zip(AsyncDynamicImpulseTriggerGroup).ToBiDictionary();
+
+  static readonly HashSet<Type> DynamicImpulseReceiverGroup = [
+    typeof(DynamicImpulseReceiver),
+    typeof(DynamicImpulseReceiverWithValue<>),
+    typeof(DynamicImpulseReceiverWithObject<>),
+  ];
+
+  static readonly HashSet<Type> AsyncDynamicImpulseReceiverGroup = [
+    typeof(AsyncDynamicImpulseReceiver),
+    typeof(AsyncDynamicImpulseReceiverWithValue<>),
+    typeof(AsyncDynamicImpulseReceiverWithObject<>),
+  ];
+
+  static readonly BiDictionary<Type, Type> AsyncDynamicImpulseReceiverMap =
+    DynamicImpulseReceiverGroup.Zip(AsyncDynamicImpulseReceiverGroup).ToBiDictionary();
+
+  static readonly BiDictionary<Type, Type> DynamicImpulseTriggerRecieverMap =
+    DynamicImpulseTriggerGroup.Zip(DynamicImpulseReceiverGroup)
+    .Concat(AsyncDynamicImpulseTriggerGroup.Zip(AsyncDynamicImpulseReceiverGroup))
+    .ToBiDictionary();
+
+  static readonly HashSet<HashSet<Type>> DynamicImpulseGroups = [
+    DynamicImpulseTriggerGroup,
+    DynamicImpulseReceiverGroup,
+    AsyncDynamicImpulseTriggerGroup,
+    AsyncDynamicImpulseReceiverGroup,
+  ];
+
+  static readonly HashSet<Type> DynamicImpulseGroup = [
+    ..DynamicImpulseTriggerGroup,
+    ..DynamicImpulseReceiverGroup,
+    ..AsyncDynamicImpulseTriggerGroup,
+    ..AsyncDynamicImpulseReceiverGroup,
+  ];
+
+  static readonly HashSet<Type> AsyncGroup = [
+    ..AsyncDynamicImpulseTriggerGroup,
+    ..AsyncDynamicImpulseReceiverGroup,
+  ];
 
   internal static IEnumerable<MenuItem> DynamicImpulseGroupItems(ContextualContext context)
   {
-    if (DynamicImpulseGroup.Any(t => context.NodeType.IsGenericType ? t == context.NodeType.GetGenericTypeDefinition() : t == context.NodeType))
+    var node = context.hitNode;
+    var nodeType = node.NodeType;
+
+    if (DynamicImpulseGroup.Contains(nodeType) || node.NodeType.TryGetGenericTypeDefinition(out nodeType) && DynamicImpulseGroup.Contains(nodeType))
     {
-      bool isGeneric = context.NodeType.IsGenericType;
-      Type baseType = isGeneric ? context.NodeType.GetGenericTypeDefinition() : context.NodeType;
-      Type innerType = isGeneric ? context.NodeType.GenericTypeArguments.First() : context.NodeType;
+      var tag = FindImpulseTag(node);
 
-      bool IsTrigger = innerType.GetNiceTypeName().Contains("DynamicImpulseTrigger");
-      bool IsAsync = innerType.GetNiceTypeName().StartsWith("Async");
-
-      Type? dynTrigData = null, dynRecData = null, asyncDynTrigData = null, asyncDynRecData = null;
-
-      Type? target = null;
-      bool hasProxyHeld = false;
-      bool hasDynData = false;
-
-      string? receiverTag = null;
-
-      if (context.proxy is ProtoFluxInputProxy)
+      if (context.proxy is { } proxy)
       {
-        ProtoFluxInputProxy inputType = (ProtoFluxInputProxy)context.proxy;
-        Type targetType = inputType.InputType;
-        target = targetType;
-        hasProxyHeld = true;
-      }
-      if (context.proxy is ProtoFluxOutputProxy)
-      {
-        ProtoFluxOutputProxy outputType = (ProtoFluxOutputProxy)context.proxy;
-        Type targetType = outputType.OutputType;
-        target = targetType;
-        hasProxyHeld = true;
-      }
-      if (context.NodeType.IsGenericType && target == null)
-      {
-        var opCount = context.NodeType.GenericTypeArguments.Length;
-        var opType = context.NodeType.GenericTypeArguments[opCount - 1];
-        target = opType;
-      }
-
-      if (baseType.GetNiceTypeName().Contains("Receiver"))
-      {
-        var trav = Traverse.Create(context.hitNode);
-        var field = trav.Field("Tag");
-        if (field.FieldExists())
+        if (proxy is ProtoFluxInputProxy or ProtoFluxOutputProxy)
         {
-          var globalField = field.GetValue<SyncRef<IGlobalValueProxy<string>>>().Target;
-          if (globalField != null) receiverTag = globalField.Value;
+          var elementType = proxy.ElementContentType;
+
+          var filledNodes = DynamicImpulseGroups
+            .Where(g => g.Contains(nodeType))
+            .Select(g => g.Where(t => t.IsGenericType).Select(t => new NodeTypeRecord(t, null, null)))
+            .Select(g => GetNodeForType(elementType, [.. g]));
+
+          foreach (var filledType in filledNodes)
+          {
+            yield return new(filledType, onSpawn: node => OnNodeSpawn(filledType, node, tag), name: NiceName(filledType));
+          }
         }
       }
-
-
-      if (target != null)
+      else
       {
-        var DynTrigger = GetNodeForType(target, [
-          new NodeTypeRecord(typeof(DynamicImpulseTriggerWithValue<>), null, null),
-          new NodeTypeRecord(typeof(DynamicImpulseTriggerWithObject<>), null, null),
-        ]);
-        dynTrigData = DynTrigger;
-
-        var AsyncDynTrigger = GetNodeForType(target, [
-          new NodeTypeRecord(typeof(AsyncDynamicImpulseTriggerWithValue<>), null, null),
-          new NodeTypeRecord(typeof(AsyncDynamicImpulseTriggerWithObject<>), null, null),
-        ]);
-        asyncDynTrigData = AsyncDynTrigger;
-
-        var DynReceiver = GetNodeForType(target, [
-          new NodeTypeRecord(typeof(DynamicImpulseReceiverWithValue<>), null, null),
-          new NodeTypeRecord(typeof(DynamicImpulseReceiverWithObject<>), null, null),
-        ]);
-        dynRecData = DynReceiver;
-
-        var AsyncDynReceiver = GetNodeForType(target, [
-          new NodeTypeRecord(typeof(AsyncDynamicImpulseReceiverWithValue<>), null, null),
-          new NodeTypeRecord(typeof(AsyncDynamicImpulseReceiverWithObject<>), null, null),
-        ]);
-        asyncDynRecData = AsyncDynReceiver;
-
-        hasDynData = true;
-      }
-
-      Dictionary<bool3, Type?> keyedImpulses = new()
-      {
-        { new(false, true, false), typeof(DynamicImpulseTrigger) },
-        { new(false, false, false), typeof(DynamicImpulseReceiver) },
-        { new(true, true, false), typeof(AsyncDynamicImpulseTrigger) },
-        { new(true, false, false), typeof(AsyncDynamicImpulseReceiver) },
-
-        { new(false, true, true), dynTrigData },
-        { new(false, false, true), dynRecData },
-        { new(true, true, true), asyncDynTrigData },
-        { new(true, false, true), asyncDynRecData },
-      };
-
-      List<Type?> sortedImpulses = keyedImpulses
-        .OrderBy(kv => !kv.Key.x == IsAsync)
-        .OrderBy(kv => hasProxyHeld ? !kv.Key.z : false)
-        .OrderBy(kv => IsTrigger ? !kv.Key.y : false)
-        .OrderBy(kv => hasDynData ? !kv.Key.z : false)
-        .Select(kv => kv.Value)
-        .ToList();
-
-      string? NodeNameSelector(Type input)
-      {
-        string constructedName = "";
-        bool isGeneric = input.IsGenericType;
-        Type baseType = isGeneric ? input.GetGenericTypeDefinition() : input;
-        Type innerType = isGeneric ? input.GenericTypeArguments.First() : input;
-        if (isGeneric)
         {
-          constructedName += innerType.GetNiceName();
+          if (DynamicImpulseTriggerRecieverMap.TryGetEither(nodeType, out var foundType) && foundType.TryMakingGenericTypeFrom(node.NodeType) is { } filledType)
+          {
+            yield return new(filledType, onSpawn: node => OnNodeSpawn(filledType, node, tag), name: NiceName(filledType));
+          }
         }
-        string niceTypeName = baseType.GetNiceTypeName().ToLower();
-        if (niceTypeName.Contains("trigger")) constructedName += " Trigger";
-        else constructedName += " Receiver";
-        if (niceTypeName.Contains("async")) constructedName += " (Async)";
-        return constructedName;
-      }
-
-      void OnNodeSpawn(Type inputType, ProtoFluxNode newNode)
-      {
-        if (receiverTag == null) return;
-
-        bool isGeneric = context.NodeType.IsGenericType;
-        Type oldBaseType = isGeneric ? context.NodeType.GetGenericTypeDefinition() : context.NodeType;
-        Type newBaseType = isGeneric ? inputType.GetGenericTypeDefinition() : inputType;
-        if (!oldBaseType.GetNiceTypeName().Contains("Receiver")) return;
-        if (!newBaseType.GetNiceTypeName().Contains("Trigger")) return;
-        context.callingTool.SpawnNode(ProtoFluxHelper.GetInputNode(typeof(string)), inputNode =>
         {
-          inputNode.EnsureVisual();
-          var casted = (FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ValueObjectInput<string>)inputNode;
-          newNode.GetInput(0).Target = casted.GetOutput(0);
-          Slot newNodeSlot = newNode.Slot;
-          casted.Value.Value = receiverTag;
-          casted.Slot.Parent = newNodeSlot.Parent;
-          casted.Slot.CopyTransform(newNodeSlot);
-          // Dynamic Impulses with data are slightly taller, so increase the vertical offset by that amount
-          casted.Slot.LocalPosition += newNodeSlot.Left * 0.18f + newNodeSlot.Up * (newBaseType.GetNiceTypeName().Contains("With") ? 0.03f : 0.015f);
-        });
-      }
-
-      foreach (var imp in sortedImpulses)
-      {
-        if (imp != null) yield return new(imp, name: NodeNameSelector(imp), onSpawn: (node) => OnNodeSpawn(imp, node));
+          if (AsyncDynamicImpulseTriggerMap.TryGetEither(nodeType, out var foundType) && foundType.TryMakingGenericTypeFrom(node.NodeType) is { } filledType)
+          {
+            yield return new(filledType, onSpawn: node => OnNodeSpawn(filledType, node, tag), name: NiceName(filledType));
+          }
+        }
+        {
+          if (AsyncDynamicImpulseReceiverMap.TryGetEither(nodeType, out var foundType) && foundType.TryMakingGenericTypeFrom(node.NodeType) is { } filledType)
+          {
+            yield return new(filledType, onSpawn: node => OnNodeSpawn(filledType, node, tag), name: NiceName(filledType));
+          }
+        }
       }
     }
+
+    #region utils
+    void OnNodeSpawn(Type inputType, ProtoFluxNode newNode, string? tag)
+    {
+      if (tag == null) return;
+
+      bool isGeneric = context.NodeType.IsGenericType;
+      Type oldBaseType = isGeneric ? context.NodeType.GetGenericTypeDefinition() : context.NodeType;
+      Type newBaseType = isGeneric ? inputType.GetGenericTypeDefinition() : inputType;
+      if (!oldBaseType.GetNiceTypeName().Contains("Receiver")) return;
+      if (!newBaseType.GetNiceTypeName().Contains("Trigger")) return;
+      context.callingTool.SpawnNode(ProtoFluxHelper.GetInputNode(typeof(string)), inputNode =>
+      {
+        inputNode.EnsureVisual();
+        var casted = (FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ValueObjectInput<string>)inputNode;
+        newNode.GetInput(0).Target = casted.GetOutput(0);
+        Slot newNodeSlot = newNode.Slot;
+        casted.Value.Value = tag;
+        casted.Slot.Parent = newNodeSlot.Parent;
+        casted.Slot.CopyTransform(newNodeSlot);
+        // Dynamic Impulses with data are slightly taller, so increase the vertical offset by that amount
+        casted.Slot.LocalPosition += newNodeSlot.Left * 0.18f + newNodeSlot.Up * (newBaseType.GetNiceTypeName().Contains("With") ? 0.03f : 0.015f);
+      });
+    }
+
+    static string NiceName(Type node)
+    {
+      var type = node.IsGenericType ? node.GetGenericTypeDefinition() : node;
+      var isTrigger = DynamicImpulseTriggerRecieverMap.ContainsFirst(type);
+      var asyncName = AsyncGroup.Contains(type) ? "(Async) " : "";
+      var kindName = isTrigger ? "Trigger" : "Receiver";
+      var dataName = node.IsGenericType ? $" with {node.GenericTypeArguments[0].GetNiceName()}" : "";
+      return $"{asyncName}{kindName}{dataName}";
+    }
+
+    static string? FindImpulseTag(ProtoFluxNode node)
+    {
+      var tagField = ((dynamic)node).Tag;
+      UniLog.Log(tagField);
+      switch (tagField)
+      {
+        case SyncRef<INodeObjectOutput<string>> tagRef:
+          {
+            var tagInput = (ObjectInput<string>)((dynamic)node.NodeInstance).Tag;
+            var tag = node.Group.EvaluateImmediatelly(tagInput, default);
+            UniLog.Log(tag);
+            return tag;
+          }
+        case SyncRef<IGlobalValueProxy<string>> globalRef:
+          {
+            var tag = globalRef.Target?.Value;
+            return tag;
+          }
+        default:
+          return null;
+      }
+    }
+    #endregion
   }
 }
