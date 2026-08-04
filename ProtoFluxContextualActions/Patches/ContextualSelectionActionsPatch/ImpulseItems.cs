@@ -12,6 +12,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Variables;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Debugging;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Audio;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Undo;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Time;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -65,6 +66,8 @@ static partial class ContextualSelectionActionsPatch
     yield return new MenuItem(typeof(PlayOneShot));
 
     yield return new MenuItem(typeof(LocalImpulseTimeoutSeconds));
+
+    yield return new MenuItem(typeof(ElapsedTimeFloat));
 
     if (IsIterationNode(nodeType))
     {
