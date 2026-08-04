@@ -180,6 +180,8 @@ static partial class ContextualSelectionActionsPatch
             yield return new(typeof(Remap_Double), group: "Math");
           }
 
+          // This isnt great, but i dont know a way to make this automatic.
+          // [Type1]As[Type2] is not handled by the current PsuedoGeneric generator, so this is how it is instead.
           if (nodeType == typeof(Half)) yield return new(typeof(HalfAsUShort), group: "Math/Binary");
           if (nodeType == typeof(float)) yield return new(typeof(FloatAsUInt), group: "Math/Binary");
           if (nodeType == typeof(double)) yield return new(typeof(DoubleAsULong), group: "Math/Binary");
@@ -188,15 +190,19 @@ static partial class ContextualSelectionActionsPatch
           if (nodeType == typeof(uint)) yield return new(typeof(UIntAsFloat), group: "Math/Binary");
           if (nodeType == typeof(ulong)) yield return new(typeof(ULongAsDouble), group: "Math/Binary");
 
-          if (nodeType == typeof(byte) || nodeType == typeof(ushort) || nodeType == typeof(uint) || nodeType == typeof(ulong))
+          if (psuedoGenericTypes.ExtractBits.Any(n => n.Types.First() == nodeType))
           {
-            if (nodeType == typeof(uint) || nodeType == typeof(ulong))
-            {
-              yield return new(psuedoGenericTypes.AND.First(n => n.Types.First() == outputType).Node, group: "Math/Binary");
-              yield return new(psuedoGenericTypes.ShiftLeft.First(n => n.Types.First() == outputType).Node, group: "Math/Binary");
-            }
-
             yield return new(psuedoGenericTypes.ExtractBits.First(n => n.Types.First() == outputType).Node, group: "Math/Binary");
+          }
+
+          if (psuedoGenericTypes.AND.Any(n => n.Types.First() == nodeType))
+          {
+            yield return new(psuedoGenericTypes.AND.First(n => n.Types.First() == outputType).Node, group: "Math/Binary");
+          }
+
+          if (psuedoGenericTypes.ShiftLeft.Any(n => n.Types.First() == nodeType))
+          {
+            yield return new(psuedoGenericTypes.ShiftLeft.First(n => n.Types.First() == outputType).Node, group: "Math/Binary");
           }
 
           if (psuedoGenericTypes.Pack.Any(t => t.Types.First().BaseVectorType(out bool isVec) == nodeType && isVec))
@@ -229,9 +235,8 @@ static partial class ContextualSelectionActionsPatch
           if (nodeType == typeof(uint)) yield return new(typeof(FloatAsUInt), group: "Math/Binary");
           if (nodeType == typeof(ulong)) yield return new(typeof(DoubleAsULong), group: "Math/Binary");
 
-          if (nodeType == typeof(byte) || nodeType == typeof(ushort) || nodeType == typeof(uint) || nodeType == typeof(ulong))
+          if (psuedoGenericTypes.ComposeBits.Any(n => n.Types.First() == nodeType))
           {
-
             yield return new(psuedoGenericTypes.ComposeBits.First(n => n.Types.First() == nodeType).Node, group: "Math/Binary");
           }
 

@@ -1108,9 +1108,9 @@ static partial class ContextualSelectionActionsPatch
         yield return createVariableNode(variableLatchInput, "Write Latch");
 
         if (nodeVariable.IsUnmanaged())
-				{
-					yield return createVariableNode(typeof(ValueIncrement<,>).MakeGenericType(typeof(FrooxEngineContext), nodeVariable), "Increment");
-				}
+        {
+          yield return createVariableNode(typeof(ValueIncrement<,>).MakeGenericType(typeof(FrooxEngineContext), nodeVariable), "Increment");
+        }
       }
     }
     else
