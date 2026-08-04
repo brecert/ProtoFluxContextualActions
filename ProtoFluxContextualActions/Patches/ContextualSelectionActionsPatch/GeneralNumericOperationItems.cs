@@ -13,7 +13,6 @@ using ProtoFlux.Runtimes.Execution.Nodes.Math;
 using ProtoFluxContextualActions.Utils;
 using ProtoFlux.Runtimes.Execution.Nodes.Binary;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Operators;
-using ProtoFlux.Runtimes.Execution.Nodes.Math.Quaternions;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -28,7 +27,6 @@ static partial class ContextualSelectionActionsPatch
       //       Feels a little weird though, ux is difficult. A custom uix menu could help.
       if (target != null)
       {
-        Type? nodeType = null;
         var world = target.World;
         var psuedoGenericTypes = world.GetPsuedoGenericTypesForWorld();
         if (target is ProtoFluxOutputProxy { OutputType.Value: var outputType } && (outputType.IsUnmanaged() || typeof(ISphericalHarmonics).IsAssignableFrom(outputType)))
@@ -36,7 +34,6 @@ static partial class ContextualSelectionActionsPatch
           var coder = Traverse.Create(typeof(Coder<>).MakeGenericType(outputType));
           var isMatrix = outputType.IsMatrixType();
           var isQuaternion = outputType.IsQuaternionType();
-          nodeType = outputType;
           // only handle values
 
           if (isQuaternion)
@@ -182,76 +179,70 @@ static partial class ContextualSelectionActionsPatch
 
           // This isnt great, but i dont know a way to make this automatic.
           // [Type1]As[Type2] is not handled by the current PsuedoGeneric generator, so this is how it is instead.
-          if (nodeType == typeof(Half)) yield return new(typeof(HalfAsUShort), group: "Math/Binary");
-          if (nodeType == typeof(float)) yield return new(typeof(FloatAsUInt), group: "Math/Binary");
-          if (nodeType == typeof(double)) yield return new(typeof(DoubleAsULong), group: "Math/Binary");
+          if (outputType == typeof(Half)) yield return new(typeof(HalfAsUShort), group: "Math/Binary");
+          if (outputType == typeof(float)) yield return new(typeof(FloatAsUInt), group: "Math/Binary");
+          if (outputType == typeof(double)) yield return new(typeof(DoubleAsULong), group: "Math/Binary");
 
-          if (nodeType == typeof(ushort)) yield return new(typeof(UShortAsHalf), group: "Math/Binary");
-          if (nodeType == typeof(uint)) yield return new(typeof(UIntAsFloat), group: "Math/Binary");
-          if (nodeType == typeof(ulong)) yield return new(typeof(ULongAsDouble), group: "Math/Binary");
+          if (outputType == typeof(ushort)) yield return new(typeof(UShortAsHalf), group: "Math/Binary");
+          if (outputType == typeof(uint)) yield return new(typeof(UIntAsFloat), group: "Math/Binary");
+          if (outputType == typeof(ulong)) yield return new(typeof(ULongAsDouble), group: "Math/Binary");
 
-          if (psuedoGenericTypes.ExtractBits.Any(n => n.Types.First() == nodeType))
+          if (psuedoGenericTypes.ExtractBits.Any(n => n.Types.First() == outputType))
           {
             yield return new(psuedoGenericTypes.ExtractBits.First(n => n.Types.First() == outputType).Node, group: "Math/Binary");
           }
 
-          if (psuedoGenericTypes.AND.Any(n => n.Types.First() == nodeType))
+          if (psuedoGenericTypes.AND.Any(n => n.Types.First() == outputType))
           {
             yield return new(psuedoGenericTypes.AND.First(n => n.Types.First() == outputType).Node, group: "Math/Binary");
           }
 
-          if (psuedoGenericTypes.ShiftLeft.Any(n => n.Types.First() == nodeType))
+          if (psuedoGenericTypes.ShiftLeft.Any(n => n.Types.First() == outputType))
           {
             yield return new(psuedoGenericTypes.ShiftLeft.First(n => n.Types.First() == outputType).Node, group: "Math/Binary");
           }
 
-          if (psuedoGenericTypes.Pack.Any(t => t.Types.First().BaseVectorType(out bool isVec) == nodeType && isVec))
+          if (psuedoGenericTypes.Pack.Any(t => t.Types.First().BaseVectorType(out bool isVec) == outputType && isVec))
           {
-            foreach (var node in psuedoGenericTypes.Pack.Where(t => t.Types.First().BaseVectorType(out bool isVec) == nodeType && isVec))
+            foreach (var node in psuedoGenericTypes.Pack.Where(t => t.Types.First().BaseVectorType(out bool isVec) == outputType && isVec))
             {
               yield return new(node.Node, group: "Vectors");
             }
           }
 
-          if (psuedoGenericTypes.Distance.Any(t => t.Types.First() == nodeType))
+          if (psuedoGenericTypes.Distance.Any(t => t.Types.First() == outputType))
           {
-            bool isSingle = nodeType == typeof(float) || nodeType == typeof(double);
-            yield return new(psuedoGenericTypes.Distance.First(t => t.Types.First() == nodeType).Node, group: isSingle ? "Math" : "Vectors");
+            bool isSingle = outputType == typeof(float) || outputType == typeof(double);
+            yield return new(psuedoGenericTypes.Distance.First(t => t.Types.First() == outputType).Node, group: isSingle ? "Math" : "Vectors");
           }
         }
         if (target is ProtoFluxInputProxy { InputType.Value: var inputType } && (inputType.IsUnmanaged() || typeof(ISphericalHarmonics).IsAssignableFrom(inputType)))
         {
-          nodeType = inputType;
-          if (psuedoGenericTypes.ZeroOne.Any(n => n.Types.First() == nodeType))
+          if (psuedoGenericTypes.ZeroOne.Any(n => n.Types.First() == inputType))
           {
-            yield return new(psuedoGenericTypes.ZeroOne.First(n => n.Types.First() == nodeType).Node, group: "Math");
+            yield return new(psuedoGenericTypes.ZeroOne.First(n => n.Types.First() == inputType).Node, group: "Math");
           }
 
-          if (nodeType == typeof(Half)) yield return new(typeof(UShortAsHalf), group: "Math/Binary");
-          if (nodeType == typeof(float)) yield return new(typeof(UIntAsFloat), group: "Math/Binary");
-          if (nodeType == typeof(double)) yield return new(typeof(ULongAsDouble), group: "Math/Binary");
+          if (inputType == typeof(Half)) yield return new(typeof(UShortAsHalf), group: "Math/Binary");
+          if (inputType == typeof(float)) yield return new(typeof(UIntAsFloat), group: "Math/Binary");
+          if (inputType == typeof(double)) yield return new(typeof(ULongAsDouble), group: "Math/Binary");
 
-          if (nodeType == typeof(ushort)) yield return new(typeof(HalfAsUShort), group: "Math/Binary");
-          if (nodeType == typeof(uint)) yield return new(typeof(FloatAsUInt), group: "Math/Binary");
-          if (nodeType == typeof(ulong)) yield return new(typeof(DoubleAsULong), group: "Math/Binary");
+          if (inputType == typeof(ushort)) yield return new(typeof(HalfAsUShort), group: "Math/Binary");
+          if (inputType == typeof(uint)) yield return new(typeof(FloatAsUInt), group: "Math/Binary");
+          if (inputType == typeof(ulong)) yield return new(typeof(DoubleAsULong), group: "Math/Binary");
 
-          if (psuedoGenericTypes.ComposeBits.Any(n => n.Types.First() == nodeType))
+          if (psuedoGenericTypes.ComposeBits.Any(n => n.Types.First() == inputType))
           {
-            yield return new(psuedoGenericTypes.ComposeBits.First(n => n.Types.First() == nodeType).Node, group: "Math/Binary");
+            yield return new(psuedoGenericTypes.ComposeBits.First(n => n.Types.First() == inputType).Node, group: "Math/Binary");
           }
 
-          if (psuedoGenericTypes.Unpack.Any(t => t.Types.First().BaseVectorType(out bool isVec) == nodeType && isVec))
+          if (psuedoGenericTypes.Unpack.Any(t => t.Types.First().BaseVectorType(out bool isVec) == inputType && isVec))
           {
-            foreach (var node in psuedoGenericTypes.Unpack.Where(t => t.Types.First().BaseVectorType(out bool isVec) == nodeType && isVec))
+            foreach (var node in psuedoGenericTypes.Unpack.Where(t => t.Types.First().BaseVectorType(out bool isVec) == inputType && isVec))
             {
               yield return new(node.Node, group: "Vectors");
             }
           }
-        }
-        if (nodeType != null)
-        {
-          // keeping this around *just in case* something ends up needing it.
-          // though, i dont know what would actually go here, despite trying multiple times.
         }
       }
     }
