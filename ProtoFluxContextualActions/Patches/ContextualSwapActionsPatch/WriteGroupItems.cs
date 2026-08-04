@@ -5,6 +5,7 @@ using Elements.Core;
 using FrooxEngine.ProtoFlux;
 using ProtoFlux.Runtimes.Execution;
 using ProtoFlux.Runtimes.Execution.Nodes;
+using ProtoFlux.Runtimes.Execution.Nodes.Actions;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Variables;
 using ProtoFluxContextualActions.Utils;
 
@@ -15,11 +16,15 @@ static partial class ContextualSwapActionsPatch
   static readonly HashSet<Type> ValueWriteGroup = [
     typeof(ValueWrite<>),
     typeof(ValueWriteLatch<>),
+    typeof(ValueIncrement<>),
+    typeof(ValueDecrement<>),
   ];
 
   static readonly HashSet<Type> ValueWriteWithContextGroup = [
     typeof(ValueWrite<,>),
     typeof(ValueWriteLatch<,>),
+    typeof(ValueIncrement<,>),
+    typeof(ValueDecrement<,>),
   ];
 
   static readonly HashSet<Type> ObjectWriteGroup = [
