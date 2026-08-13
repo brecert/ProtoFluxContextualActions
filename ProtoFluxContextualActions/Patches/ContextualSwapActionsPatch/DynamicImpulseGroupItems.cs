@@ -3,7 +3,6 @@ using FrooxEngine;
 using FrooxEngine.ProtoFlux;
 using HarmonyLib;
 using ProtoFlux.Core;
-using ProtoFlux.Runtimes.Execution;
 using ProtoFlux.Runtimes.Execution.Nodes.Actions;
 using ProtoFluxContextualActions.Extensions;
 using ProtoFluxContextualActions.Utils;
@@ -34,6 +33,8 @@ static partial class ContextualSwapActionsPatch
     typeof(DynamicImpulseReceiver),
     typeof(DynamicImpulseReceiverWithValue<>),
     typeof(DynamicImpulseReceiverWithObject<>),
+    typeof(DynamicImpulseTriggerWithValue<>),
+    typeof(DynamicImpulseTriggerWithObject<>)
   ];
 
   static readonly HashSet<Type> AsyncDynamicImpulseReceiverGroup = [

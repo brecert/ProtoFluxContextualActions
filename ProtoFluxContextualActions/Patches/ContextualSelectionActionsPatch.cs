@@ -44,6 +44,7 @@ internal static partial class ContextualSelectionActionsPatch
 
     internal readonly bool overload = overload;
 
+
     internal readonly string group = group;
 
     // allows for items to be placed before/after others, without needing to reorder the code itself.
@@ -244,9 +245,6 @@ internal static partial class ContextualSelectionActionsPatch
   {
     ProtoFluxOutputProxy outputProxy = (ProtoFluxOutputProxy)elementProxy;
     if (item.overload) throw new Exception("Overloading with ProtoFluxOutputProxy is not supported");
-    var input = addedNode.NodeInputs
-        .FirstOrDefault(i => i.TargetType.IsGenericType && (outputProxy.OutputType.Value.IsAssignableFrom(i.TargetType.GenericTypeArguments[0]) || ProtoFlux.Core.TypeHelper.CanImplicitlyConvertTo(outputProxy.OutputType, i.TargetType.GenericTypeArguments[0])))
-        ?? (ISyncRef)addedNode.NodeInputLists.First().GetElement(0) ?? throw new Exception($"Could not find matching input of type '{outputProxy.OutputType}' in '{addedNode}'");
 
     tool.StartTask(async () =>
     {
@@ -260,6 +258,10 @@ internal static partial class ContextualSelectionActionsPatch
 
         if (!doConnect) return;
       }
+
+      var input = addedNode.NodeInputs
+          .FirstOrDefault(i => i.TargetType.IsGenericType && (outputProxy.OutputType.Value.IsAssignableFrom(i.TargetType.GenericTypeArguments[0]) || ProtoFlux.Core.TypeHelper.CanImplicitlyConvertTo(outputProxy.OutputType, i.TargetType.GenericTypeArguments[0])))
+          ?? (ISyncRef)addedNode.NodeInputLists.First().GetElement(0) ?? throw new Exception($"Could not find matching input of type '{outputProxy.OutputType}' in '{addedNode}'");
 
       addedNode.TryConnectInput(input, outputProxy.NodeOutput.Target, allowExplicitCast: false, undoable: true);
     });

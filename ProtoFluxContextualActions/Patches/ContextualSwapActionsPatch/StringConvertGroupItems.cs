@@ -20,6 +20,11 @@ static partial class ContextualSwapActionsPatch
     typeof(UnescapeString),
   ];
 
+  static readonly HashSet<Type> StringFormatGroup = [
+    typeof(ToLower),
+    typeof(ToUpper),
+  ];
+
   internal static IEnumerable<MenuItem> StringConvertGroupItems(ContextualContext context)
   {
     if (StringUriGroup.Contains(context.NodeType))
@@ -32,6 +37,13 @@ static partial class ContextualSwapActionsPatch
     if (StringEscapeGroup.Contains(context.NodeType))
     {
       foreach (var match in StringEscapeGroup)
+      {
+        yield return new MenuItem(match, connectionTransferType: ConnectionTransferType.ByIndexLossy);
+      }
+    }
+    if (StringFormatGroup.Contains(context.NodeType))
+    {
+      foreach (var match in StringFormatGroup)
       {
         yield return new MenuItem(match, connectionTransferType: ConnectionTransferType.ByIndexLossy);
       }

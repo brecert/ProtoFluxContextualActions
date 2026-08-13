@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Elements.Core;
+using FrooxEngine.ProtoFlux;
 using FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.Math.Constants;
 using HarmonyLib;
 using ProtoFlux.Runtimes.Execution.Nodes.Actions;
@@ -56,8 +57,8 @@ static partial class ContextualSwapActionsPatch
         {
           yield return new(typeof(ValueInc<>).MakeGenericType(opType));
           yield return new(typeof(ValueDec<>).MakeGenericType(opType));
-          yield return new(typeof(ValueIncrement<>).MakeGenericType(opType));
-          yield return new(typeof(ValueDecrement<>).MakeGenericType(opType));
+          yield return new(typeof(ValueIncrement<,>).MakeGenericType(typeof(FrooxEngineContext), opType));
+          yield return new(typeof(ValueDecrement<,>).MakeGenericType(typeof(FrooxEngineContext), opType));
         }
 
         if (ArithmeticAddOneGroup.Contains(genericType))

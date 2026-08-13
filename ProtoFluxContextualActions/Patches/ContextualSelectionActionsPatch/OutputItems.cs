@@ -1106,9 +1106,12 @@ static partial class ContextualSelectionActionsPatch
         ]);
         yield return createVariableNode(variableInput, "Write");
         yield return createVariableNode(variableLatchInput, "Write Latch");
-      }
 
-      // todo: figure out ValueIncrement<> and ValueDecrement<> and why they never spawn properly
+        if (nodeVariable.IsUnmanaged())
+        {
+          yield return createVariableNode(typeof(ValueIncrement<,>).MakeGenericType(typeof(FrooxEngineContext), nodeVariable), "Increment");
+        }
+      }
     }
     else
     {

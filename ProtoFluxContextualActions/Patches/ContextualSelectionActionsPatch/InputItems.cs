@@ -42,6 +42,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Avatar;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Display;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Keyboard;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Interaction.Focusing;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Locomotion;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -232,6 +233,11 @@ static partial class ContextualSelectionActionsPatch
     else if (typeof(IFingerPoseSourceComponent).IsAssignableFrom(inputType))
     {
       yield return new MenuItem(typeof(UserFingerPoseSource));
+    }
+
+    else if (nodeType == typeof(GetLocomotionArchetype))
+    {
+      yield return new MenuItem(typeof(GetActiveLocomotionModule));
     }
 
     else if (inputType == typeof(Uri))

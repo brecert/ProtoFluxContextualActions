@@ -243,11 +243,6 @@ static partial class ContextualSelectionActionsPatch
             }
           }
         }
-        if (nodeType != null)
-        {
-          // keeping this around *just in case* something ends up needing it.
-          // though, i dont know what would actually go here, despite trying multiple times.
-        }
       }
     }
   }

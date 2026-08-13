@@ -13,6 +13,7 @@ static partial class ContextualSwapActionsPatch
   static readonly HashSet<Type> MinMaxGroup = [
     typeof(ValueMin<>),
     typeof(ValueMax<>),
+    typeof(ValueClamp<>), // min+max == clamp, so a swap action is good to have
   ];
 
   internal static IEnumerable<MenuItem> MinMaxGroupItems(ContextualContext context)
