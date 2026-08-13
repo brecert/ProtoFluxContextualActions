@@ -44,6 +44,8 @@ public class ProtoFluxContextualActions : ResoniteMod
   private static readonly ModConfigurationKey<int> maxItemsPerPage = new("Max Items Per Page", "The maximum amount of items per page", () => 10);
   [AutoRegisterConfigKey]
   private static readonly ModConfigurationKey<bool> showBackButton = new("Show Back Button", "Whether to show the back button in the submenus.", () => false);
+  [AutoRegisterConfigKey]
+  private static readonly ModConfigurationKey<bool> showUnsupportedActions = new("Show Unsupported Actions", "Whether to show actions that may have potentially undefined, or unsupported behavior. This will hide refhack related actions for example.", () => false);
 
 
   [AutoRegisterConfigKey]
@@ -159,6 +161,8 @@ public class ProtoFluxContextualActions : ResoniteMod
   internal static bool ShouldDoDefaultActionOnPrimaryRelease() => defaultActionOnPrimaryRelease.Value;
 
   internal static bool ShouldDisplayBackButton() => showBackButton.Value;
+
+  internal static bool ShouldDisplayUnsupportedActions() => showUnsupportedActions.Value;
 
   internal static MenuVisual GetMenuVisual() => currentMenuVisual.Value;
 }

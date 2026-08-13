@@ -667,7 +667,7 @@ static partial class ContextualSelectionActionsPatch
     }
 
 
-    if (outputType == typeof(IWorldElement))
+    if (outputType == typeof(IWorldElement) && ProtoFluxContextualActions.ShouldDisplayUnsupportedActions())
     {
       yield return new MenuItem(typeof(IsRemoved));
       yield return new MenuItem(typeof(ReferenceID));
