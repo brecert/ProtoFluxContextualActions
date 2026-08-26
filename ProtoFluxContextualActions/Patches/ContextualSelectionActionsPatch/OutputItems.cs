@@ -637,34 +637,34 @@ static partial class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(AssignRole));
     }
 
-    if (typeof(IWorldElement).IsAssignableFrom(outputType) && outputType != typeof(IWorldElement))
-    {
-      yield return new MenuItem(
-        typeof(ObjectCast<,>).MakeGenericType(outputType, typeof(IWorldElement)),
-        name: "IWorldElement", group: "Casts"
-      );
-    }
-    if (outputType != typeof(object))
-    {
-      if (outputType.IsUnmanaged())
-      {
-        yield return new MenuItem(
-          typeof(ValueToObjectCast<>).MakeGenericType(outputType),
-          name: "Object", group: "Casts"
-        );
-      }
-      else if (ReflectionHelper.IsNullable(outputType))
-      {
-        yield return new MenuItem(typeof(NullableToObjectCast<>).MakeGenericType(Nullable.GetUnderlyingType(outputType) ?? outputType), name: "Object", group: "Casts");
-      }
-      else
-      {
-        yield return new MenuItem(
-          typeof(ObjectCast<,>).MakeGenericType(outputType, typeof(object)),
-          name: "Object", group: "Casts"
-        );
-      }
-    }
+    // if (typeof(IWorldElement).IsAssignableFrom(outputType) && outputType != typeof(IWorldElement) && !outputType.IsUnmanaged() && outputType.IsAssignableFrom(typeof(object)))
+    // {
+    //   yield return new MenuItem(
+    //     typeof(ObjectCast<,>).MakeGenericType(outputType, typeof(IWorldElement)),
+    //     name: "IWorldElement", group: "Casts"
+    //   );
+    // }
+    // if (outputType != typeof(object))
+    // {
+    //   if (outputType.IsUnmanaged())
+    //   {
+    //     yield return new MenuItem(
+    //       typeof(ValueToObjectCast<>).MakeGenericType(outputType),
+    //       name: "Object", group: "Casts"
+    //     );
+    //   }
+    //   else if (ReflectionHelper.IsNullable(outputType))
+    //   {
+    //     yield return new MenuItem(typeof(NullableToObjectCast<>).MakeGenericType(Nullable.GetUnderlyingType(outputType) ?? outputType), name: "Object", group: "Casts");
+    //   }
+    //   else
+    //   {
+    //     yield return new MenuItem(
+    //       typeof(ObjectCast<,>).MakeGenericType(outputType, typeof(object)),
+    //       name: "Object", group: "Casts"
+    //     );
+    //   }
+    // }
 
 
     if (outputType == typeof(IWorldElement) && ProtoFluxContextualActions.ShouldDisplayUnsupportedActions())
