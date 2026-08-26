@@ -60,6 +60,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Elements;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Network;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Animation;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Security;
+using ProtoFlux.Runtimes.Execution.Nodes.Collections;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -674,7 +675,7 @@ static partial class ContextualSelectionActionsPatch
       yield return new MenuItem(
         typeof(ReferenceID),
         name: "RefID -> ULong",
-        onNodeSpawn: (ProtoFluxNode node, ProtoFluxElementProxy proxy, ProtoFluxTool tool) =>
+        onNodeSpawn: (node, proxy, tool) =>
         {
           tool.StartTask(async () =>
           {
@@ -942,6 +943,118 @@ static partial class ContextualSelectionActionsPatch
       if (NodeUtils.TryGetEnumToNumberNode(enumType, out var toNumberType))
       {
         yield return new MenuItem(toNumberType.MakeGenericType(outputType));
+      }
+    }
+
+    {
+      if (TypeUtils.MatchInterface(outputType, typeof(KeyValuePair<,>), out var keyValuePairType))
+      {
+        var keyType = keyValuePairType.GenericTypeArguments[0];
+        var valueType = keyValuePairType.GenericTypeArguments[1];
+
+        var unpackKeyValuePair = new List<Type?>([
+          typeof(UnpackObjectKeyObjectValuePair<,>).TryMakeGenericType(keyType, valueType),
+          typeof(UnpackObjectKeyValueValuePair<,>).TryMakeGenericType(keyType, valueType),
+          typeof(UnpackValueKeyObjectValuePair<,>).TryMakeGenericType(keyType, valueType),
+          typeof(UnpackValueKeyValueValuePair<,>).TryMakeGenericType(keyType, valueType),
+        ]).FirstOrDefault(t => t?.IsValidGenericType(validForInstantiation: true) ?? false);
+        if (unpackKeyValuePair is { }) yield return new MenuItem(unpackKeyValuePair);
+      }
+    }
+    {
+      if (TypeUtils.MatchInterface(outputType, typeof(IEnumerable<>), out var enumerableType))
+      {
+        var elementType = enumerableType.GenericTypeArguments[0];
+
+        // todo: swap with index
+        var forEachItem = new List<Type?>([
+          typeof(ForEachObject<,>).TryMakeGenericType(outputType, elementType),
+          typeof(ForEachValue<,>).TryMakeGenericType(outputType, elementType),
+        ]).FirstOrDefault(t => t?.IsValidGenericType(validForInstantiation: true) ?? false);
+        if (forEachItem is { }) yield return new MenuItem(forEachItem);
+      }
+    }
+
+    {
+      if (TypeUtils.MatchInterface(outputType, typeof(IReadOnlyCollection<>), out var listType))
+      {
+        var valueType = listType.GenericTypeArguments[0];
+
+        yield return new(typeof(ReadOnlyCount<,>).MakeGenericType(outputType, valueType));
+
+        var addItem = new List<Type?>([
+          typeof(ReadOnlyContainsObject<,>).TryMakeGenericType(outputType, valueType),
+          typeof(ReadOnlyContainsValue<,>).TryMakeGenericType(outputType, valueType),
+        ]).FirstOrDefault(t => t?.IsValidGenericType(validForInstantiation: true) ?? false);
+        if (addItem is { }) yield return new MenuItem(addItem);
+
+        var getItem = new List<Type?>([
+          typeof(ReadOnlyGetAtObject<,>).TryMakeGenericType(outputType, valueType),
+          typeof(ReadOnlyGetAtValue<,>).TryMakeGenericType(outputType, valueType),
+        ]).FirstOrDefault(t => t?.IsValidGenericType(validForInstantiation: true) ?? false);
+        if (getItem is { }) yield return new MenuItem(getItem);
+
+      }
+    }
+
+    {
+      if (TypeUtils.MatchInterface(outputType, typeof(ICollection<>), out var listType))
+      {
+        var valueType = listType.GenericTypeArguments[0];
+
+        yield return new(typeof(Count<>).MakeGenericType(outputType));
+        yield return new(typeof(IsReadOnly<,>).MakeGenericType(outputType, valueType));
+
+        var addItem = new List<Type?>([
+          typeof(ContainsObject<,>).TryMakeGenericType(outputType, valueType),
+          typeof(ContainsValue<,>).TryMakeGenericType(outputType, valueType),
+        ]).FirstOrDefault(t => t?.IsValidGenericType(validForInstantiation: true) ?? false);
+        if (addItem is { }) yield return new MenuItem(addItem);
+      }
+    }
+    {
+      if (TypeUtils.MatchInterface(outputType, typeof(IList<>), out var listType))
+      {
+        var valueType = listType.GenericTypeArguments[0];
+
+        yield return new(typeof(Clear<>).MakeGenericType(outputType));
+        yield return new(typeof(RemoveAt<>).MakeGenericType(outputType));
+
+        var addItem = new List<Type?>([
+          typeof(AddObject<,>).TryMakeGenericType(outputType, valueType),
+          typeof(AddValue<,>).TryMakeGenericType(outputType, valueType),
+        ]).FirstOrDefault(t => t?.IsValidGenericType(validForInstantiation: true) ?? false);
+        if (addItem is { }) yield return new MenuItem(addItem);
+
+        var getItem = new List<Type?>([
+          typeof(GetAtObject<,>).TryMakeGenericType(outputType, valueType),
+          typeof(GetAtValue<,>).TryMakeGenericType(outputType, valueType),
+        ]).FirstOrDefault(t => t?.IsValidGenericType(validForInstantiation: true) ?? false);
+        if (getItem is { }) yield return new MenuItem(getItem);
+
+        var indexOfItem = new List<Type?>([
+          typeof(IndexOfObject<,>).TryMakeGenericType(outputType, valueType),
+          typeof(IndexOfValue<,>).TryMakeGenericType(outputType, valueType),
+        ]).FirstOrDefault(t => t?.IsValidGenericType(validForInstantiation: true) ?? false);
+        if (indexOfItem is { }) yield return new MenuItem(indexOfItem);
+
+        var insertAtItem = new List<Type?>([
+          typeof(InsertAtObject<,>).TryMakeGenericType(outputType, valueType),
+          typeof(InsertAtValue<,>).TryMakeGenericType(outputType, valueType),
+        ]).FirstOrDefault(t => t?.IsValidGenericType(validForInstantiation: true) ?? false);
+        if (insertAtItem is { }) yield return new MenuItem(insertAtItem);
+
+        var removeItem = new List<Type?>([
+          typeof(RemoveObject<,>).TryMakeGenericType(outputType, valueType),
+          typeof(RemoveValue<,>).TryMakeGenericType(outputType, valueType),
+        ]).FirstOrDefault(t => t?.IsValidGenericType(validForInstantiation: true) ?? false);
+        if (removeItem is { }) yield return new MenuItem(removeItem);
+
+        var setAtItem = new List<Type?>([
+          typeof(SetAtObject<,>).TryMakeGenericType(outputType, valueType),
+          typeof(SetAtValue<,>).TryMakeGenericType(outputType, valueType),
+        ]).FirstOrDefault(t => t?.IsValidGenericType(validForInstantiation: true) ?? false);
+        if (setAtItem is { }) yield return new MenuItem(setAtItem);
       }
     }
 
