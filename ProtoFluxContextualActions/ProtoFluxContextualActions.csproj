@@ -5,11 +5,11 @@
 		<AssemblyName>ProtoFluxContextualActions</AssemblyName>
 		<AssemblyTitle>ProtoFlux Contextual Actions</AssemblyTitle>
 		<Description>Adds additional contextual actions for protoflux.</Description>
-		<Authors>bree</Authors>
-		<RepositoryUrl>https://github.com/brecert/ProtoFluxContextualActions</RepositoryUrl>
+		<Authors>bree, IHaveAName2653</Authors>
+		<RepositoryUrl>https://github.com/IHaveAName2653/ProtoFluxContextualActions</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>Resonite,Mod,ResoniteModLoader,Tweaks,ProtoFlux</PackageTags>
-		<Version>0.14.1</Version>
+		<Version>2.1.0</Version>
 		<PackageReadmeFile>../README.md</PackageReadmeFile>
 	</PropertyGroup>
 
@@ -64,6 +64,7 @@
             <Name>%(ResoniteReference.Identity)</Name>
             <HintPath Condition="'%(HintPath)' == '' And Exists('$(ResoniteAssemblyPath)/%(Identity).dll')">$(ResoniteAssemblyPath)/%(Identity).dll</HintPath>
             <HintPath Condition="'%(HintPath)' == '' And Exists('$(ResoniteAssemblyPath)/%(Identity).exe')">$(ResoniteAssemblyPath)/%(Identity).exe</HintPath>
+			<Private>False</Private>
         </Reference>
     </ItemGroup>
 
@@ -71,10 +72,12 @@
       <Reference Include="ResoniteModLoader">
         <HintPath>$(ResonitePath)ResoniteModLoader.dll</HintPath>
         <HintPath>$(ResonitePath)Libraries\ResoniteModLoader.dll</HintPath>
+		<Private>False</Private>
       </Reference>
       <Reference Include="HarmonyLib">
         <HintPath>$(ResonitePath)rml_libs\0Harmony.dll</HintPath>
         <HintPath Condition="Exists('$(ResonitePath)0Harmony.dll')">$(ResonitePath)0Harmony.dll</HintPath>
+		<Private>False</Private>
       </Reference>
       <Reference Include="ResoniteHotReloadLib" Condition="'$(Configuration)'=='Debug'">
         <HintPath>$(ResonitePath)rml_libs\ResoniteHotReloadLib.dll</HintPath>

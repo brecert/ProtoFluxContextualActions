@@ -15,14 +15,18 @@ class PsuedoGenericTypes(World world)
 {
   internal World World = world;
 
-  // We will convert the types to protoflux nodes rather than frooxengine ones for convenience 
+  // We will convert the types to protoflux nodes rather than frooxengine ones for convenience
   // this is technically not "correct" behavior, but it saves us trouble right now
   internal PsuedoGenerics MapTypes(string startingWith) =>
     PsuedoGenericUtils.MapPsuedoGenericsToGenericTypes(World, startingWith)
       .Select(a => (NodeUtils.ProtoFluxBindingMapping[a.Node], a.Types));
 
+  internal PsuedoGenerics MapTypes2(string startingWith) =>
+    PsuedoGenericUtils.MapPsuedoGenericsToGenericTypes2(World, startingWith)
+      .Select(a => (NodeUtils.ProtoFluxBindingMapping[a.Node], a.Types));
+
   public PsuedoGenerics Acos { get => field ??= MapTypes("Acos_"); }
-  public PsuedoGenerics Add { get => field ??= MapTypes("Add_"); }
+
   public PsuedoGenerics Angle { get => field ??= MapTypes("Angle_"); }
   public PsuedoGenerics AngularVelocityDelta { get => field ??= MapTypes("AngularVelocityDelta_"); }
   public PsuedoGenerics Approximately { get => field ??= MapTypes("Approximately_"); }
@@ -33,14 +37,35 @@ class PsuedoGenericTypes(World world)
   public PsuedoGenerics Avg { get => field ??= MapTypes("Avg_"); }
   public PsuedoGenerics AvgMulti { get => field ??= MapTypes("AvgMulti_"); }
   public PsuedoGenerics BezierCurve { get => field ??= MapTypes("BezierCurve_"); }
+  public PsuedoGenerics MultiBezierCurve { get => field ??= MapTypes("MultiBezierCurve_"); }
   public PsuedoGenerics Ceil { get => field ??= MapTypes("Ceil_"); }
   public PsuedoGenerics CeilToInt { get => field ??= MapTypes("CeilToInt_"); }
+  public PsuedoGenerics Round { get => field ??= MapTypes("Round_"); }
+  public PsuedoGenerics RoundToInt { get => field ??= MapTypes("RoundToInt_"); }
+  public PsuedoGenerics Floor { get => field ??= MapTypes("Floor_"); }
+  public PsuedoGenerics FloorToInt { get => field ??= MapTypes("FloorToInt_"); }
   public PsuedoGenerics Clamp01 { get => field ??= MapTypes("Clamp01_"); }
+
+  public PsuedoGenerics ZeroOne { get => field ??= MapTypes("ZeroOne"); }
 
   public PsuedoGenerics Log { get => field ??= MapTypes("Log_"); }
   public PsuedoGenerics Log10 { get => field ??= MapTypes("Log10_"); }
   public PsuedoGenerics LogN { get => field ??= MapTypes("LogN_"); }
 
+  public PsuedoGenerics Sqrt { get => field ??= MapTypes("Sqrt_"); }
+  public PsuedoGenerics NthRoot { get => field ??= MapTypes("NthRoot_"); }
+
+  public PsuedoGenerics Distance { get => field ?? MapTypes("Distance_"); }
+
+  public PsuedoGenerics Parse { get => field ??= MapTypes("Parse_"); }
+  public PsuedoGenerics ObjToString { get => field ??= MapTypes("ToString_"); }
+
+  public PsuedoGenerics Cast { get => field ??= MapTypes2("Cast_"); }
+
+  public PsuedoGenerics Add { get => field ??= MapTypes("Add_"); }
+  public PsuedoGenerics Sub { get => field ??= MapTypes("Sub_"); }
+  public PsuedoGenerics Mul { get => field ??= MapTypes("Mul_"); }
+  public PsuedoGenerics Div { get => field ??= MapTypes("Div_"); }
 
   public PsuedoGenerics AND { get => field ??= MapTypes("AND_"); }
   public PsuedoGenerics OR { get => field ??= MapTypes("OR_"); }
@@ -64,15 +89,26 @@ class PsuedoGenericTypes(World world)
 
   public PsuedoGenerics Sin { get => field ??= MapTypes("Sin_"); }
   public PsuedoGenerics Cos { get => field ??= MapTypes("Cos_"); }
+  public PsuedoGenerics Tan { get => field ??= MapTypes("Tan_"); }
 
+  public PsuedoGenerics Slerp { get => field ??= MapTypes("Slerp_"); }
+  public PsuedoGenerics SlerpUnclamped { get => field ??= MapTypes("SlerpUnclamped_"); }
+  public PsuedoGenerics SlerpWithMagnitude { get => field ??= MapTypes("SlerpWithMagnitude_"); }
+
+  public PsuedoGenerics CosineLerp { get => field ??= MapTypes("CosineLerp_"); }
+  public PsuedoGenerics MultiCosineLerp { get => field ??= MapTypes("MultiCosineLerp_"); }
 
   public PsuedoGenerics Unpack { get => field ??= MapTypes("Unpack_"); }
   public PsuedoGenerics EulerAngles { get => field ??= MapTypes("EulerAngles_"); }
+  public PsuedoGenerics ToAxisAngle { get => field ??= MapTypes("ToAxisAngle_"); }
   public PsuedoGenerics UnpackRows { get => field ??= MapTypes("UnpackRows_"); }
   public PsuedoGenerics UnpackColumns { get => field ??= MapTypes("UnpackColumns_"); }
 
   public PsuedoGenerics Pack { get => field ??= MapTypes("Pack_"); }
   public PsuedoGenerics FromEuler { get => field ??= MapTypes("FromEuler_"); }
+  public PsuedoGenerics AxisAngle { get => field ??= MapTypes("AxisAngle_"); }
+  public PsuedoGenerics LookRotation { get => field ??= MapTypes("LookRotation_"); }
+  public PsuedoGenerics FromToRotation { get => field ??= MapTypes("FromToRotation_"); }
   public PsuedoGenerics PackRows { get => field ??= MapTypes("PackRows_"); }
   public PsuedoGenerics PackColumns { get => field ??= MapTypes("PackColumns_"); }
   public PsuedoGenerics ComposeTRS { get => field ??= MapTypes("ComposeTRS_"); }
@@ -84,12 +120,33 @@ class PsuedoGenericTypes(World world)
   public PsuedoGenerics RotateLeft { get => field ??= MapTypes("RotateLeft_"); }
   public PsuedoGenerics RotateRight { get => field ??= MapTypes("RotateRight_"); }
 
+  public PsuedoGenerics ExtractBits { get => field ??= MapTypes("ExtractBits_"); }
+  public PsuedoGenerics ComposeBits { get => field ??= MapTypes("ComposeBits_"); }
+
   public PsuedoGenerics All { get => field ??= MapTypes("All_"); }
   public PsuedoGenerics Any { get => field ??= MapTypes("Any_"); }
   public PsuedoGenerics None { get => field ??= MapTypes("None_"); }
   public PsuedoGenerics XorElements { get => field ??= MapTypes("XorElements_"); }
 
+  public PsuedoGenerics Mask { get => field ??= MapTypes("Mask_"); }
+
   public PsuedoGenerics Repeat01 { get => field ??= MapTypes("Repeat01_"); }
+  public PsuedoGenerics Remap11_01 { get => field ?? MapTypes("Remap11_01_"); }
+
+  public PsuedoGenerics Normalized { get => field ??= MapTypes("Normalized_"); }
+  public PsuedoGenerics Magnitude { get => field ??= MapTypes("Magnitude_"); }
+  public PsuedoGenerics Dot { get => field ??= MapTypes("Dot_"); }
+  public PsuedoGenerics Cross { get => field ??= MapTypes("Cross_"); }
+  public PsuedoGenerics Reflect { get => field ??= MapTypes("Reflect_"); }
+  public PsuedoGenerics Project { get => field ??= MapTypes("Project_"); }
+
+  public PsuedoGenerics Random { get => field ?? MapTypes("Random"); }
+  public PsuedoGenerics RandomLerp { get => field ?? MapTypes("RandomLerp"); }
+  public PsuedoGenerics RandomSlerp { get => field ?? MapTypes("RandomSlerp"); }
+
+  public PsuedoGenerics RandomHue { get => field ?? MapTypes("RandomHue_"); }
+  public PsuedoGenerics RandomGrayscale { get => field ?? MapTypes("RandomGrayscale_"); }
+  public PsuedoGenerics RandomRGBA { get => field ?? MapTypes("RandomRGBA_"); }
 
   public PsuedoGenerics PackTangentPoint
   {
@@ -108,4 +165,6 @@ class PsuedoGenericTypes(World world)
       (typeof(PackTangentPointDouble3), [typeof(TangentPointDouble4)]),
     ];
   }
+
+  public PsuedoGenerics PackTangentPoint2 { get => field ?? MapTypes("PackTangentPoint"); }
 }

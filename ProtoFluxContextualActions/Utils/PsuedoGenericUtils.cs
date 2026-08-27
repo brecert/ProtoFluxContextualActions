@@ -22,6 +22,14 @@ public static class PsuedoGenericUtils
       // skip non matching
       .Where(a => a.Item2.All(t => t != null));
 
+  public static IEnumerable<(Type Node, IEnumerable<Type> Types)> MapPsuedoGenericsToGenericTypes2(World world, string startingWith) =>
+    GetProtoFluxNodes().Values
+      .Select(t => (name: t.GetNiceTypeName(), type: t))
+      .Where(a => a.name.StartsWith(startingWith) && !a.type.IsGenericType)
+      .Select(a => (a.type, ParseUnderscoreGenerics(world, a.name[startingWith.Length..]).Where(t => t != null)))
+      // skip non matching
+      .Where(a => a.Item2.Count() > 0);
+
   public static Type? TryGetPsuedoGenericForType(World world, string startingWith, params Type[] types)
   {
     var (node, _) = MapPsuedoGenericsToGenericTypes(world, startingWith).FirstOrDefault(n => n.Types.SequenceEqual(types));
@@ -40,4 +48,7 @@ public static class PsuedoGenericUtils
 
   static Dictionary<string, Type> GetProtoFluxNodes() =>
     Traverse.Create(typeof(ProtoFluxHelper)).Field<Dictionary<string, Type>>("protoFluxNodes").Value;
+
+  public static IEnumerable<Type> GetTypesFromNode(World world, Type nodeType) =>
+      nodeType.IsGenericType ? nodeType.GenericTypeArguments : ParseUnderscoreGenerics(world, string.Join("_", nodeType.GetNiceTypeName().Split("_")[1..]));
 }

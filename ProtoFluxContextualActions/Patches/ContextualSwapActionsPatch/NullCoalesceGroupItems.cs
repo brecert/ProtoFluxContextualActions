@@ -18,7 +18,10 @@ static partial class ContextualSwapActionsPatch
     {
       foreach (var match in NullCoalesceGroup)
       {
-        yield return new MenuItem(match.MakeGenericType(context.NodeType.GenericTypeArguments[0]), name: match == typeof(MultiNullCoalesce<>) ? FormatMultiName(context.NodeType) : null);
+        yield return new MenuItem(
+          match.MakeGenericType(context.NodeType.GenericTypeArguments[0]),
+          name: match == typeof(MultiNullCoalesce<>) ? FormatMultiName(context.NodeType) : null,
+          connectionTransferType: ConnectionTransferType.ByIndexLossy);
       }
     }
   }

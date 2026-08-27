@@ -2,11 +2,33 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Elements.Core;
+using HarmonyLib;
 
 namespace ProtoFluxContextualActions.Utils;
 
 static class TypeUtils
 {
+  public static Type? TryMakingGenericTypeFrom(this Type to, Type from)
+  {
+    if (to.IsGenericType != from.IsGenericType) return null;
+
+    if (to.IsGenericType)
+    {
+      if (to.TryMakeGenericType(from.GenericTypeArguments) is Type type)
+      {
+        return type;
+      }
+      else
+      {
+        return null;
+      }
+    }
+    else
+    {
+      return to;
+    }
+  }
+
   public static Type? TryMakeGenericType(this Type type, params Type[] typeArguments)
   {
     try
@@ -70,5 +92,17 @@ static class TypeUtils
     }
 
     return matchedType != null;
+  }
+
+  public static Type BaseVectorType(this Type type, out bool isVector)
+  {
+    isVector = false;
+    var traverse = Traverse.Create(type).Field("BASE_TYPE");
+    if (traverse.FieldExists())
+    {
+      isVector = true;
+      return traverse.GetValue<Type>();
+    }
+    return type;
   }
 }

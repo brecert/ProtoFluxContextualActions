@@ -16,6 +16,7 @@ static class Groups
     typeof(WorldTime2Float),
     typeof(WorldTime10Float),
     typeof(WorldTimeTenthFloat),
+    typeof(WorldTimeHalfFloat),
   ];
 
   public static FrozenSet<Type> WorldTimeDoubleGroup = [
@@ -108,7 +109,7 @@ static class Groups
     typeof(SetNormalizedPosition),
     typeof(SetSpeed),
   ];
-  
+
   public static readonly FrozenSet<Type> CommonPlaybackActionsGroup = [
     typeof(Play),
     typeof(Pause),
