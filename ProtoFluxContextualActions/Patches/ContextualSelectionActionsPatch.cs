@@ -19,6 +19,7 @@ using System.Diagnostics.CodeAnalysis;
 using ProtoFlux.Runtimes.Execution.Nodes.Math.SphericalHarmonics;
 using ProtoFlux.Runtimes.Execution.Nodes.Math.Rects;
 using ProtoFlux.Runtimes.Execution;
+using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Physics;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -339,6 +340,7 @@ internal static partial class ContextualSelectionActionsPatch
             (typeof(SphericalHarmonicsL2<>),  [typeof(UnpackSH2<>)]),
             (typeof(SphericalHarmonicsL3<>),  [typeof(UnpackSH3<>)]),
             (typeof(SphericalHarmonicsL4<>),  [typeof(UnpackSH4<>)]),
+            (typeof(RaycastHit), [typeof(UnpackRaycastHit)]),
           ])
           .ToDictionary(i => i.Item1, i => i.Item2.ToList());
 

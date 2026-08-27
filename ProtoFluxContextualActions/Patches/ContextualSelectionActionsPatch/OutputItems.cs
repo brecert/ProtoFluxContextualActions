@@ -998,6 +998,7 @@ static partial class ContextualSelectionActionsPatch
     }
 
     {
+      // todo: move to unpacking?
       if (TypeUtils.MatchInterface(outputType, typeof(KeyValuePair<,>), out var keyValuePairType))
       {
         var keyType = keyValuePairType.GenericTypeArguments[0];
