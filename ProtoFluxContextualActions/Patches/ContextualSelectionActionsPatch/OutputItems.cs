@@ -953,7 +953,7 @@ static partial class ContextualSelectionActionsPatch
         var valueType = dictionaryType.GenericTypeArguments[1];
 
         // I wish I didn't need to manually check these but generic creation is *not* failing and throwing with unmanaged types despite the constraint so...
-        var addItemWithKey = (keyType.IsUnmanaged(), valueType.IsUnmanaged()) switch
+        var addItemWithKey = (valueType.IsUnmanaged(), keyType.IsUnmanaged()) switch
         {
           (true, true) => typeof(AddValueWithValueKey<,,>),
           (true, false) => typeof(AddValueWithObjectKey<,,>),
@@ -962,7 +962,7 @@ static partial class ContextualSelectionActionsPatch
         };
         yield return new(addItemWithKey.MakeGenericType(outputType, keyType, valueType));
 
-        var getItemWithKey = (keyType.IsUnmanaged(), valueType.IsUnmanaged()) switch
+        var getItemWithKey = (valueType.IsUnmanaged(), keyType.IsUnmanaged()) switch
         {
           (true, true) => typeof(GetValueWithValueKey<,,>),
           (true, false) => typeof(GetValueWithObjectKey<,,>),
@@ -971,7 +971,7 @@ static partial class ContextualSelectionActionsPatch
         };
         yield return new(getItemWithKey.MakeGenericType(outputType, keyType, valueType));
 
-        var setItemWithKey = (keyType.IsUnmanaged(), valueType.IsUnmanaged()) switch
+        var setItemWithKey = (valueType.IsUnmanaged(), keyType.IsUnmanaged()) switch
         {
           (true, true) => typeof(SetValueWithValueKey<,,>),
           (true, false) => typeof(SetValueWithObjectKey<,,>),
