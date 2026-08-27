@@ -947,18 +947,70 @@ static partial class ContextualSelectionActionsPatch
     }
 
     {
+      if (TypeUtils.MatchInterface(outputType, typeof(IDictionary<,>), out var dictionaryType))
+      {
+        var keyType = dictionaryType.GenericTypeArguments[0];
+        var valueType = dictionaryType.GenericTypeArguments[1];
+
+        // I wish I didn't need to manually check these but generic creation is *not* failing and throwing with unmanaged types despite the constraint so...
+        var addItemWithKey = (keyType.IsUnmanaged(), valueType.IsUnmanaged()) switch
+        {
+          (true, true) => typeof(AddValueWithValueKey<,,>),
+          (true, false) => typeof(AddValueWithObjectKey<,,>),
+          (false, true) => typeof(AddObjectWithValueKey<,,>),
+          (false, false) => typeof(AddObjectWithObjectKey<,,>)
+        };
+        yield return new(addItemWithKey.MakeGenericType(outputType, keyType, valueType));
+
+        var getItemWithKey = (keyType.IsUnmanaged(), valueType.IsUnmanaged()) switch
+        {
+          (true, true) => typeof(GetValueWithValueKey<,,>),
+          (true, false) => typeof(GetValueWithObjectKey<,,>),
+          (false, true) => typeof(GetObjectWithValueKey<,,>),
+          (false, false) => typeof(GetObjectWithObjectKey<,,>)
+        };
+        yield return new(getItemWithKey.MakeGenericType(outputType, keyType, valueType));
+
+        var setItemWithKey = (keyType.IsUnmanaged(), valueType.IsUnmanaged()) switch
+        {
+          (true, true) => typeof(SetValueWithValueKey<,,>),
+          (true, false) => typeof(SetValueWithObjectKey<,,>),
+          (false, true) => typeof(SetObjectWithValueKey<,,>),
+          (false, false) => typeof(SetObjectWithObjectKey<,,>)
+        };
+        yield return new(setItemWithKey.MakeGenericType(outputType, keyType, valueType));
+
+
+        var removeKey = keyType.IsUnmanaged() switch
+        {
+          true => typeof(RemoveValueKey<,,>),
+          false => typeof(RemoveObjectKey<,,>),
+        };
+        yield return new(removeKey.MakeGenericType(outputType, keyType, valueType));
+
+        var containsKey = keyType.IsUnmanaged() switch
+        {
+          true => typeof(ContainsValueKey<,,>),
+          false => typeof(ContainsObjectKey<,,>),
+        };
+        yield return new(containsKey.MakeGenericType(outputType, keyType, valueType));
+      }
+    }
+
+    {
       if (TypeUtils.MatchInterface(outputType, typeof(KeyValuePair<,>), out var keyValuePairType))
       {
         var keyType = keyValuePairType.GenericTypeArguments[0];
         var valueType = keyValuePairType.GenericTypeArguments[1];
 
-        var unpackKeyValuePair = new List<Type?>([
-          typeof(UnpackObjectKeyObjectValuePair<,>).TryMakeGenericType(keyType, valueType),
-          typeof(UnpackObjectKeyValueValuePair<,>).TryMakeGenericType(keyType, valueType),
-          typeof(UnpackValueKeyObjectValuePair<,>).TryMakeGenericType(keyType, valueType),
-          typeof(UnpackValueKeyValueValuePair<,>).TryMakeGenericType(keyType, valueType),
-        ]).FirstOrDefault(t => t?.IsValidGenericType(validForInstantiation: true) ?? false);
-        if (unpackKeyValuePair is { }) yield return new MenuItem(unpackKeyValuePair);
+        var addItemWithKey = (keyType.IsUnmanaged(), valueType.IsUnmanaged()) switch
+        {
+          (true, true) => typeof(UnpackValueKeyValueValuePair<,>),
+          (true, false) => typeof(UnpackValueKeyObjectValuePair<,>),
+          (false, true) => typeof(UnpackObjectKeyValueValuePair<,>),
+          (false, false) => typeof(UnpackObjectKeyObjectValuePair<,>)
+        };
+        yield return new(addItemWithKey.MakeGenericType(keyType, valueType));
       }
     }
     {
@@ -967,11 +1019,12 @@ static partial class ContextualSelectionActionsPatch
         var elementType = enumerableType.GenericTypeArguments[0];
 
         // todo: swap with index
-        var forEachItem = new List<Type?>([
-          typeof(ForEachObject<,>).TryMakeGenericType(outputType, elementType),
-          typeof(ForEachValue<,>).TryMakeGenericType(outputType, elementType),
-        ]).FirstOrDefault(t => t?.IsValidGenericType(validForInstantiation: true) ?? false);
-        if (forEachItem is { }) yield return new MenuItem(forEachItem);
+        var forEachItem = elementType.IsUnmanaged() switch
+        {
+          true => typeof(ForEachValue<,>),
+          false => typeof(ForEachObject<,>),
+        };
+        yield return new(forEachItem.MakeGenericType(outputType, elementType));
       }
     }
 
@@ -982,34 +1035,48 @@ static partial class ContextualSelectionActionsPatch
 
         yield return new(typeof(ReadOnlyCount<,>).MakeGenericType(outputType, valueType));
 
-        var addItem = new List<Type?>([
-          typeof(ReadOnlyContainsObject<,>).TryMakeGenericType(outputType, valueType),
-          typeof(ReadOnlyContainsValue<,>).TryMakeGenericType(outputType, valueType),
-        ]).FirstOrDefault(t => t?.IsValidGenericType(validForInstantiation: true) ?? false);
-        if (addItem is { }) yield return new MenuItem(addItem);
+        var containsItem = valueType.IsUnmanaged() switch
+        {
+          true => typeof(ReadOnlyContainsValue<,>),
+          false => typeof(ReadOnlyContainsObject<,>),
+        };
+        yield return new(containsItem.MakeGenericType(outputType, valueType));
 
-        var getItem = new List<Type?>([
-          typeof(ReadOnlyGetAtObject<,>).TryMakeGenericType(outputType, valueType),
-          typeof(ReadOnlyGetAtValue<,>).TryMakeGenericType(outputType, valueType),
-        ]).FirstOrDefault(t => t?.IsValidGenericType(validForInstantiation: true) ?? false);
-        if (getItem is { }) yield return new MenuItem(getItem);
-
+        var getAtItem = valueType.IsUnmanaged() switch
+        {
+          true => typeof(ReadOnlyGetAtValue<,>),
+          false => typeof(ReadOnlyGetAtObject<,>),
+        };
+        yield return new(getAtItem.MakeGenericType(outputType, valueType));
       }
     }
-
+    {
+      if (TypeUtils.MatchInterface(outputType, typeof(System.Collections.ICollection), out var listType))
+      {
+        yield return new(typeof(Count<>).MakeGenericType(outputType));
+      }
+    }
     {
       if (TypeUtils.MatchInterface(outputType, typeof(ICollection<>), out var listType))
       {
         var valueType = listType.GenericTypeArguments[0];
 
-        yield return new(typeof(Count<>).MakeGenericType(outputType));
+        yield return new(typeof(Count<,>).MakeGenericType(outputType, valueType));
         yield return new(typeof(IsReadOnly<,>).MakeGenericType(outputType, valueType));
 
-        var addItem = new List<Type?>([
-          typeof(ContainsObject<,>).TryMakeGenericType(outputType, valueType),
-          typeof(ContainsValue<,>).TryMakeGenericType(outputType, valueType),
-        ]).FirstOrDefault(t => t?.IsValidGenericType(validForInstantiation: true) ?? false);
-        if (addItem is { }) yield return new MenuItem(addItem);
+        var containsItem = valueType.IsUnmanaged() switch
+        {
+          true => typeof(ContainsValue<,>),
+          false => typeof(ContainsObject<,>),
+        };
+        yield return new(containsItem.MakeGenericType(outputType, valueType));
+      }
+    }
+    {
+      if (TypeUtils.MatchInterface(outputType, typeof(System.Collections.IList), out var listType))
+      {
+        yield return new(typeof(Clear<>).MakeGenericType(outputType));
+        yield return new(typeof(RemoveAt<>).MakeGenericType(outputType));
       }
     }
     {
@@ -1017,44 +1084,50 @@ static partial class ContextualSelectionActionsPatch
       {
         var valueType = listType.GenericTypeArguments[0];
 
-        yield return new(typeof(Clear<>).MakeGenericType(outputType));
-        yield return new(typeof(RemoveAt<>).MakeGenericType(outputType));
+        yield return new(typeof(Clear<,>).MakeGenericType(outputType, valueType));
+        yield return new(typeof(RemoveAt<,>).MakeGenericType(outputType, valueType));
 
-        var addItem = new List<Type?>([
-          typeof(AddObject<,>).TryMakeGenericType(outputType, valueType),
-          typeof(AddValue<,>).TryMakeGenericType(outputType, valueType),
-        ]).FirstOrDefault(t => t?.IsValidGenericType(validForInstantiation: true) ?? false);
-        if (addItem is { }) yield return new MenuItem(addItem);
+        var addItem = valueType.IsUnmanaged() switch
+        {
+          true => typeof(AddValue<,>),
+          false => typeof(AddObject<,>),
+        };
+        yield return new(addItem.MakeGenericType(outputType, valueType));
 
-        var getItem = new List<Type?>([
-          typeof(GetAtObject<,>).TryMakeGenericType(outputType, valueType),
-          typeof(GetAtValue<,>).TryMakeGenericType(outputType, valueType),
-        ]).FirstOrDefault(t => t?.IsValidGenericType(validForInstantiation: true) ?? false);
-        if (getItem is { }) yield return new MenuItem(getItem);
+        var getItem = valueType.IsUnmanaged() switch
+        {
+          true => typeof(GetAtValue<,>),
+          false => typeof(GetAtObject<,>),
+        };
+        yield return new(getItem.MakeGenericType(outputType, valueType));
 
-        var indexOfItem = new List<Type?>([
-          typeof(IndexOfObject<,>).TryMakeGenericType(outputType, valueType),
-          typeof(IndexOfValue<,>).TryMakeGenericType(outputType, valueType),
-        ]).FirstOrDefault(t => t?.IsValidGenericType(validForInstantiation: true) ?? false);
-        if (indexOfItem is { }) yield return new MenuItem(indexOfItem);
+        var indexOfItem = valueType.IsUnmanaged() switch
+        {
+          true => typeof(IndexOfValue<,>),
+          false => typeof(IndexOfObject<,>),
+        };
+        yield return new(getItem.MakeGenericType(outputType, valueType));
 
-        var insertAtItem = new List<Type?>([
-          typeof(InsertAtObject<,>).TryMakeGenericType(outputType, valueType),
-          typeof(InsertAtValue<,>).TryMakeGenericType(outputType, valueType),
-        ]).FirstOrDefault(t => t?.IsValidGenericType(validForInstantiation: true) ?? false);
-        if (insertAtItem is { }) yield return new MenuItem(insertAtItem);
+        var insertAtItem = valueType.IsUnmanaged() switch
+        {
+          true => typeof(InsertAtValue<,>),
+          false => typeof(InsertAtObject<,>),
+        };
+        yield return new(insertAtItem.MakeGenericType(outputType, valueType));
 
-        var removeItem = new List<Type?>([
-          typeof(RemoveObject<,>).TryMakeGenericType(outputType, valueType),
-          typeof(RemoveValue<,>).TryMakeGenericType(outputType, valueType),
-        ]).FirstOrDefault(t => t?.IsValidGenericType(validForInstantiation: true) ?? false);
-        if (removeItem is { }) yield return new MenuItem(removeItem);
+        var removeItem = valueType.IsUnmanaged() switch
+        {
+          true => typeof(RemoveValue<,>),
+          false => typeof(RemoveObject<,>),
+        };
+        yield return new(removeItem.MakeGenericType(outputType, valueType));
 
-        var setAtItem = new List<Type?>([
-          typeof(SetAtObject<,>).TryMakeGenericType(outputType, valueType),
-          typeof(SetAtValue<,>).TryMakeGenericType(outputType, valueType),
-        ]).FirstOrDefault(t => t?.IsValidGenericType(validForInstantiation: true) ?? false);
-        if (setAtItem is { }) yield return new MenuItem(setAtItem);
+        var setAtItem = valueType.IsUnmanaged() switch
+        {
+          true => typeof(SetAtValue<,>),
+          false => typeof(SetAtObject<,>),
+        };
+        yield return new(setAtItem.MakeGenericType(outputType, valueType));
       }
     }
 
