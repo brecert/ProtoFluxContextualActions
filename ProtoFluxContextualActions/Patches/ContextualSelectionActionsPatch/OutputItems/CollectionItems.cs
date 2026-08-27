@@ -45,39 +45,39 @@ static partial class ContextualSelectionActionsPatch
       yield return new(addItemWithKey.MakeGenericType(keyType, valueType));
     }
 
+
+    if (TypeUtils.MatchInterface(outputType, typeof(IReadOnlyCollection<>), out var readOnlyCollectionType))
     {
-      if (TypeUtils.MatchInterface(outputType, typeof(IReadOnlyCollection<>), out var readOnlyCollectionType))
+      var valueType = readOnlyCollectionType.GenericTypeArguments[0];
+
+      yield return new(typeof(ReadOnlyCount<,>).MakeGenericType(outputType, valueType));
+
+      var containsItem = valueType.IsUnmanaged() switch
       {
-        var valueType = readOnlyCollectionType.GenericTypeArguments[0];
-
-        yield return new(typeof(ReadOnlyCount<,>).MakeGenericType(outputType, valueType));
-
-        var containsItem = valueType.IsUnmanaged() switch
-        {
-          true => typeof(ReadOnlyContainsValue<,>),
-          false => typeof(ReadOnlyContainsObject<,>),
-        };
-        yield return new(containsItem.MakeGenericType(outputType, valueType));
-      }
-      else if (TypeUtils.MatchInterface(outputType, typeof(ICollection<>), out var collectionType))
-      {
-        var valueType = collectionType.GenericTypeArguments[0];
-
-        yield return new(typeof(Count<,>).MakeGenericType(outputType, valueType));
-        yield return new(typeof(IsReadOnly<,>).MakeGenericType(outputType, valueType));
-
-        var containsItem = valueType.IsUnmanaged() switch
-        {
-          true => typeof(ContainsValue<,>),
-          false => typeof(ContainsObject<,>),
-        };
-        yield return new(containsItem.MakeGenericType(outputType, valueType));
-      }
-      else if (TypeUtils.MatchInterface(outputType, typeof(System.Collections.ICollection), out _))
-      {
-        yield return new(typeof(Count<>).MakeGenericType(outputType));
-      }
+        true => typeof(ReadOnlyContainsValue<,>),
+        false => typeof(ReadOnlyContainsObject<,>),
+      };
+      yield return new(containsItem.MakeGenericType(outputType, valueType));
     }
+    else if (TypeUtils.MatchInterface(outputType, typeof(ICollection<>), out var collectionType))
+    {
+      var valueType = collectionType.GenericTypeArguments[0];
+
+      yield return new(typeof(Count<,>).MakeGenericType(outputType, valueType));
+      yield return new(typeof(IsReadOnly<,>).MakeGenericType(outputType, valueType));
+
+      var containsItem = valueType.IsUnmanaged() switch
+      {
+        true => typeof(ContainsValue<,>),
+        false => typeof(ContainsObject<,>),
+      };
+      yield return new(containsItem.MakeGenericType(outputType, valueType));
+    }
+    else if (TypeUtils.MatchInterface(outputType, typeof(System.Collections.ICollection), out _))
+    {
+      yield return new(typeof(Count<>).MakeGenericType(outputType));
+    }
+
 
     if (TypeUtils.MatchInterface(outputType, typeof(IReadOnlyList<>), out var readonlyListType))
     {
