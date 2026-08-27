@@ -57,7 +57,7 @@ static partial class ContextualSelectionActionsPatch
         true => typeof(ReadOnlyContainsValue<,>),
         false => typeof(ReadOnlyContainsObject<,>),
       };
-      yield return new(containsItem.MakeGenericType(outputType, valueType));
+      yield return new(containsItem.MakeGenericType(outputType, valueType), group: "Comparisons"); // I guess to match the rest
     }
     else if (TypeUtils.MatchInterface(outputType, typeof(ICollection<>), out var collectionType))
     {
@@ -71,13 +71,12 @@ static partial class ContextualSelectionActionsPatch
         true => typeof(ContainsValue<,>),
         false => typeof(ContainsObject<,>),
       };
-      yield return new(containsItem.MakeGenericType(outputType, valueType));
+      yield return new(containsItem.MakeGenericType(outputType, valueType), group: "Comparisons");
     }
     else if (TypeUtils.MatchInterface(outputType, typeof(System.Collections.ICollection), out _))
     {
       yield return new(typeof(Count<>).MakeGenericType(outputType));
     }
-
 
     if (TypeUtils.MatchInterface(outputType, typeof(IReadOnlyList<>), out var readonlyListType))
     {
@@ -95,8 +94,8 @@ static partial class ContextualSelectionActionsPatch
     {
       var valueType = listType.GenericTypeArguments[0];
 
-      yield return new(typeof(Clear<,>).MakeGenericType(outputType, valueType));
-      yield return new(typeof(RemoveAt<,>).MakeGenericType(outputType, valueType));
+      yield return new(typeof(Clear<,>).MakeGenericType(outputType, valueType), group: "Lists");
+      yield return new(typeof(RemoveAt<,>).MakeGenericType(outputType, valueType), group: "Lists");
 
       if (readonlyListType is null)
       {
@@ -121,7 +120,7 @@ static partial class ContextualSelectionActionsPatch
         true => typeof(InsertAtValue<,>),
         false => typeof(InsertAtObject<,>),
       };
-      yield return new(insertAtItem.MakeGenericType(outputType, valueType));
+      yield return new(insertAtItem.MakeGenericType(outputType, valueType), group: "Lists");
 
       var indexOfItem = valueType.IsUnmanaged() switch
       {
@@ -135,19 +134,19 @@ static partial class ContextualSelectionActionsPatch
         true => typeof(RemoveValue<,>),
         false => typeof(RemoveObject<,>),
       };
-      yield return new(removeItem.MakeGenericType(outputType, valueType));
+      yield return new(removeItem.MakeGenericType(outputType, valueType), group: "Lists");
 
       var setAtItem = valueType.IsUnmanaged() switch
       {
         true => typeof(SetAtValue<,>),
         false => typeof(SetAtObject<,>),
       };
-      yield return new(setAtItem.MakeGenericType(outputType, valueType));
+      yield return new(setAtItem.MakeGenericType(outputType, valueType), group: "Lists");
     }
     else if (TypeUtils.MatchInterface(outputType, typeof(System.Collections.IList), out _))
     {
-      yield return new(typeof(Clear<>).MakeGenericType(outputType));
-      yield return new(typeof(RemoveAt<>).MakeGenericType(outputType));
+      yield return new(typeof(Clear<>).MakeGenericType(outputType), group: "Lists");
+      yield return new(typeof(RemoveAt<>).MakeGenericType(outputType), group: "Lists");
     }
   }
 
@@ -166,7 +165,7 @@ static partial class ContextualSelectionActionsPatch
         (false, true) => typeof(AddObjectWithValueKey<,,>),
         (false, false) => typeof(AddObjectWithObjectKey<,,>)
       };
-      yield return new(addItemWithKey.MakeGenericType(outputType, keyType, valueType));
+      yield return new(addItemWithKey.MakeGenericType(outputType, keyType, valueType), group: "Dictionaries");
 
       var getItemWithKey = (valueType.IsUnmanaged(), keyType.IsUnmanaged()) switch
       {
@@ -175,7 +174,7 @@ static partial class ContextualSelectionActionsPatch
         (false, true) => typeof(GetObjectWithValueKey<,,>),
         (false, false) => typeof(GetObjectWithObjectKey<,,>)
       };
-      yield return new(getItemWithKey.MakeGenericType(outputType, keyType, valueType));
+      yield return new(getItemWithKey.MakeGenericType(outputType, keyType, valueType), group: "Dictionaries");
 
       var setItemWithKey = (valueType.IsUnmanaged(), keyType.IsUnmanaged()) switch
       {
@@ -184,7 +183,7 @@ static partial class ContextualSelectionActionsPatch
         (false, true) => typeof(SetObjectWithValueKey<,,>),
         (false, false) => typeof(SetObjectWithObjectKey<,,>)
       };
-      yield return new(setItemWithKey.MakeGenericType(outputType, keyType, valueType));
+      yield return new(setItemWithKey.MakeGenericType(outputType, keyType, valueType), group: "Dictionaries");
 
 
       var removeKey = keyType.IsUnmanaged() switch
@@ -192,14 +191,14 @@ static partial class ContextualSelectionActionsPatch
         true => typeof(RemoveValueKey<,,>),
         false => typeof(RemoveObjectKey<,,>),
       };
-      yield return new(removeKey.MakeGenericType(outputType, keyType, valueType));
+      yield return new(removeKey.MakeGenericType(outputType, keyType, valueType), group: "Dictionaries");
 
       var containsKey = keyType.IsUnmanaged() switch
       {
         true => typeof(ContainsValueKey<,,>),
         false => typeof(ContainsObjectKey<,,>),
       };
-      yield return new(containsKey.MakeGenericType(outputType, keyType, valueType));
+      yield return new(containsKey.MakeGenericType(outputType, keyType, valueType), group: "Comparisons");
     }
   }
 }
