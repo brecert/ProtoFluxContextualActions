@@ -29,7 +29,6 @@ static partial class ContextualSelectionActionsPatch
       yield return dictionaryItem;
     }
 
-
     // todo: move to unpacking?
     if (TypeUtils.MatchInterface(outputType, typeof(KeyValuePair<,>), out var keyValuePairType))
     {
@@ -47,9 +46,9 @@ static partial class ContextualSelectionActionsPatch
     }
 
     {
-      if (TypeUtils.MatchInterface(outputType, typeof(IReadOnlyCollection<>), out var readOnlyListType))
+      if (TypeUtils.MatchInterface(outputType, typeof(IReadOnlyCollection<>), out var readOnlyCollectionType))
       {
-        var valueType = readOnlyListType.GenericTypeArguments[0];
+        var valueType = readOnlyCollectionType.GenericTypeArguments[0];
 
         yield return new(typeof(ReadOnlyCount<,>).MakeGenericType(outputType, valueType));
 
@@ -82,7 +81,7 @@ static partial class ContextualSelectionActionsPatch
 
     if (TypeUtils.MatchInterface(outputType, typeof(IReadOnlyList<>), out var readonlyListType))
     {
-      var valueType = readonlyListType.GenericTypeArguments[1];
+      var valueType = readonlyListType.GenericTypeArguments[0];
 
       var getAtItem = valueType.IsUnmanaged() switch
       {
@@ -91,7 +90,6 @@ static partial class ContextualSelectionActionsPatch
       };
       yield return new(getAtItem.MakeGenericType(outputType, valueType));
     }
-
 
     if (TypeUtils.MatchInterface(outputType, typeof(IList<>), out var listType))
     {
