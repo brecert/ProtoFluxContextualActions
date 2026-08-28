@@ -97,6 +97,13 @@ static partial class ContextualSelectionActionsPatch
       yield return new(typeof(Clear<,>).MakeGenericType(outputType, valueType), group: "Lists");
       yield return new(typeof(RemoveAt<,>).MakeGenericType(outputType, valueType), group: "Lists");
 
+      var removeAllItems = valueType.IsUnmanaged() switch
+      {
+        true => typeof(RemoveAllValue<,>),
+        false => typeof(RemoveAllObject<,>),
+      };
+      yield return new(removeAllItems.MakeGenericType(outputType, valueType), group: "Lists");
+
       if (readonlyListType is null)
       {
         var getItem = valueType.IsUnmanaged() switch
