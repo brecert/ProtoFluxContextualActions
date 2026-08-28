@@ -422,6 +422,7 @@ static partial class ContextualSelectionActionsPatch
     if (outputType == typeof(Grabber))
     {
       yield return new MenuItem(typeof(GrabberBodyNode));
+      yield return new MenuItem(typeof(GrabbedGrabbables));
     }
 
     if (outputType == typeof(CharacterController))
