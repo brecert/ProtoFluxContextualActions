@@ -10,23 +10,12 @@ static class TypeUtils
 {
   public static Type? TryMakingGenericTypeFrom(this Type to, Type from)
   {
-    if (to.IsGenericType != from.IsGenericType) return null;
-
-    if (to.IsGenericType)
+    return (to.IsGenericType, from.IsGenericType) switch
     {
-      if (to.TryMakeGenericType(from.GenericTypeArguments) is Type type)
-      {
-        return type;
-      }
-      else
-      {
-        return null;
-      }
-    }
-    else
-    {
-      return to;
-    }
+      (true, true) => to.TryMakeGenericType(from.GenericTypeArguments),
+      (false, false) => to,
+      _ => null,
+    };
   }
 
   public static Type? TryMakeGenericType(this Type type, params Type[] typeArguments)

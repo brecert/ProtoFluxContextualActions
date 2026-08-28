@@ -350,6 +350,7 @@ internal static partial class ContextualSwapActionsPatch
       .. DesktopInputGroupItems(context),
       .. ColorGroupItems(context),
       .. ImpulseRelayGroupItems(context),
+      ..ForEachGroupItems(context),
     ];
 
     var indexedItems = menuItems.Index();
