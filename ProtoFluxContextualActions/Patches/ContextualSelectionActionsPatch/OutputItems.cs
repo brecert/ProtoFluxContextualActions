@@ -109,6 +109,11 @@ static partial class ContextualSelectionActionsPatch
     ]);
     yield return new MenuItem(delayValueNode, group: "Comparisons");
 
+    foreach (var collectionItem in CollectionItems(outputType))
+    {
+      yield return collectionItem;
+    }
+
     if (outputType == typeof(Slot))
     {
       yield return new MenuItem(typeof(GlobalTransform));
@@ -944,11 +949,6 @@ static partial class ContextualSelectionActionsPatch
       {
         yield return new MenuItem(toNumberType.MakeGenericType(outputType));
       }
-    }
-
-    foreach (var collectionItem in CollectionItems(outputType))
-    {
-      yield return collectionItem;
     }
 
     if (TypeUtils.MatchInterface(outputType, typeof(IQuantity<>), out var quantityType))
