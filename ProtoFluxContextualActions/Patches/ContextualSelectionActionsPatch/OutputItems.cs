@@ -262,30 +262,33 @@ static partial class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(StringLength));
 
       yield return new MenuItem(typeof(IndexOfString));
+      yield return new MenuItem(typeof(SplitString));
 
-      yield return new MenuItem(typeof(Contains));
+      yield return new MenuItem(typeof(Contains), group: "Strings");
+      yield return new MenuItem(typeof(Contains), group: "Comparisons");
       yield return new MenuItem(typeof(Substring));
-      yield return new MenuItem(typeof(TrimString));
-      yield return new MenuItem(typeof(IsStringEmpty));
+      yield return new MenuItem(typeof(TrimString), group: "Strings");
+      yield return new MenuItem(typeof(IsStringEmpty), group: "Strings");
+      yield return new MenuItem(typeof(IsStringEmpty), group: "Comparisons");
 
       yield return new MenuItem(typeof(FormatString));
-      yield return new MenuItem(typeof(ReplaceSubstring));
+      yield return new MenuItem(typeof(ReplaceSubstring), group: "Strings");
 
-      yield return new MenuItem(typeof(ProtoFlux.Runtimes.Execution.Nodes.Strings.ToLower));
+      yield return new MenuItem(typeof(ProtoFlux.Runtimes.Execution.Nodes.Strings.ToLower), group: "Strings");
 
-      yield return new MenuItem(typeof(GetCharacter));
+      yield return new MenuItem(typeof(GetCharacter), group: "Strings");
 
-      yield return new MenuItem(typeof(CountOccurrences));
+      yield return new MenuItem(typeof(CountOccurrences), group: "Strings");
 
-      yield return new MenuItem(typeof(StripRTF_Tags));
+      yield return new MenuItem(typeof(StripRTF_Tags), group: "Strings");
 
       // Multi, Join and Insert can be swapped to
       yield return new MenuItem(typeof(ConcatenateString));
 
-      yield return new MenuItem(typeof(UnescapeString));
-      yield return new MenuItem(typeof(UnescapeUriDataString));
+      yield return new MenuItem(typeof(UnescapeString), group: "Strings");
+      yield return new MenuItem(typeof(UnescapeUriDataString), group: "Strings");
 
-      yield return new MenuItem(typeof(StringToAbsoluteURI));
+      yield return new MenuItem(typeof(StringToAbsoluteURI), group: "Strings");
     }
     else if (outputType == typeof(char))
     {
