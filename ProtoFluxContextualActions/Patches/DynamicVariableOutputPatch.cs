@@ -17,6 +17,7 @@ namespace ProtoFluxContextualActions.Patches;
 internal static class DynamicVariableOutputPatch
 {
   static readonly Uri Icon_Color_Output = new("resdb:///e0a4e5f5dd6c0fc7e2b089b873455f908a8ede7de4fd37a3430ef71917a543ec.png");
+  static readonly Uri Icon_Color_ReadWrite = new("resdb:///9f8c026ec26641cabcc2b000a967631879dcf1855eb2775ddf0160da09d6a63f.png");
 
   internal static void Postfix(ProtoFluxTool __instance, InteractionHandler tool, ContextMenu menu)
   {
@@ -46,7 +47,7 @@ internal static class DynamicVariableOutputPatch
       };
 
       label = "Read";
-      var readItem = menu.AddItem(in label, Icon_Color_Output, RadiantUI_Constants.Hero.CYAN);
+      var readItem = menu.AddItem(in label, Icon_Color_ReadWrite, RadiantUI_Constants.Hero.CYAN);
       readItem.Button.LocalPressed += (button, data) =>
       {
         var variableRead = GetNodeForType(variableType, [
@@ -75,7 +76,7 @@ internal static class DynamicVariableOutputPatch
       };
 
       label = "Write";
-      var writeItem = menu.AddItem(in label, Icon_Color_Output, RadiantUI_Constants.Hero.CYAN);
+      var writeItem = menu.AddItem(in label, Icon_Color_ReadWrite, RadiantUI_Constants.Hero.CYAN);
       writeItem.Button.LocalPressed += (button, data) =>
       {
         var variableRead = GetNodeForType(variableType, [
