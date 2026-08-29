@@ -80,7 +80,17 @@ public static class SwapHelper
     {
       if (to.GetImpulseByName(remap?.GetValueOrDefault(element.DisplayName) ?? element.DisplayName) is ImpulseElement toImpulse)
       {
-        toImpulse.Target = element.Target;
+        // todo: ReachesAsyncOperation may be unoptimized, switch to our own implementation
+        var isValidConnection = (toImpulse.TargetType, element.Target?.ReachesAsyncOperation() ?? false) switch
+        {
+          (ImpulseType.AsyncCall or ImpulseType.AsyncResumption or ImpulseType.Continuation, _) => true,
+          (_, false) => true,
+          _ => false,
+        };
+        if (isValidConnection)
+        {
+          toImpulse.Target = element.Target;
+        }
       }
     }
 
@@ -123,9 +133,13 @@ public static class SwapHelper
     foreach (var element in impulsingFromElements)
     {
       var name = from.GetOperationName(element.Target.FindLinearOperationIndex());
-      if (to.GetOperationByName(name) is IOperation operation)
+      if (to.GetOperationByName(name) is IOperation toOperation)
       {
-        element.Target = operation;
+        if (element.TargetElement() is { } fromOperation)
+        {
+          TryMapOperation(element, fromOperation, toOperation);
+        }
+        // element.Target = toOperation;
       }
     }
 
@@ -133,7 +147,11 @@ public static class SwapHelper
     {
       foreach (var source in impulsingFromElements)
       {
-        source.Target = to.GetOperation(source.Target.FindLinearOperationIndex());
+        var toOperation = to.GetOperation(source.Target.FindLinearOperationIndex());
+        if (source.TargetElement() is { } fromOperation)
+        {
+          TryMapOperation(source, fromOperation, toOperation);
+        }
       }
     }
 
@@ -144,13 +162,28 @@ public static class SwapHelper
 
     foreach (var evaluatingElement in query.GetImpulsingElements(from))
     {
-      if (evaluatingElement.TargetElement() is OperationElement outputElement)
+      if (evaluatingElement.TargetElement() is OperationElement operationElement)
       {
-        if (hasOperationMap && (operationMapMapTable?.TryGetValue(outputElement.DisplayName, out var remappedName) ?? false))
+        if (hasOperationMap && (operationMapMapTable?.TryGetValue(operationElement.DisplayName, out var remappedName) ?? false))
         {
-          evaluatingElement.Target = to.GetOperationByName(remappedName);
+          var toOperation = to.GetOperationByName(remappedName);
+          TryMapOperation(evaluatingElement, operationElement, toOperation);
         }
       }
+    }
+  }
+
+  private static void TryMapOperation(ImpulseElement impulse, OperationElement fromOperation, IOperation? toOperation)
+  {
+    var isValidConnection = (impulse.IsAsync, toOperation is IAsyncOperation) switch
+    {
+      (_, false) => true,
+      (true, _) => true,
+      _ => false,
+    };
+    if (isValidConnection)
+    {
+      impulse.Target = toOperation;
     }
   }
 

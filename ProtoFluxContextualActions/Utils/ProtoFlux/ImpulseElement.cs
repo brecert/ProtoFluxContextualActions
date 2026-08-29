@@ -54,6 +54,12 @@ public readonly struct ImpulseElement(INode node, int elementIndex, int? element
       : OwnerNode.GetImpulseName(ElementIndex);
 
   public readonly ImpulseType TargetType => OwnerNode.GetImpulseType(ElementIndex);
+  public readonly bool IsAsync => TargetType switch
+  {
+    ImpulseType.AsyncCall => true,
+    ImpulseType.AsyncResumption => true,
+    _ => false,
+  };
 
   int IElementIndex.ElementIndex => ElementIndex;
 

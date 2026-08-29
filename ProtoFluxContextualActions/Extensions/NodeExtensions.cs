@@ -172,6 +172,16 @@ internal static partial class NodeExtensions
     return null;
   }
 
+  public static OperationElement? GetOperationElementByName(this INode node, string name)
+  {
+    var meta = node.Metadata.GetOperationByName(name);
+    if (meta != null)
+    {
+      return new(node, meta.Index);
+    }
+    return null;
+  }
+
   public static ImpulseElement GetImpulseByIndex(this INode node, int index) =>
     new(node, index);
 
