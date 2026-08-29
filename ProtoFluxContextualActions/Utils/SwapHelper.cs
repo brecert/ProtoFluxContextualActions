@@ -80,8 +80,7 @@ public static class SwapHelper
     {
       if (to.GetImpulseByName(remap?.GetValueOrDefault(element.DisplayName) ?? element.DisplayName) is ImpulseElement toImpulse)
       {
-        // todo: ReachesAsyncOperation may be unoptimized, switch to our own implementation
-        var isValidConnection = (toImpulse.TargetType, element.Target?.ReachesAsyncOperation() ?? false) switch
+        var isValidConnection = (toImpulse.TargetType, element.Target is ISyncOperation) switch
         {
           (ImpulseType.AsyncCall or ImpulseType.AsyncResumption or ImpulseType.Continuation, _) => true,
           (_, false) => true,
