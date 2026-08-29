@@ -299,6 +299,10 @@ static partial class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(GET_String));
       yield return new MenuItem(typeof(FocusWorld));
     }
+    else if (typeof(IEnumerable<string>).IsAssignableFrom(outputType))
+    {
+      yield return new MenuItem(typeof(JoinString));
+    }
 
     else if (outputType == typeof(DateTime))
     {
