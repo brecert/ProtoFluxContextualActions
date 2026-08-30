@@ -143,63 +143,7 @@ static partial class ContextualSelectionActionsPatch
       bool shouldRelay = ProtoFluxContextualActions.ShouldUseRelays();
       Type baseType = shouldRelay ? typeof(ObjectRelay<Slot>) : typeof(ChildrenCount);
 
-      yield return new MenuItem(
-        typeof(ObjectCast<Slot, IWorldElement>),
-        name: "Allocating User",
-        group: "Slots",
-        onNodeSpawn: (ProtoFluxNode node, ProtoFluxElementProxy proxy, ProtoFluxTool tool) =>
-        {
-          tool.StartTask(async () =>
-          {
-            // Node spawning
-            Type allocNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.References.AllocatingUser);
-            ProtoFluxNode? thisAllocNode = null;
-
-            tool.SpawnNode(allocNode, newNode =>
-            {
-              thisAllocNode = newNode;
-              newNode.EnsureVisual();
-            });
-
-            await new Updates(3);
-
-            if (thisAllocNode == null)
-            {
-              node.Slot.Destroy();
-              return;
-            }
-
-            node.World.BeginUndoBatch("Create Allocating User");
-
-            node.Slot.CreateSpawnUndoPoint("Spawn Object Cast");
-            thisAllocNode.Slot.CreateSpawnUndoPoint("Spawn Allocating User");
-
-            // Inputs and outputs
-            INodeOutput inputRelay = node.GetOutput(0);
-
-            ISyncRef allocInstance = thisAllocNode.GetInput(0);
-
-            allocInstance.Target = inputRelay;
-
-            // Positions
-            float3 baseUp = node.Slot.Up;
-            float3 baseRight = node.Slot.Right;
-
-            void LocalTransformNode(ProtoFluxNode input, float X, float Y)
-            {
-              Slot target = input.Slot;
-              target.CopyTransform(node.Slot);
-              target.GlobalPosition += (baseUp * Y) + (baseRight * X);
-            }
-
-            LocalTransformNode(thisAllocNode, 0.09f, 0.00375f);
-
-            node.World.EndUndoBatch();
-          });
-
-          return true;
-        }
-      );
+      yield return new MenuItem(typeof(AllocatingUser), name: "Allocating User", group: "Slots");
 
     }
 
