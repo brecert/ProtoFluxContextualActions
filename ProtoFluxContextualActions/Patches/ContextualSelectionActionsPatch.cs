@@ -251,7 +251,7 @@ internal static partial class ContextualSelectionActionsPatch
     {
       // this is dumb
       // TODO: investigate why it's needed for casting to work
-      await new Updates();
+      await new Updates(2);
 
       if (item.onNodeSpawn != null)
       {
