@@ -164,6 +164,11 @@ static partial class ContextualSelectionActionsPatch
       var keyType = dictionaryType.GenericTypeArguments[0];
       var valueType = dictionaryType.GenericTypeArguments[1];
 
+      // nodes like Clear<,> require KVPair, so just construct the type for when its needed.
+      var kvType = typeof(KeyValuePair<,>).MakeGenericType(keyType, valueType);
+
+      yield return new(typeof(Clear<,>).MakeGenericType(outputType, kvType), group: "Dictionaries");
+
       // I wish I didn't need to manually check these but generic creation is *not* failing and throwing with unmanaged types despite the constraint so...
       var addItemWithKey = (valueType.IsUnmanaged(), keyType.IsUnmanaged()) switch
       {

@@ -60,7 +60,7 @@ using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Elements;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Network;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Animation;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Security;
-using ProtoFlux.Runtimes.Execution.Nodes.Collections;
+using System.Reflection;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -140,66 +140,10 @@ static partial class ContextualSelectionActionsPatch
 
       yield return new MenuItem(typeof(DynamicImpulseTrigger), group: "Events");
 
-      bool shouldRelay = ProtoFluxContextualActions.ShouldUseRelays();
+      bool shouldRelay = ProtoFluxContextualActions.ShouldUseRelays;
       Type baseType = shouldRelay ? typeof(ObjectRelay<Slot>) : typeof(ChildrenCount);
 
-      yield return new MenuItem(
-        typeof(ObjectCast<Slot, IWorldElement>),
-        name: "Allocating User",
-        group: "Slots",
-        onNodeSpawn: (ProtoFluxNode node, ProtoFluxElementProxy proxy, ProtoFluxTool tool) =>
-        {
-          tool.StartTask(async () =>
-          {
-            // Node spawning
-            Type allocNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.References.AllocatingUser);
-            ProtoFluxNode? thisAllocNode = null;
-
-            tool.SpawnNode(allocNode, newNode =>
-            {
-              thisAllocNode = newNode;
-              newNode.EnsureVisual();
-            });
-
-            await new Updates(3);
-
-            if (thisAllocNode == null)
-            {
-              node.Slot.Destroy();
-              return;
-            }
-
-            node.World.BeginUndoBatch("Create Allocating User");
-
-            node.Slot.CreateSpawnUndoPoint("Spawn Object Cast");
-            thisAllocNode.Slot.CreateSpawnUndoPoint("Spawn Allocating User");
-
-            // Inputs and outputs
-            INodeOutput inputRelay = node.GetOutput(0);
-
-            ISyncRef allocInstance = thisAllocNode.GetInput(0);
-
-            allocInstance.Target = inputRelay;
-
-            // Positions
-            float3 baseUp = node.Slot.Up;
-            float3 baseRight = node.Slot.Right;
-
-            void LocalTransformNode(ProtoFluxNode input, float X, float Y)
-            {
-              Slot target = input.Slot;
-              target.CopyTransform(node.Slot);
-              target.GlobalPosition += (baseUp * Y) + (baseRight * X);
-            }
-
-            LocalTransformNode(thisAllocNode, 0.09f, 0.00375f);
-
-            node.World.EndUndoBatch();
-          });
-
-          return true;
-        }
-      );
+      yield return new MenuItem(typeof(AllocatingUser), name: "Allocating User", group: "Slots");
 
     }
 
@@ -298,6 +242,10 @@ static partial class ContextualSelectionActionsPatch
     {
       yield return new MenuItem(typeof(GET_String));
       yield return new MenuItem(typeof(FocusWorld));
+    }
+    else if (typeof(IEnumerable<string>).IsAssignableFrom(outputType))
+    {
+      yield return new MenuItem(typeof(JoinString));
     }
 
     else if (outputType == typeof(DateTime))
@@ -503,37 +451,37 @@ static partial class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(AssignRole));
     }
 
-    // if (typeof(IWorldElement).IsAssignableFrom(outputType) && outputType != typeof(IWorldElement) && !outputType.IsUnmanaged() && outputType.IsAssignableFrom(typeof(object)))
-    // {
-    //   yield return new MenuItem(
-    //     typeof(ObjectCast<,>).MakeGenericType(outputType, typeof(IWorldElement)),
-    //     name: "IWorldElement", group: "Casts"
-    //   );
-    // }
-    // if (outputType != typeof(object))
-    // {
-    //   if (outputType.IsUnmanaged())
-    //   {
-    //     yield return new MenuItem(
-    //       typeof(ValueToObjectCast<>).MakeGenericType(outputType),
-    //       name: "Object", group: "Casts"
-    //     );
-    //   }
-    //   else if (ReflectionHelper.IsNullable(outputType))
-    //   {
-    //     yield return new MenuItem(typeof(NullableToObjectCast<>).MakeGenericType(Nullable.GetUnderlyingType(outputType) ?? outputType), name: "Object", group: "Casts");
-    //   }
-    //   else
-    //   {
-    //     yield return new MenuItem(
-    //       typeof(ObjectCast<,>).MakeGenericType(outputType, typeof(object)),
-    //       name: "Object", group: "Casts"
-    //     );
-    //   }
-    // }
+    if (typeof(IWorldElement).IsAssignableFrom(outputType) && outputType != typeof(IWorldElement))
+    {
+      yield return new MenuItem(
+        typeof(ObjectCast<,>).MakeGenericType(outputType, typeof(IWorldElement)),
+        name: "IWorldElement", group: "Casts"
+      );
+    }
+    if (outputType != typeof(object))
+    {
+      if (outputType.IsUnmanaged() || typeof(ISphericalHarmonics).IsAssignableFrom(outputType))
+      {
+        yield return new MenuItem(
+          typeof(ValueToObjectCast<>).MakeGenericType(outputType),
+          name: "Object", group: "Casts"
+        );
+      }
+      else if (ReflectionHelper.IsNullable(outputType))
+      {
+        yield return new MenuItem(typeof(NullableToObjectCast<>).MakeGenericType(Nullable.GetUnderlyingType(outputType) ?? outputType), name: "Object", group: "Casts");
+      }
+      else if (outputType.IsClass)
+      {
+        yield return new MenuItem(
+          typeof(ObjectCast<,>).MakeGenericType(outputType, typeof(object)),
+          name: "Object", group: "Casts"
+        );
+      }
+    }
 
 
-    if (outputType == typeof(IWorldElement) && ProtoFluxContextualActions.ShouldDisplayUnsupportedActions())
+    if (outputType == typeof(IWorldElement) && ProtoFluxContextualActions.ShouldDisplayUnsupportedActions)
     {
       yield return new MenuItem(typeof(IsRemoved));
       yield return new MenuItem(typeof(ReferenceID));
@@ -552,43 +500,19 @@ static partial class ContextualSelectionActionsPatch
             Type lengthInputNode = ProtoFluxHelper.GetInputNode(typeof(int));
             Type numberStyleNode = ProtoFluxHelper.GetInputNode(typeof(NumberStyles));
 
-            ProtoFluxNode? thisRefIDObjectCastNode = null;
-            ProtoFluxNode? thisToStringNode = null;
-            ProtoFluxNode? thisStringRemoveNode = null;
-            ProtoFluxNode? thisParseULongNode = null;
-            ProtoFluxNode? thisLengthInputNode = null;
-            ProtoFluxNode? thisNumberStyleNode = null;
+            ProtoFluxNode? SpawnNode(Type nodeType)
+            {
+              return tool.SpawnNode(nodeType, node => node.EnsureVisual());
+            }
 
-            tool.SpawnNode(refIDObjectCastNode, newNode =>
-            {
-              thisRefIDObjectCastNode = newNode;
-              newNode.EnsureVisual();
-            });
-            tool.SpawnNode(toStringNode, newNode =>
-            {
-              thisToStringNode = newNode;
-              newNode.EnsureVisual();
-            });
-            tool.SpawnNode(stringRemoveNode, newNode =>
-            {
-              thisStringRemoveNode = newNode;
-              newNode.EnsureVisual();
-            });
-            tool.SpawnNode(parseULongNode, newNode =>
-            {
-              thisParseULongNode = newNode;
-              newNode.EnsureVisual();
-            });
-            tool.SpawnNode(lengthInputNode, newNode =>
-            {
-              thisLengthInputNode = newNode;
-              newNode.EnsureVisual();
-            });
-            tool.SpawnNode(numberStyleNode, newNode =>
-            {
-              thisNumberStyleNode = newNode;
-              newNode.EnsureVisual();
-            });
+            ProtoFluxNode? refObjCast = SpawnNode(refIDObjectCastNode);
+            ProtoFluxNode? toStr = SpawnNode(toStringNode);
+            ProtoFluxNode? strRemove = SpawnNode(stringRemoveNode);
+            ProtoFluxNode? parseULong = SpawnNode(parseULongNode);
+            ProtoFluxNode? lenInput = SpawnNode(lengthInputNode);
+            ProtoFluxNode? styleInput = SpawnNode(numberStyleNode);
+
+            ProtoFluxNode?[] nodes = [node, refObjCast, toStr, strRemove, parseULong, lenInput, styleInput];
 
             await new Updates(6);
 
@@ -598,87 +522,53 @@ static partial class ContextualSelectionActionsPatch
             tempSlot.CopyTransform(nodeSlot);
             nodeSlot.Parent = tempSlot;
 
-            if (
-              thisRefIDObjectCastNode == null ||
-              thisToStringNode == null ||
-              thisStringRemoveNode == null ||
-              thisParseULongNode == null ||
-              thisLengthInputNode == null ||
-              thisNumberStyleNode == null)
+            if (nodes.Any(n => n == null))
             {
-              node.Slot.Destroy();
-              thisRefIDObjectCastNode?.Slot.Destroy();
-              thisToStringNode?.Slot.Destroy();
-              thisStringRemoveNode?.Slot.Destroy();
-              thisParseULongNode?.Slot.Destroy();
-              thisLengthInputNode?.Slot.Destroy();
-              thisNumberStyleNode?.Slot.Destroy();
+              foreach (var node in nodes)
+              {
+                node?.Slot.Destroy();
+              }
               return;
             }
 
             node.World.BeginUndoBatch("Create RefID -> ULong");
 
-            node.Slot.CreateSpawnUndoPoint("Spawn Object Cast");
-            thisRefIDObjectCastNode.Slot.CreateSpawnUndoPoint("Spawn ToString Node");
-            thisToStringNode.Slot.CreateSpawnUndoPoint("Spawn ToString Node");
-            thisStringRemoveNode.Slot.CreateSpawnUndoPoint("Spawn String Remove Node");
-            thisParseULongNode.Slot.CreateSpawnUndoPoint("Spawn Parse ULong");
-            thisLengthInputNode.Slot.CreateSpawnUndoPoint("Spawn Length Input");
-            thisNumberStyleNode.Slot.CreateSpawnUndoPoint("Spawn Number Styles Input");
+            foreach (var node in nodes)
+            {
+              node!.Slot.CreateSpawnUndoPoint("Spawn Node");
+            }
 
             // Inputs and outputs
             INodeOutput inputRelay = node.GetOutput(0);
 
-            ISyncRef refIDInstance = thisRefIDObjectCastNode.GetInput(0);
-            INodeOutput refIDValue = thisRefIDObjectCastNode.GetOutput(0);
-            ISyncRef objectInstance = thisToStringNode.GetInput(0);
-            INodeOutput objectValue = thisToStringNode.GetOutput(0);
-            ISyncRef stringRemoveInstance = thisStringRemoveNode.GetInput(0);
-            ISyncRef stringRemoveLength = thisStringRemoveNode.GetInput(2);
-            INodeOutput stringRemoveValue = thisStringRemoveNode.GetOutput(0);
-            ISyncRef parseULongInstance = thisParseULongNode.GetInput(0);
-            ISyncRef parseULongStyle = thisParseULongNode.GetInput(1);
+            ISyncRef refIDInstance = refObjCast!.GetInput(0);
+            INodeOutput refIDValue = refObjCast.GetOutput(0);
+            ISyncRef objectInstance = toStr!.GetInput(0);
+            INodeOutput objectValue = toStr.GetOutput(0);
+            ISyncRef stringRemoveInstance = strRemove!.GetInput(0);
+            ISyncRef stringRemoveLength = strRemove.GetInput(2);
+            INodeOutput stringRemoveValue = strRemove.GetOutput(0);
+            ISyncRef parseULongInstance = parseULong!.GetInput(0);
+            ISyncRef parseULongStyle = parseULong.GetInput(1);
 
-            INodeOutput lengthValue = thisLengthInputNode.GetOutput(0);
-            INodeOutput numberStylesValue = thisNumberStyleNode.GetOutput(0);
+            INodeOutput lengthValue = lenInput!.GetOutput(0);
+            INodeOutput numberStylesValue = styleInput!.GetOutput(0);
 
             refIDInstance.Target = inputRelay;
             objectInstance.Target = refIDValue;
 
-            stringRemoveInstance.Target = thisToStringNode;
+            stringRemoveInstance.Target = toStr;
             parseULongInstance.Target = stringRemoveValue;
 
             stringRemoveLength.Target = lengthValue;
             parseULongStyle.Target = numberStylesValue;
 
-            (thisLengthInputNode as FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ValueInput<int>)?.Value.Value = 2;
-            (thisNumberStyleNode as FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ValueInput<NumberStyles>)?.Value.Value = NumberStyles.HexNumber;
-
-            // Positions
-            float3 baseUp = nodeSlot.Up;
-            float3 baseRight = nodeSlot.Right;
-
-            void LocalTransformNode(ProtoFluxNode input, float X, float Y)
-            {
-              Slot target = input.Slot;
-              target.CopyTransform(nodeSlot);
-              target.Parent = nodeSlot.Parent;
-              target.GlobalPosition += (baseUp * Y) + (baseRight * X);
-            }
-
-            LocalTransformNode(thisRefIDObjectCastNode, 0.09f, -0.00375f);
-
-            LocalTransformNode(thisToStringNode, 0.18f, -0.03f);
-            LocalTransformNode(thisStringRemoveNode, 0.33f, -0.03f);
-            LocalTransformNode(thisParseULongNode, 0.495f, -0.03f);
-
-            LocalTransformNode(thisLengthInputNode, 0.18f, -0.135f);
-            LocalTransformNode(thisNumberStyleNode, 0.27f, 0.075f);
+            (lenInput as FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ValueInput<int>)?.Value.Value = 2;
+            (styleInput as FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ValueInput<NumberStyles>)?.Value.Value = NumberStyles.HexNumber;
 
             node.World.EndUndoBatch();
 
-            ProtoFluxNode?[] allNodes = [node, thisRefIDObjectCastNode, thisToStringNode, thisStringRemoveNode, thisParseULongNode, thisLengthInputNode, thisNumberStyleNode];
-            foreach (var node in allNodes)
+            foreach (var node in nodes)
             {
               if (node == null) continue;
               if (node.IsRemoved) continue;
@@ -686,21 +576,58 @@ static partial class ContextualSelectionActionsPatch
             }
             var tempGrab = tempSlot.AttachComponent<Grabbable>();
 
-            await new Updates(240);
+            // for fixing prints that snap the nodes early
+            await new Updates(6);
+
+            // Positions
+            void setPositions()
+            {
+              float3 baseUp = nodeSlot.Up;
+              float3 baseRight = nodeSlot.Right;
+
+              void LocalTransformNode(ProtoFluxNode input, float X, float Y)
+              {
+                Slot target = input.Slot;
+                target.CopyTransform(nodeSlot);
+                target.Parent = nodeSlot.Parent;
+                target.GlobalPosition += (baseUp * Y) + (baseRight * X);
+              }
+
+              LocalTransformNode(refObjCast, 0.09f, -0.00375f);
+
+              LocalTransformNode(toStr, 0.18f, -0.03f);
+              LocalTransformNode(strRemove, 0.33f, -0.03f);
+              LocalTransformNode(parseULong, 0.495f, -0.03f);
+
+              LocalTransformNode(lenInput, 0.18f, -0.135f);
+              LocalTransformNode(styleInput, 0.27f, 0.075f);
+            }
+            setPositions();
+
+            await new Updates(ProtoFluxContextualActions.StructureReleaseUpdates);
+
             int i = 0;
             while (tempGrab.IsGrabbed && i < 200)
             {
               await new Updates(5);
               i++;
             }
-            foreach (var node in allNodes)
+            foreach (var node in nodes)
             {
               if (node == null) continue;
               if (node.IsRemoved) continue;
-              node.Slot.GetComponent<Grabbable>().Enabled = true;
+              var nodeGrabbable = node.Slot.GetComponent<Grabbable>();
+              nodeGrabbable.Enabled = true;
+              // send a drop event, just in case
+              typeof(Grabbable).GetMethod("RunGrabEvent", BindingFlags.NonPublic | BindingFlags.Instance)?.Invoke(nodeGrabbable, [true]);
             }
 
             tempSlot.Destroy(origParent);
+
+            // set positions again after everything / make lightprint not break            
+            await new Updates(3);
+
+            setPositions();
           });
 
           return true;
@@ -936,11 +863,9 @@ static partial class ContextualSelectionActionsPatch
           name: name,
           onNodeSpawn: (ProtoFluxNode newNode, ProtoFluxElementProxy proxy, ProtoFluxTool _) =>
           {
-            ProtoFluxOutputProxy output = (ProtoFluxOutputProxy)proxy;
-
             ISyncRef targetRef = newNode.GetReference(0);
 
-            newNode.TryConnectReference(targetRef, outputProxy.Node.Target, undoable: true);
+            newNode.TryConnectReference(targetRef, outputProxy.Node.Target, false);
 
             return connectNode;
           },

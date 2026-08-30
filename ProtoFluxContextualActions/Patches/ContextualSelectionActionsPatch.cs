@@ -76,7 +76,7 @@ internal static partial class ContextualSelectionActionsPatch
   [HarmonyPatch(typeof(ProtoFluxTool), nameof(ProtoFluxTool.OnPrimaryRelease))]
   internal static void PrimaryReleasePatch(ProtoFluxTool __instance, SyncRef<ProtoFluxElementProxy> ____currentProxy)
   {
-    if (!ProtoFluxContextualActions.ShouldDoDefaultActionOnPrimaryRelease()) return;
+    if (!ProtoFluxContextualActions.ShouldDoDefaultActionOnPrimaryRelease) return;
     if (!__instance.LocalUser.IsContextMenuOpen()) return;
     // only allow the contextmenu to trigger if the menu came from the tool
     if (__instance.LocalUser.GetUserContextMenu().CurrentSummoner != __instance) return;
@@ -251,7 +251,7 @@ internal static partial class ContextualSelectionActionsPatch
     {
       // this is dumb
       // TODO: investigate why it's needed for casting to work
-      await new Updates();
+      await new Updates(2);
 
       if (item.onNodeSpawn != null)
       {
@@ -260,8 +260,15 @@ internal static partial class ContextualSelectionActionsPatch
         if (!doConnect) return;
       }
 
-      var input = addedNode.NodeInputs
-          .FirstOrDefault(i => i.TargetType.IsGenericType && (outputProxy.OutputType.Value.IsAssignableFrom(i.TargetType.GenericTypeArguments[0]) || ProtoFlux.Core.TypeHelper.CanImplicitlyConvertTo(outputProxy.OutputType, i.TargetType.GenericTypeArguments[0])))
+      var outputType = outputProxy.OutputType.Value;
+
+      // collection types (in some cases) can be casted to the value input rather than the collection input.
+      var isCollectionType = TypeUtils.MatchInterface(outputType, typeof(ICollection<>), out var collectionType);
+      var input = !isCollectionType ? null : addedNode.NodeInputs
+        .FirstOrDefault(i => TypeUtils.MatchInterface(i.TargetType.GenericTypeArguments[0], collectionType!, out _));
+
+      input ??= addedNode.NodeInputs
+          .FirstOrDefault(i => i.TargetType.IsGenericType && (outputType.IsAssignableFrom(i.TargetType.GenericTypeArguments[0]) || ProtoFlux.Core.TypeHelper.CanImplicitlyConvertTo(outputProxy.OutputType, i.TargetType.GenericTypeArguments[0])))
           ?? (ISyncRef)addedNode.NodeInputLists.First().GetElement(0) ?? throw new Exception($"Could not find matching input of type '{outputProxy.OutputType}' in '{addedNode}'");
 
       addedNode.TryConnectInput(input, outputProxy.NodeOutput.Target, allowExplicitCast: false, undoable: true);

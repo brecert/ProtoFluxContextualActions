@@ -13,14 +13,14 @@ internal class ContextMenuCreator
 {
   internal async Task<ContextMenu> CreateContextMenu(ProtoFluxTool tool, bool isInitialMenu = false)
   {
-    bool shouldKeepPositionConfig = ProtoFluxContextualActions.ShouldTryKeepContextPosition();
+    bool shouldKeepPositionConfig = ProtoFluxContextualActions.ShouldTryKeepContextPosition;
     bool shouldKeepPosition = !isInitialMenu && shouldKeepPositionConfig;
     var menu = await tool.LocalUser.OpenContextMenu(tool, tool.Slot, options: new ContextMenuOptions { speedOverride = 12, keepPosition = shouldKeepPosition });
 
     // stupid attempt to force the contextmenu to use flick, as it tends to fail in vr at lower framerates?
     _ = tool.StartTask(async () =>
     {
-      bool shouldTryFixFlick = ProtoFluxContextualActions.ShouldTryFixFlick();
+      bool shouldTryFixFlick = ProtoFluxContextualActions.ShouldTryFixFlick;
       if (!shouldTryFixFlick) return;
       await new Updates(3);
       var user = Engine.Current.WorldManager.FocusedWorld.LocalUser;

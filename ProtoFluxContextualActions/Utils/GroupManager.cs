@@ -37,7 +37,7 @@ internal enum MenuVisual
 internal class GroupManager
 {
   // Page Config
-  int MaxPerPage => ProtoFluxContextualActions.GetMaxItemsPerPage(); // Maximum possible items in the context menu, excluding Previous/Next/Back buttons
+  int MaxPerPage => ProtoFluxContextualActions.MaxItemsPerPage; // Maximum possible items in the context menu, excluding Previous/Next/Back buttons
   const bool ShowBackOnAllPages = false;
 
   // Folder Config
@@ -74,7 +74,7 @@ internal class GroupManager
     });
 
     // Would be read from mod config instead of a constant
-    MenuVisual selectedVisual = overrideVisual ?? ProtoFluxContextualActions.GetMenuVisual();
+    MenuVisual selectedVisual = overrideVisual ?? ProtoFluxContextualActions.MenuVisual;
 
     currentVisual = selectedVisual switch
     {
@@ -271,7 +271,7 @@ internal class GroupManager
     if (currentTool.IsRemoved) return;
     bool showPreviousButton = pageIndex > 0;
     bool showNextButton = pageIndex < Items.Count - 1;
-    bool showBackButton = ProtoFluxContextualActions.ShouldDisplayBackButton()
+    bool showBackButton = ProtoFluxContextualActions.ShouldDisplayBackButton
             && GroupedItems.Count != 1
             && (ShowBackOnAllPages || pageIndex == 0)
             && !isRoot;
