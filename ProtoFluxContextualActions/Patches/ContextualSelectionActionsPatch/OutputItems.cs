@@ -451,7 +451,7 @@ static partial class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(AssignRole));
     }
 
-    if (typeof(IWorldElement).IsAssignableFrom(outputType) && outputType != typeof(IWorldElement) && !outputType.IsUnmanaged() && outputType.IsAssignableFrom(typeof(object)))
+    if (typeof(IWorldElement).IsAssignableFrom(outputType) && outputType != typeof(IWorldElement))
     {
       yield return new MenuItem(
         typeof(ObjectCast<,>).MakeGenericType(outputType, typeof(IWorldElement)),
