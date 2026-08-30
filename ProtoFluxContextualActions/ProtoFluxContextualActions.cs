@@ -35,6 +35,8 @@ public class ProtoFluxContextualActions : ResoniteMod
   [AutoRegisterConfigKey]
   private static readonly ModConfigurationKey<bool> fluxStructureRelays = new("Structure Relays", "If \"Flux Structures\" should contain relays", () => true);
   [AutoRegisterConfigKey]
+  private static readonly ModConfigurationKey<int> fluxStructureReleaseUpdates = new("Structure Release Updates", "How many updates to allow for structures to be 'released' from the 'global grabber'", () => 240);
+  [AutoRegisterConfigKey]
   private static readonly ModConfigurationKey<bool> tryFixFlick = new("Try Fix Context Flick", "If the context menu should attempt to fix flicking", () => true);
   [AutoRegisterConfigKey]
   private static readonly ModConfigurationKey<bool> tryKeepContextPosition = new("Try Keep Context Menu Position", "If the context menu should attempt to stay in the same position", () => false);
@@ -151,6 +153,7 @@ public class ProtoFluxContextualActions : ResoniteMod
   }
 
   internal static bool ShouldUseRelays() => fluxStructureRelays.Value;
+  internal static int StructureReleaseUpdates() => fluxStructureReleaseUpdates.Value;
 
   internal static bool ShouldTryFixFlick() => tryFixFlick.Value;
 
