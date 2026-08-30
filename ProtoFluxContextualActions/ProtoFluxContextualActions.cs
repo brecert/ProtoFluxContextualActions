@@ -152,20 +152,20 @@ public class ProtoFluxContextualActions : ResoniteMod
     }
   }
 
-  internal static bool ShouldUseRelays() => fluxStructureRelays.Value;
-  internal static int StructureReleaseUpdates() => fluxStructureReleaseUpdates.Value;
+  internal static bool ShouldUseRelays => fluxStructureRelays.Value;
+  internal static int StructureReleaseUpdates => fluxStructureReleaseUpdates.Value;
 
-  internal static bool ShouldTryFixFlick() => tryFixFlick.Value;
+  internal static bool ShouldTryFixFlick => tryFixFlick.Value;
 
-  internal static bool ShouldTryKeepContextPosition() => tryKeepContextPosition.Value;
+  internal static bool ShouldTryKeepContextPosition => tryKeepContextPosition.Value;
 
-  internal static int GetMaxItemsPerPage() => maxItemsPerPage.Value;
+  internal static int MaxItemsPerPage => maxItemsPerPage.Value;
 
-  internal static bool ShouldDoDefaultActionOnPrimaryRelease() => defaultActionOnPrimaryRelease.Value;
+  internal static bool ShouldDoDefaultActionOnPrimaryRelease => defaultActionOnPrimaryRelease.Value;
 
-  internal static bool ShouldDisplayBackButton() => showBackButton.Value;
+  internal static bool ShouldDisplayBackButton => showBackButton.Value;
 
-  internal static bool ShouldDisplayUnsupportedActions() => showUnsupportedActions.Value;
+  internal static bool ShouldDisplayUnsupportedActions => showUnsupportedActions.Value;
 
-  internal static MenuVisual GetMenuVisual() => currentMenuVisual.Value;
+  internal static MenuVisual MenuVisual => currentMenuVisual.Value;
 }

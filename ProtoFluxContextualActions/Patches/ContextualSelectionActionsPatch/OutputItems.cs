@@ -140,7 +140,7 @@ static partial class ContextualSelectionActionsPatch
 
       yield return new MenuItem(typeof(DynamicImpulseTrigger), group: "Events");
 
-      bool shouldRelay = ProtoFluxContextualActions.ShouldUseRelays();
+      bool shouldRelay = ProtoFluxContextualActions.ShouldUseRelays;
       Type baseType = shouldRelay ? typeof(ObjectRelay<Slot>) : typeof(ChildrenCount);
 
       yield return new MenuItem(typeof(AllocatingUser), name: "Allocating User", group: "Slots");
@@ -481,7 +481,7 @@ static partial class ContextualSelectionActionsPatch
     }
 
 
-    if (outputType == typeof(IWorldElement) && ProtoFluxContextualActions.ShouldDisplayUnsupportedActions())
+    if (outputType == typeof(IWorldElement) && ProtoFluxContextualActions.ShouldDisplayUnsupportedActions)
     {
       yield return new MenuItem(typeof(IsRemoved));
       yield return new MenuItem(typeof(ReferenceID));
@@ -604,7 +604,7 @@ static partial class ContextualSelectionActionsPatch
             }
             setPositions();
 
-            await new Updates(ProtoFluxContextualActions.StructureReleaseUpdates());
+            await new Updates(ProtoFluxContextualActions.StructureReleaseUpdates);
 
             int i = 0;
             while (tempGrab.IsGrabbed && i < 200)
