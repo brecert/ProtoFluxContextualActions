@@ -940,11 +940,15 @@ static partial class ContextualSelectionActionsPatch
           name: name,
           onNodeSpawn: (ProtoFluxNode newNode, ProtoFluxElementProxy proxy, ProtoFluxTool _) =>
           {
-            ProtoFluxOutputProxy output = (ProtoFluxOutputProxy)proxy;
+            newNode.StartTask(async () =>
+            {
+              // we have to delay here to assign the variable in some cases, like if the wire was released.
+              await new Updates(1);
 
-            ISyncRef targetRef = newNode.GetReference(0);
+              ISyncRef targetRef = newNode.GetReference(0);
 
-            newNode.TryConnectReference(targetRef, outputProxy.Node.Target, undoable: true);
+              newNode.TryConnectReference(targetRef, outputProxy.Node.Target, false);
+            });
 
             return connectNode;
           },
