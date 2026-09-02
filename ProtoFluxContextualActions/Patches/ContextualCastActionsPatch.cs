@@ -13,6 +13,7 @@ using ProtoFlux.Core;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Reflection;
+using ProtoFluxContextualActions.Utils.ProtoFlux;
 
 [HarmonyPatchCategory("ProtoFluxTool Contextual Cast Actions"), TweakCategory("Adds 'Contextual Cast Actions' to the ProtoFlux Tool. Casting certain types to others may suggest extra actions, rather than only allowing explicit casts.")]
 [HarmonyPatch(typeof(ProtoFluxTool), "TryConnect", argumentTypes: [typeof(ProtoFluxNode), typeof(ISyncRef), typeof(INodeOutput)])]
@@ -153,61 +154,13 @@ internal static class ContextualSelectionActionsPatch
   {
     foreach (var type in NodeTypes())
     {
-      var outputs = OutputMetadata(type).ToList();
-      var inputs = InputMetadata(type).ToList();
+      var outputs = NodeMetadataUtils.GetOutputMetadata(type).ToList();
+      var inputs = NodeMetadataUtils.GetInputMetadata(type).ToList();
 
       if (outputs.Count != 1) continue;
       if (inputs.Count != 1) continue;
 
       yield return ((outputs.First().OutputType, inputs.First().InputType), type);
-    }
-  }
-
-  // todo: move to a utility class
-  // lighter than GetMetadata
-  internal static IEnumerable<OutputMetadata> OutputMetadata(Type type)
-  {
-    var index = 0;
-    {
-      if (TypeUtils.MatchInterface(type, typeof(ProtoFlux.Core.IOutput<>), out var outputType))
-      {
-        yield return new OutputMetadata(
-          index: index++,
-          ownerType: type,
-          outputType: outputType.GenericTypeArguments[0],
-          dataClass: outputType.GenericTypeArguments[0].IsValueType ? DataClass.Value : DataClass.Object
-        );
-      }
-    }
-    foreach (var field in type.EnumerateAllInstanceFields(BindingFlags.Instance | BindingFlags.Public))
-    {
-      if (TypeUtils.MatchInterface(field.FieldType, typeof(ProtoFlux.Core.IOutput<>), out var outputType))
-      {
-        yield return new OutputMetadata(
-          index: index++,
-          field: field,
-          dataClass: outputType.GenericTypeArguments[0].IsValueType ? DataClass.Value : DataClass.Object
-        );
-      }
-    }
-  }
-
-  // todo: move to a utility class
-  // lighter than GetMetadata
-  internal static IEnumerable<InputMetadata> InputMetadata(Type type)
-  {
-    var index = 0;
-    foreach (var field in type.EnumerateAllInstanceFields(BindingFlags.Instance | BindingFlags.Public))
-    {
-      if (TypeUtils.MatchInterface(field.FieldType, typeof(ProtoFlux.Core.IInput<>), out var inputType))
-      {
-        yield return new InputMetadata(
-          index: index++,
-          field: field,
-          dataClass: inputType.GenericTypeArguments[0].IsValueType ? DataClass.Value : DataClass.Object,
-          defaultValue: default // this isn't correct but we'll ignore it for now because we're not using it.
-        );
-      }
     }
   }
 

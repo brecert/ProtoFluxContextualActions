@@ -283,7 +283,7 @@ static partial class ContextualSelectionActionsPatch
 
     if (TypeUtils.MatchInterface(outputType, typeof(IField<>), out var matchedType))
     {
-      Type innerType = matchedType.GenericTypeArguments[0];
+      var innerType = matchedType.GenericTypeArguments[0];
       yield return new(typeof(FieldAsVariable<>).MakeGenericType(innerType));
 
       if (innerType.SupportsConstantLerp() && typeof(TweenValue<>).TryMakeGenericType(innerType) is { } tweenType)

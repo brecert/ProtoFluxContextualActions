@@ -10,6 +10,7 @@ using FrooxEngine.ProtoFlux;
 using HarmonyLib;
 using ProtoFlux.Core;
 using System.Reflection;
+using ProtoFluxContextualActions.Utils.ProtoFlux;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -95,23 +96,10 @@ internal static class ContextualReferenceActionsPatch
 
     foreach (var nodeType in NodeTypes())
     {
-      var globalRefMeta = GlobalRefMetadata(nodeType).FirstOrDefault(m => !m.ValueType.IsGenericTypeDefinition);
+      var globalRefMeta = NodeMetadataUtils.GetGlobalRefMetadata(nodeType).FirstOrDefault(m => !m.ValueType.IsGenericTypeDefinition);
       if (globalRefMeta != null && globalRefMeta.ValueType.IsAssignableFrom(grabbedReference.GetType()))
       {
         yield return new MenuItem(nodeType);
-      }
-    }
-  }
-
-  // lighter than GetMetadata
-  internal static IEnumerable<GlobalRefMetadata> GlobalRefMetadata(Type type)
-  {
-    var index = 0;
-    foreach (var field in type.EnumerateAllInstanceFields(BindingFlags.Instance | BindingFlags.Public))
-    {
-      if (field.FieldType.IsGenericType && field.FieldType.GetGenericTypeDefinition() == typeof(GlobalRef<>))
-      {
-        yield return new GlobalRefMetadata(index++, field);
       }
     }
   }
