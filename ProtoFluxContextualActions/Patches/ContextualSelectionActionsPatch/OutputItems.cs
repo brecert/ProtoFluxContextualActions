@@ -474,159 +474,166 @@ static partial class ContextualSelectionActionsPatch
       }
     }
 
+    if (outputType.IsAssignableTo(typeof(IWorldElement)))
+    {
+      yield return new MenuItem(typeof(ReferenceID), group: "Casts");
+    }
 
-    if (outputType == typeof(IWorldElement) && ProtoFluxContextualActions.ShouldDisplayUnsupportedActions)
+    if (outputType == typeof(IWorldElement))
     {
       yield return new MenuItem(typeof(IsRemoved));
-      yield return new MenuItem(typeof(ReferenceID));
-      yield return new MenuItem(
-        typeof(ReferenceID),
-        name: "RefID -> ULong",
-        onNodeSpawn: (node, proxy, tool) =>
-        {
-          tool.StartTask(async () =>
+      if (ProtoFluxContextualActions.ShouldDisplayUnsupportedActions)
+      {
+        yield return new MenuItem(typeof(ReferenceID));
+        yield return new MenuItem(
+          typeof(ReferenceID),
+          name: "RefID -> ULong",
+          onNodeSpawn: (node, proxy, tool) =>
           {
-            // Node spawning
-            Type refIDObjectCastNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.Casts.ValueToObjectCast<RefID>);
-            Type toStringNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ParsingFormatting.ToString_object);
-            Type stringRemoveNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.Strings.StringRemove);
-            Type parseULongNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ParsingFormatting.Parse_Ulong);
-            Type lengthInputNode = ProtoFluxHelper.GetInputNode(typeof(int));
-            Type numberStyleNode = ProtoFluxHelper.GetInputNode(typeof(NumberStyles));
-
-            ProtoFluxNode? SpawnNode(Type nodeType)
+            tool.StartTask(async () =>
             {
-              return tool.SpawnNode(nodeType, node => node.EnsureVisual());
-            }
+              // Node spawning
+              Type refIDObjectCastNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.Casts.ValueToObjectCast<RefID>);
+              Type toStringNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ParsingFormatting.ToString_object);
+              Type stringRemoveNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.Strings.StringRemove);
+              Type parseULongNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ParsingFormatting.Parse_Ulong);
+              Type lengthInputNode = ProtoFluxHelper.GetInputNode(typeof(int));
+              Type numberStyleNode = ProtoFluxHelper.GetInputNode(typeof(NumberStyles));
 
-            ProtoFluxNode? refObjCast = SpawnNode(refIDObjectCastNode);
-            ProtoFluxNode? toStr = SpawnNode(toStringNode);
-            ProtoFluxNode? strRemove = SpawnNode(stringRemoveNode);
-            ProtoFluxNode? parseULong = SpawnNode(parseULongNode);
-            ProtoFluxNode? lenInput = SpawnNode(lengthInputNode);
-            ProtoFluxNode? styleInput = SpawnNode(numberStyleNode);
+              ProtoFluxNode? SpawnNode(Type nodeType)
+              {
+                return tool.SpawnNode(nodeType, node => node.EnsureVisual());
+              }
 
-            ProtoFluxNode?[] nodes = [node, refObjCast, toStr, strRemove, parseULong, lenInput, styleInput];
+              ProtoFluxNode? refObjCast = SpawnNode(refIDObjectCastNode);
+              ProtoFluxNode? toStr = SpawnNode(toStringNode);
+              ProtoFluxNode? strRemove = SpawnNode(stringRemoveNode);
+              ProtoFluxNode? parseULong = SpawnNode(parseULongNode);
+              ProtoFluxNode? lenInput = SpawnNode(lengthInputNode);
+              ProtoFluxNode? styleInput = SpawnNode(numberStyleNode);
 
-            await new Updates(6);
+              ProtoFluxNode?[] nodes = [node, refObjCast, toStr, strRemove, parseULong, lenInput, styleInput];
 
-            var nodeSlot = node.Slot;
-            var origParent = nodeSlot.Parent;
-            var tempSlot = origParent.AddSlot("Temp Flux Holder", false);
-            tempSlot.CopyTransform(nodeSlot);
-            nodeSlot.Parent = tempSlot;
+              await new Updates(6);
 
-            if (nodes.Any(n => n == null))
-            {
+              var nodeSlot = node.Slot;
+              var origParent = nodeSlot.Parent;
+              var tempSlot = origParent.AddSlot("Temp Flux Holder", false);
+              tempSlot.CopyTransform(nodeSlot);
+              nodeSlot.Parent = tempSlot;
+
+              if (nodes.Any(n => n == null))
+              {
+                foreach (var node in nodes)
+                {
+                  node?.Slot.Destroy();
+                }
+                return;
+              }
+
+              node.World.BeginUndoBatch("Create RefID -> ULong");
+
               foreach (var node in nodes)
               {
-                node?.Slot.Destroy();
+                node!.Slot.CreateSpawnUndoPoint("Spawn Node");
               }
-              return;
-            }
 
-            node.World.BeginUndoBatch("Create RefID -> ULong");
+              // Inputs and outputs
+              INodeOutput inputRelay = node.GetOutput(0);
 
-            foreach (var node in nodes)
-            {
-              node!.Slot.CreateSpawnUndoPoint("Spawn Node");
-            }
+              ISyncRef refIDInstance = refObjCast!.GetInput(0);
+              INodeOutput refIDValue = refObjCast.GetOutput(0);
+              ISyncRef objectInstance = toStr!.GetInput(0);
+              INodeOutput objectValue = toStr.GetOutput(0);
+              ISyncRef stringRemoveInstance = strRemove!.GetInput(0);
+              ISyncRef stringRemoveLength = strRemove.GetInput(2);
+              INodeOutput stringRemoveValue = strRemove.GetOutput(0);
+              ISyncRef parseULongInstance = parseULong!.GetInput(0);
+              ISyncRef parseULongStyle = parseULong.GetInput(1);
 
-            // Inputs and outputs
-            INodeOutput inputRelay = node.GetOutput(0);
+              INodeOutput lengthValue = lenInput!.GetOutput(0);
+              INodeOutput numberStylesValue = styleInput!.GetOutput(0);
 
-            ISyncRef refIDInstance = refObjCast!.GetInput(0);
-            INodeOutput refIDValue = refObjCast.GetOutput(0);
-            ISyncRef objectInstance = toStr!.GetInput(0);
-            INodeOutput objectValue = toStr.GetOutput(0);
-            ISyncRef stringRemoveInstance = strRemove!.GetInput(0);
-            ISyncRef stringRemoveLength = strRemove.GetInput(2);
-            INodeOutput stringRemoveValue = strRemove.GetOutput(0);
-            ISyncRef parseULongInstance = parseULong!.GetInput(0);
-            ISyncRef parseULongStyle = parseULong.GetInput(1);
+              refIDInstance.Target = inputRelay;
+              objectInstance.Target = refIDValue;
 
-            INodeOutput lengthValue = lenInput!.GetOutput(0);
-            INodeOutput numberStylesValue = styleInput!.GetOutput(0);
+              stringRemoveInstance.Target = toStr;
+              parseULongInstance.Target = stringRemoveValue;
 
-            refIDInstance.Target = inputRelay;
-            objectInstance.Target = refIDValue;
+              stringRemoveLength.Target = lengthValue;
+              parseULongStyle.Target = numberStylesValue;
 
-            stringRemoveInstance.Target = toStr;
-            parseULongInstance.Target = stringRemoveValue;
+              (lenInput as FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ValueInput<int>)?.Value.Value = 2;
+              (styleInput as FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ValueInput<NumberStyles>)?.Value.Value = NumberStyles.HexNumber;
 
-            stringRemoveLength.Target = lengthValue;
-            parseULongStyle.Target = numberStylesValue;
+              node.World.EndUndoBatch();
 
-            (lenInput as FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ValueInput<int>)?.Value.Value = 2;
-            (styleInput as FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ValueInput<NumberStyles>)?.Value.Value = NumberStyles.HexNumber;
-
-            node.World.EndUndoBatch();
-
-            foreach (var node in nodes)
-            {
-              if (node == null) continue;
-              if (node.IsRemoved) continue;
-              node.Slot.GetComponent<Grabbable>().Enabled = false;
-            }
-            var tempGrab = tempSlot.AttachComponent<Grabbable>();
-
-            // for fixing prints that snap the nodes early
-            await new Updates(6);
-
-            // Positions
-            void setPositions()
-            {
-              float3 baseUp = nodeSlot.Up;
-              float3 baseRight = nodeSlot.Right;
-
-              void LocalTransformNode(ProtoFluxNode input, float X, float Y)
+              foreach (var node in nodes)
               {
-                Slot target = input.Slot;
-                target.CopyTransform(nodeSlot);
-                target.Parent = nodeSlot.Parent;
-                target.GlobalPosition += (baseUp * Y) + (baseRight * X);
+                if (node == null) continue;
+                if (node.IsRemoved) continue;
+                node.Slot.GetComponent<Grabbable>().Enabled = false;
+              }
+              var tempGrab = tempSlot.AttachComponent<Grabbable>();
+
+              // for fixing prints that snap the nodes early
+              await new Updates(6);
+
+              // Positions
+              void setPositions()
+              {
+                float3 baseUp = nodeSlot.Up;
+                float3 baseRight = nodeSlot.Right;
+
+                void LocalTransformNode(ProtoFluxNode input, float X, float Y)
+                {
+                  Slot target = input.Slot;
+                  target.CopyTransform(nodeSlot);
+                  target.Parent = nodeSlot.Parent;
+                  target.GlobalPosition += (baseUp * Y) + (baseRight * X);
+                }
+
+                LocalTransformNode(refObjCast, 0.09f, -0.00375f);
+
+                LocalTransformNode(toStr, 0.18f, -0.03f);
+                LocalTransformNode(strRemove, 0.33f, -0.03f);
+                LocalTransformNode(parseULong, 0.495f, -0.03f);
+
+                LocalTransformNode(lenInput, 0.18f, -0.135f);
+                LocalTransformNode(styleInput, 0.27f, 0.075f);
+              }
+              setPositions();
+
+              await new Updates(ProtoFluxContextualActions.StructureReleaseUpdates);
+
+              int i = 0;
+              while (tempGrab.IsGrabbed && i < 200)
+              {
+                await new Updates(5);
+                i++;
+              }
+              foreach (var node in nodes)
+              {
+                if (node == null) continue;
+                if (node.IsRemoved) continue;
+                var nodeGrabbable = node.Slot.GetComponent<Grabbable>();
+                nodeGrabbable.Enabled = true;
+                // send a drop event, just in case
+                typeof(Grabbable).GetMethod("RunGrabEvent", BindingFlags.NonPublic | BindingFlags.Instance)?.Invoke(nodeGrabbable, [true]);
               }
 
-              LocalTransformNode(refObjCast, 0.09f, -0.00375f);
+              tempSlot.Destroy(origParent);
 
-              LocalTransformNode(toStr, 0.18f, -0.03f);
-              LocalTransformNode(strRemove, 0.33f, -0.03f);
-              LocalTransformNode(parseULong, 0.495f, -0.03f);
+              // set positions again after everything / make lightprint not break            
+              await new Updates(3);
 
-              LocalTransformNode(lenInput, 0.18f, -0.135f);
-              LocalTransformNode(styleInput, 0.27f, 0.075f);
-            }
-            setPositions();
+              setPositions();
+            });
 
-            await new Updates(ProtoFluxContextualActions.StructureReleaseUpdates);
-
-            int i = 0;
-            while (tempGrab.IsGrabbed && i < 200)
-            {
-              await new Updates(5);
-              i++;
-            }
-            foreach (var node in nodes)
-            {
-              if (node == null) continue;
-              if (node.IsRemoved) continue;
-              var nodeGrabbable = node.Slot.GetComponent<Grabbable>();
-              nodeGrabbable.Enabled = true;
-              // send a drop event, just in case
-              typeof(Grabbable).GetMethod("RunGrabEvent", BindingFlags.NonPublic | BindingFlags.Instance)?.Invoke(nodeGrabbable, [true]);
-            }
-
-            tempSlot.Destroy(origParent);
-
-            // set positions again after everything / make lightprint not break            
-            await new Updates(3);
-
-            setPositions();
-          });
-
-          return true;
-        }
-      );
+            return true;
+          }
+        );
+      }
     }
 
     if (typeof(IPlayable).IsAssignableFrom(outputType))
