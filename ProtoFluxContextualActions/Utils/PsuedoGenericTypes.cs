@@ -58,7 +58,7 @@ class PsuedoGenericTypes(World world)
   public PsuedoGenerics Distance { get => field ?? MapTypes("Distance_"); }
 
   public PsuedoGenerics Parse { get => field ??= MapTypes("Parse_"); }
-  public PsuedoGenerics ObjToString { get => field ??= MapTypes("ToString_"); }
+  public PsuedoGenerics ToString_ { get => field ??= MapTypes("ToString_"); }
 
   public PsuedoGenerics Cast { get => field ??= MapTypes2("Cast_"); }
 

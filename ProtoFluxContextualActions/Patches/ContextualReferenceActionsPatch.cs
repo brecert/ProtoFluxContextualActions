@@ -95,7 +95,7 @@ internal static class ContextualReferenceActionsPatch
 
     foreach (var nodeType in NodeTypes())
     {
-      var globalRefMeta = GlobalRefMetadata(nodeType).Where(m => !m.ValueType.IsGenericTypeDefinition).FirstOrDefault();
+      var globalRefMeta = GlobalRefMetadata(nodeType).FirstOrDefault(m => !m.ValueType.IsGenericTypeDefinition);
       if (globalRefMeta != null && globalRefMeta.ValueType.IsAssignableFrom(grabbedReference.GetType()))
       {
         yield return new MenuItem(nodeType);

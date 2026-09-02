@@ -7,17 +7,29 @@ using ProtoFluxContextualActions.Attributes;
 using HarmonyLib;
 using System.Linq;
 using ProtoFluxContextualActions.Utils;
-using ProtoFlux.Runtimes.Execution.Nodes.Strings;
 using ProtoFlux.Runtimes.Execution.Nodes.ParsingFormatting;
 using ProtoFlux.Runtimes.Execution.Nodes.Casts;
 using ProtoFlux.Core;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Reflection;
 
 [HarmonyPatchCategory("ProtoFluxTool Contextual Cast Actions"), TweakCategory("Adds 'Contextual Cast Actions' to the ProtoFlux Tool. Casting certain types to others may suggest extra actions, rather than only allowing explicit casts.")]
 [HarmonyPatch(typeof(ProtoFluxTool), "TryConnect", argumentTypes: [typeof(ProtoFluxNode), typeof(ISyncRef), typeof(INodeOutput)])]
 internal static class ContextualSelectionActionsPatch
 {
+  internal readonly struct MenuItem(Type node, string? name = null, Action<ProtoFluxNode>? onSpawn = null)
+  {
+    internal readonly Type node = node;
+    internal readonly string? name = name;
+    internal readonly string DisplayName => name ?? NodeMetadataHelper.GetMetadata(node).Name ?? node.GetNiceTypeName();
+    internal readonly Action<ProtoFluxNode>? onSpawn = onSpawn;
+  }
+
   internal static bool Prefix(ProtoFluxTool __instance, ProtoFluxNode node, ISyncRef input, INodeOutput output)
   {
+    var tool = __instance;
+
     if (node.TryConnectInput(input, output, allowExplicitCast: false, undoable: true))
     {
       return false;
@@ -25,203 +37,183 @@ internal static class ContextualSelectionActionsPatch
 
     __instance.StartTask(async delegate
     {
-      ContextMenu menu = await __instance.LocalUser.OpenContextMenu(__instance, __instance.ActiveHandler.Slot);
+      var menu = await __instance.LocalUser.OpenContextMenu(__instance, __instance.ActiveHandler.Slot);
       menu.AddMenuItem("Tools.ProtoFlux.ExplicitCast".AsLocaleKey(), colorX.Orange, () =>
       {
         node.TryConnectInput(input, output, allowExplicitCast: true, undoable: true);
         menu.Close();
       });
-      TryGetExtraCasts(__instance, node, input, output, menu);
-      menu.AddItem("General.Cancel".AsLocaleKey(), (Uri?)null, new colorX?(colorX.White), (ButtonEventHandler)menu.CloseMenu);
+
+
+      foreach (var castItem in TryGetExtraCasts(__instance, node, input, output))
+      {
+        menu.AddMenuItem(
+          name: castItem.DisplayName,
+          icon: (Uri?)null,
+          color: new colorX?(colorX.White),
+          onClicked: () => SpawnNode(tool, castItem, (castNode) =>
+          {
+            if (castItem.onSpawn is { } onSpawn)
+            {
+              onSpawn(castNode);
+            }
+            else
+            {
+              var castInput = castNode.GetInput(0); // todo: specify...
+              var castOutput = castNode.GetOutput(0); // todo: specify...
+              castNode.TryConnectInput(castInput, output, allowExplicitCast: true, undoable: true);
+              node.TryConnectInput(input, castOutput, allowExplicitCast: true, undoable: true);
+            }
+          })
+        );
+      }
+
+      menu.AddItem("General.Cancel".AsLocaleKey(), (Uri?)null, new colorX?(colorX.White), menu.CloseMenu);
     });
     return false;
   }
 
-  internal static void TryGetExtraCasts(ProtoFluxTool tool, ProtoFluxNode node, ISyncRef input, INodeOutput output, ContextMenu menu)
+  private static void SpawnNode(ProtoFluxTool tool, MenuItem item, Action<ProtoFluxNode> setup)
+  {
+    var nodeBinding = ProtoFluxHelper.GetBindingForNode(item.node);
+    tool.SpawnNode(nodeBinding, n =>
+    {
+      n.EnsureElementsInDynamicLists();
+      setup(n);
+      tool.LocalUser.CloseContextMenu(tool);
+      CleanupDraggedWire(tool);
+    });
+  }
+
+  internal static IEnumerable<MenuItem> TryGetExtraCasts(ProtoFluxTool tool, ProtoFluxNode node, ISyncRef input, INodeOutput output)
   {
     var world = node.World;
     var psuedoGenericTypes = world.GetPsuedoGenericTypesForWorld();
 
-    Type outputType = output.MappedOutput.OutputType;
-    Type baseInputType = input.TargetType;
-    Type inputType = baseInputType.IsGenericType ? baseInputType.GenericTypeArguments.Last() : baseInputType;
+    var outputType = output.MappedOutput.OutputType;
+    var baseInputType = input.TargetType;
+    var inputType = baseInputType.IsGenericType ? baseInputType.GenericTypeArguments.Last() : baseInputType;
 
-    if (outputType == typeof(bool) && psuedoGenericTypes.ZeroOne.Any(n => n.Types.First() == inputType))
+    if (CastMap.TryGetValue((inputType, outputType), out var casts))
     {
-      Type zeroOneNode = psuedoGenericTypes.ZeroOne.First(n => n.Types.First() == inputType).Node;
-      var nodeBinding = ProtoFluxHelper.GetBindingForNode(zeroOneNode);
-      menu.AddMenuItem("0/1", colorX.Cyan, () =>
+      foreach (var cast in casts)
       {
-        tool.SpawnNode(nodeBinding, n =>
-        {
-          n.EnsureElementsInDynamicLists();
-          n.GetInput(0).Target = output;
-          input.Target = n.GetOutput(0);
-          menu.Close();
-        });
-      });
+        yield return new(cast);
+      }
     }
 
-    if (outputType == typeof(string) && inputType == typeof(bool))
+    if (outputType == typeof(string))
     {
-      var nodeBinding = ProtoFluxHelper.GetBindingForNode(typeof(IsStringEmpty));
-      menu.AddMenuItem("String Empty", colorX.Cyan, () =>
+      if (psuedoGenericTypes.Parse.FirstOrDefault(n => n.Types.SequenceEqual([inputType])) is { Node: { } parseNode })
       {
-        tool.SpawnNode(nodeBinding, n =>
-        {
-          n.EnsureElementsInDynamicLists();
-          n.GetInput(0).Target = output;
-          input.Target = n.GetOutput(0);
-          menu.Close();
-        });
-      });
-    }
-
-    if (outputType == typeof(string) && psuedoGenericTypes.Parse.Any(n => n.Types.First() == inputType))
-    {
-      Type parseNode = psuedoGenericTypes.Parse.First(n => n.Types.First() == inputType).Node;
-      var nodeBinding = ProtoFluxHelper.GetBindingForNode(parseNode);
-      menu.AddMenuItem("Parse", colorX.Cyan, () =>
-      {
-        tool.SpawnNode(nodeBinding, n =>
-        {
-          n.EnsureElementsInDynamicLists();
-          n.GetInput(0).Target = output;
-          input.Target = n.GetOutput(0);
-          menu.Close();
-        });
-      });
+        yield return new(parseNode);
+      }
+      ;
     }
 
     if (inputType == typeof(string))
     {
-      if (psuedoGenericTypes.ObjToString.Any(n => n.Types.First() == outputType))
+      if (psuedoGenericTypes.ToString_.FirstOrDefault(n => n.Types.SequenceEqual([outputType])) is { Node: { } toStringNode })
       {
-        Type toStringNode = psuedoGenericTypes.ObjToString.First(n => n.Types.First() == outputType).Node;
-        var nodeBinding = ProtoFluxHelper.GetBindingForNode(toStringNode);
-        menu.AddMenuItem("To String", colorX.Cyan, () =>
-        {
-          tool.SpawnNode(nodeBinding, n =>
-          {
-            n.EnsureElementsInDynamicLists();
-            n.GetInput(0).Target = output;
-            input.Target = n.GetOutput(0);
-            menu.Close();
-          });
-        });
+        yield return new(toStringNode);
       }
       else
       {
-        // type has no direct cast. use T->object->ToString
-
-
-        Type? castNode = null;
-        if (outputType.IsUnmanaged())
+        // todo: make this automatic.
+        // todo: better layout
+        yield return new(typeof(ToString_object), onSpawn: toStringNode =>
         {
-          castNode = typeof(ValueToObjectCast<>).MakeGenericType(outputType);
-        }
-        else if (ReflectionHelper.IsNullable(outputType))
-        {
-          castNode = typeof(NullableToObjectCast<>).MakeGenericType(Nullable.GetUnderlyingType(outputType) ?? outputType);
-        }
-        else
-        {
-          castNode = typeof(ObjectCast<,>).MakeGenericType(outputType, typeof(object));
-        }
-        if (castNode != null)
-        {
-          Type toStringNode = typeof(ToString_object);
-          var toStringBinding = ProtoFluxHelper.GetBindingForNode(toStringNode);
-          var castBinding = ProtoFluxHelper.GetBindingForNode(castNode);
-          menu.AddMenuItem("To String", colorX.Cyan, () =>
+          var castNode = outputType switch
           {
-            tool.SpawnNode(castBinding, cast =>
+            var t when t.IsUnmanaged() => typeof(ValueToObjectCast<>).TryMakeGenericType(t),
+            var t when ReflectionHelper.IsNullable(t) => typeof(NullableToObjectCast<>).TryMakeGenericType(Nullable.GetUnderlyingType(t) ?? t),
+            var t => typeof(ObjectCast<,>).TryMakeGenericType(t, typeof(object))
+          };
+
+          if (castNode != null && ProtoFluxHelper.GetBindingForNode(castNode) is { } castNodeBinding)
+          {
+            tool.SpawnNode(castNodeBinding, setup: n =>
             {
-              cast.EnsureElementsInDynamicLists();
-              cast.GetInput(0).Target = output;
-              tool.SpawnNode(toStringBinding, toString =>
-              {
-                toString.EnsureElementsInDynamicLists();
-                toString.GetInput(0).Target = cast.GetOutput(0);
-                input.Target = toString.GetOutput(0);
-              });
-              menu.Close();
+              n.GetInput(0).Target = output;
+              toStringNode.GetInput(0).Target = n.GetOutput(0);
+              node.TryConnectInput(input, toStringNode.GetOutput(0), allowExplicitCast: false, undoable: true);
             });
-          });
-        }
-      }
-    }
-
-    // UniLog.Warning($"here is literally every fucking cast node\n\n\n");
-    // foreach (var v in psuedoGenericTypes.Cast)
-    // {
-    //   UniLog.Warning($"Node: {v.Node}, types: {v.Types.ToArray()}");
-    // }
-    // UniLog.Warning($"yeah\n\n\n");
-
-    if (psuedoGenericTypes.Cast.Any(n => n.Types.SequenceEqual([outputType, inputType])))
-    {
-      Type valueCastNode = psuedoGenericTypes.Cast.First(n => n.Types.SequenceEqual([outputType, inputType])).Node;
-      var nodeBinding = ProtoFluxHelper.GetBindingForNode(valueCastNode);
-      menu.AddMenuItem("Value Cast", colorX.Cyan, () =>
-      {
-        tool.SpawnNode(nodeBinding, n =>
-        {
-          n.EnsureElementsInDynamicLists();
-          n.GetInput(0).Target = output;
-          input.Target = n.GetOutput(0);
-          menu.Close();
-        });
-      });
-    }
-
-    if (inputType == typeof(int))
-    {
-      if (psuedoGenericTypes.RoundToInt.Any(t => t.Types.First() == outputType))
-      {
-        Type valueCastNode = psuedoGenericTypes.RoundToInt.First(t => t.Types.First() == outputType).Node;
-        var nodeBinding = ProtoFluxHelper.GetBindingForNode(valueCastNode);
-        menu.AddMenuItem("Round", colorX.Cyan, () =>
-        {
-          tool.SpawnNode(nodeBinding, n =>
-          {
-            n.EnsureElementsInDynamicLists();
-            n.GetInput(0).Target = output;
-            input.Target = n.GetOutput(0);
-            menu.Close();
-          });
-        });
-      }
-      if (psuedoGenericTypes.FloorToInt.Any(t => t.Types.First() == outputType))
-      {
-        Type valueCastNode = psuedoGenericTypes.FloorToInt.First(t => t.Types.First() == outputType).Node;
-        var nodeBinding = ProtoFluxHelper.GetBindingForNode(valueCastNode);
-        menu.AddMenuItem("Floor To Int", colorX.Cyan, () =>
-        {
-          tool.SpawnNode(nodeBinding, n =>
-          {
-            n.EnsureElementsInDynamicLists();
-            n.GetInput(0).Target = output;
-            input.Target = n.GetOutput(0);
-            menu.Close();
-          });
-        });
-      }
-      if (psuedoGenericTypes.CeilToInt.Any(t => t.Types.First() == outputType))
-      {
-        Type valueCastNode = psuedoGenericTypes.CeilToInt.First(t => t.Types.First() == outputType).Node;
-        var nodeBinding = ProtoFluxHelper.GetBindingForNode(valueCastNode);
-        menu.AddMenuItem("Ceil To Int", colorX.Cyan, () =>
-        {
-          tool.SpawnNode(nodeBinding, n =>
-          {
-            n.EnsureElementsInDynamicLists();
-            n.GetInput(0).Target = output;
-            input.Target = n.GetOutput(0);
-            menu.Close();
-          });
+          }
         });
       }
     }
   }
+
+  static Dictionary<(Type, Type), HashSet<Type>> CastMap =>
+    field ??= GetCastPairs()
+      .GroupBy(a => a.io)
+      .ToDictionary(g => g.Key, g => g.Select(a => a.node).ToHashSet());
+
+  static IEnumerable<((Type input, Type output) io, Type node)> GetCastPairs()
+  {
+    foreach (var type in NodeTypes())
+    {
+      var outputs = OutputMetadata(type).ToList();
+      var inputs = InputMetadata(type).ToList();
+
+      if (outputs.Count != 1) continue;
+      if (inputs.Count != 1) continue;
+
+      yield return ((outputs.First().OutputType, inputs.First().InputType), type);
+    }
+  }
+
+  // todo: move to a utility class
+  // lighter than GetMetadata
+  internal static IEnumerable<OutputMetadata> OutputMetadata(Type type)
+  {
+    var index = 0;
+    {
+      if (TypeUtils.MatchInterface(type, typeof(ProtoFlux.Core.IOutput<>), out var outputType))
+      {
+        yield return new OutputMetadata(
+          index: index++,
+          ownerType: type,
+          outputType: outputType.GenericTypeArguments[0],
+          dataClass: outputType.GenericTypeArguments[0].IsValueType ? DataClass.Value : DataClass.Object
+        );
+      }
+    }
+    foreach (var field in type.EnumerateAllInstanceFields(BindingFlags.Instance | BindingFlags.Public))
+    {
+      if (TypeUtils.MatchInterface(field.FieldType, typeof(ProtoFlux.Core.IOutput<>), out var outputType))
+      {
+        yield return new OutputMetadata(
+          index: index++,
+          field: field,
+          dataClass: outputType.GenericTypeArguments[0].IsValueType ? DataClass.Value : DataClass.Object
+        );
+      }
+    }
+  }
+
+  // todo: move to a utility class
+  // lighter than GetMetadata
+  internal static IEnumerable<InputMetadata> InputMetadata(Type type)
+  {
+    var index = 0;
+    foreach (var field in type.EnumerateAllInstanceFields(BindingFlags.Instance | BindingFlags.Public))
+    {
+      if (TypeUtils.MatchInterface(field.FieldType, typeof(ProtoFlux.Core.IInput<>), out var inputType))
+      {
+        yield return new InputMetadata(
+          index: index++,
+          field: field,
+          dataClass: inputType.GenericTypeArguments[0].IsValueType ? DataClass.Value : DataClass.Object,
+          defaultValue: default // this isn't correct but we'll ignore it for now because we're not using it.
+        );
+      }
+    }
+  }
+
+  public static IEnumerable<Type> NodeTypes() =>
+    Traverse.Create(typeof(ProtoFluxHelper)).Field<Dictionary<Type, Type>>("protoFluxToBindingMapping").Value.Keys;
+
+  [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "CleanupDraggedWire")]
+  extern static void CleanupDraggedWire(ProtoFluxTool instance);
 }

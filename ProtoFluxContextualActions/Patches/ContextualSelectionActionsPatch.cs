@@ -103,10 +103,10 @@ internal static partial class ContextualSelectionActionsPatch
       return true;
     }
 
-    IEnumerable<MenuItem> selectionItems = MenuItems(elementProxy)
-      .Where(i => (i.binding ?? i.node)
-      .IsValidGenericType(validForInstantiation: true)); // this isn't great, we should instead catch errors before they propigate to here.
-    bool hasSwaps = false;
+    var selectionItems = MenuItems(elementProxy)
+      .Where(i => (i.binding ?? i.node).IsValidGenericType(validForInstantiation: true)); // this isn't great, we should instead catch errors before they propigate to here.
+
+    var hasSwaps = false;
     ProtoFluxNode? swapRoot = null;
     var hit = GetHit(__instance);
     if (hit is { Collider.Slot: var hitSlot })

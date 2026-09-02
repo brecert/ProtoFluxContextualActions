@@ -420,9 +420,9 @@ static partial class ContextualSelectionActionsPatch
 
     else
     {
-      if (psuedoGenericTypes.ObjToString.Any(n => n.Types.First() == outputType))
+      if (psuedoGenericTypes.ToString_.Any(n => n.Types.First() == outputType))
       {
-        yield return new(psuedoGenericTypes.ObjToString.First(n => n.Types.First() == outputType).Node, group: "Casts");
+        yield return new(psuedoGenericTypes.ToString_.First(n => n.Types.First() == outputType).Node, group: "Casts");
       }
       else if (outputType != typeof(string))
       {
