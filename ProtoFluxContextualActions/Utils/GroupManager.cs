@@ -1,17 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 using Elements.Core;
 
 using FrooxEngine;
 using FrooxEngine.ProtoFlux;
 
-using HarmonyLib;
-
 using ProtoFluxContextualActions.Utils.Visuals;
-
-using static ProtoFluxContextualActions.Patches.ContextualSelectionActionsPatch;
 
 namespace ProtoFluxContextualActions.Utils;
 
@@ -73,7 +65,7 @@ internal class GroupManager
 
     contextItems.ForEach((item) =>
     {
-      string itemGroup = item.baseItem.Group;
+      var itemGroup = item.baseItem.Group;
       if (GroupedItems.TryGetValue(itemGroup, out List<GroupItem>? list)) list.Add(item);
       else GroupedItems.Add(itemGroup, [item]);
     });
@@ -100,7 +92,7 @@ internal class GroupManager
 
     foreach (var kv in GroupedItems)
     {
-      string key = kv.Key;
+      var key = kv.Key;
 
       if (string.IsNullOrEmpty(prefix) && string.IsNullOrEmpty(key)) items.AddRange(kv.Value);
 
@@ -130,7 +122,7 @@ internal class GroupManager
 
       var remaining = key[(prefix.Length + 1)..];
 
-      int slash = remaining.IndexOf('/');
+      var slash = remaining.IndexOf('/');
       if (slash >= 0)
       {
         var next = remaining[..slash];
@@ -151,7 +143,7 @@ internal class GroupManager
   {
     if (string.IsNullOrEmpty(prefix)) return "";
 
-    int index = prefix.LastIndexOf('/');
+    var index = prefix.LastIndexOf('/');
     if (index < 0) return "";
 
     return prefix[..index];
@@ -274,9 +266,9 @@ internal class GroupManager
   void RenderFolder(List<List<GroupItem>> Items, int pageIndex, bool isRoot = false, bool initialMenu = false, string prefix = "")
   {
     if (currentTool.IsRemoved) return;
-    bool showPreviousButton = pageIndex > 0;
-    bool showNextButton = pageIndex < Items.Count - 1;
-    bool showBackButton = ProtoFluxContextualActions.ShouldDisplayBackButton
+    var showPreviousButton = pageIndex > 0;
+    var showNextButton = pageIndex < Items.Count - 1;
+    var showBackButton = ProtoFluxContextualActions.ShouldDisplayBackButton
             && GroupedItems.Count != 1
             && (ShowBackOnAllPages || pageIndex == 0)
             && !isRoot;
@@ -296,7 +288,7 @@ internal class GroupManager
           }
           else
           {
-            string parentFolder = GetParentPrefix(prefix);
+            var parentFolder = GetParentPrefix(prefix);
             if (string.IsNullOrEmpty(parentFolder))
             {
               RenderRoot();

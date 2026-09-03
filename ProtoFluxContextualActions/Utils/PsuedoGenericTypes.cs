@@ -1,11 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-
 using FrooxEngine;
 
-using ProtoFlux.Core;
 using ProtoFlux.Runtimes.Execution.Nodes.Math;
 
 using ProtoFluxContextualActions.Patches;

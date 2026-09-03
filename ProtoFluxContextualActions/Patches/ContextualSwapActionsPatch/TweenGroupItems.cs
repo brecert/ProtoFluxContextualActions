@@ -1,14 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 using Elements.Core;
 
-using FrooxEngine;
 using FrooxEngine.ProtoFlux;
 
 using ProtoFlux.Core;
-using ProtoFlux.Runtimes.Execution.Nodes.Actions;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Animation;
 
 namespace ProtoFluxContextualActions.Patches;
@@ -20,7 +14,7 @@ static partial class ContextualSwapActionsPatch
     if (context.NodeType.IsGenericType ? typeof(TweenValue<>) == context.NodeType.GetGenericTypeDefinition() : typeof(TweenValue<>) == context.NodeType)
     {
       Type? target = null;
-      bool hasProxyHeld = false;
+      var hasProxyHeld = false;
 
       if (context.proxy is ProtoFluxInputProxy)
       {

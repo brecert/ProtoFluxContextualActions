@@ -1,12 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using Elements.Core;
-
-using ProtoFlux.Core;
-
-using ProtoFluxContextualActions.Extensions;
 using ProtoFluxContextualActions.Utils;
 
 namespace ProtoFluxContextualActions.Patches;

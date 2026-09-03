@@ -1,6 +1,3 @@
-using System;
-using System.Threading.Tasks;
-
 using FrooxEngine;
 using FrooxEngine.ProtoFlux;
 

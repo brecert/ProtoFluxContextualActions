@@ -182,7 +182,7 @@ internal static partial class ContextualSelectionActionsPatch
       //items.Sort((a, b) => a.orderOffset - b.orderOffset);
 
       GroupManager grouper = new(__instance, items, targetColor);
-      bool success = grouper.RenderRoot(true);
+      var success = grouper.RenderRoot(true);
 
       return !success;
     }
@@ -215,7 +215,7 @@ internal static partial class ContextualSelectionActionsPatch
 
         if (item.onNodeSpawn != null)
         {
-          bool doConnect = item.onNodeSpawn(addedNode, elementProxy, tool);
+          var doConnect = item.onNodeSpawn(addedNode, elementProxy, tool);
 
           if (!doConnect) return;
         }
@@ -228,7 +228,7 @@ internal static partial class ContextualSelectionActionsPatch
     {
       if (item.onNodeSpawn != null)
       {
-        bool doConnect = item.onNodeSpawn(addedNode, elementProxy, tool);
+        var doConnect = item.onNodeSpawn(addedNode, elementProxy, tool);
 
         if (!doConnect) return;
       }
@@ -252,7 +252,7 @@ internal static partial class ContextualSelectionActionsPatch
 
       if (item.onNodeSpawn != null)
       {
-        bool doConnect = item.onNodeSpawn(addedNode, elementProxy, tool);
+        var doConnect = item.onNodeSpawn(addedNode, elementProxy, tool);
 
         if (!doConnect) return;
       }
@@ -272,7 +272,7 @@ internal static partial class ContextualSelectionActionsPatch
 
     if (item.onNodeSpawn != null)
     {
-      bool doConnect = item.onNodeSpawn(addedNode, elementProxy, tool);
+      var doConnect = item.onNodeSpawn(addedNode, elementProxy, tool);
 
       if (!doConnect) return;
     }
@@ -286,7 +286,7 @@ internal static partial class ContextualSelectionActionsPatch
     if (item.overload) throw new Exception("Overloading with ProtoFluxOperationProxy is not supported");
     if (item.onNodeSpawn != null)
     {
-      bool doConnect = item.onNodeSpawn(addedNode, elementProxy, tool);
+      var doConnect = item.onNodeSpawn(addedNode, elementProxy, tool);
 
       if (!doConnect) return;
     }

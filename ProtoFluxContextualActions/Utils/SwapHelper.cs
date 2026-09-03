@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 
 using Elements.Core;
 
@@ -272,7 +269,7 @@ public static class SwapHelper
 
     if (tryByIndex)
     {
-      for (int i = 0; i < MathX.Min(from.InputCount, to.InputCount); i++)
+      for (var i = 0; i < MathX.Min(from.InputCount, to.InputCount); i++)
       {
         if (from.GetInputType(i) == to.GetInputType(i) && from.GetInputSource(i) is IOutput output)
         {

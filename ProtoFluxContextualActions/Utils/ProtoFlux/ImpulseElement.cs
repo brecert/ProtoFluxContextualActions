@@ -1,5 +1,3 @@
-using HarmonyLib;
-
 using ProtoFlux.Core;
 
 namespace ProtoFluxContextualActions.Utils.ProtoFlux;

@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 
 using Elements.Core;
@@ -103,7 +100,7 @@ internal static partial class ContextualSwapActionsPatch
         {
           if (data.SecondsSinceLastSecondaryPress() < DoublePressTime && data.lastSecondaryPressNode != null && !data.lastSecondaryPressNode.IsRemoved && data.lastSecondaryPressNode == hitNode)
           {
-            bool success = CreateMenu(__instance, hitNode, null);
+            var success = CreateMenu(__instance, hitNode, null);
             data.lastSecondaryPressNode = null;
             data.lastSecondaryPressNode = null;
             data.lastSpawnNodeType = null;
@@ -141,7 +138,7 @@ internal static partial class ContextualSwapActionsPatch
       __instance.SpawnNodeType.Value = additionalData.GetOrCreateValue(__instance).lastSpawnNodeType;
 
       GroupManager grouper = new(__instance, items, colorX.White);
-      bool success = grouper.RenderRoot(true);
+      var success = grouper.RenderRoot(true);
 
       return !success;
     }

@@ -1,13 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 using Elements.Core;
 
 using FrooxEngine;
 using FrooxEngine.ProtoFlux;
-
-using HarmonyLib;
 
 using ProtoFlux.Core;
 using ProtoFlux.Runtimes.Execution.Nodes.Actions;
@@ -129,7 +123,7 @@ static partial class ContextualSwapActionsPatch
     {
       if (tag == null) return;
 
-      bool isGeneric = context.NodeType.IsGenericType;
+      var isGeneric = context.NodeType.IsGenericType;
       Type oldBaseType = isGeneric ? context.NodeType.GetGenericTypeDefinition() : context.NodeType;
       Type newBaseType = isGeneric ? inputType.GetGenericTypeDefinition() : inputType;
       if (!oldBaseType.GetNiceTypeName().Contains("Receiver")) return;

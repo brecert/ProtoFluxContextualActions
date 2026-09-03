@@ -1,5 +1,3 @@
-using System;
-
 using ProtoFlux.Core;
 
 namespace ProtoFluxContextualActions.Utils.ProtoFlux;

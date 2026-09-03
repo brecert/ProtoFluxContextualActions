@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
-
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Display;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Mouse;
-using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Slots;
 
 namespace ProtoFluxContextualActions.Patches;
 

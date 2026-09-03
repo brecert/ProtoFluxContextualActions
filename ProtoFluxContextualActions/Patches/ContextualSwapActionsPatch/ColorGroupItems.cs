@@ -1,11 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using Elements.Core;
-
 using ProtoFlux.Runtimes.Execution.Nodes.Color;
-using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Slots;
 using ProtoFlux.Runtimes.Execution.Nodes.Operators;
 
 namespace ProtoFluxContextualActions.Patches;
@@ -82,12 +75,12 @@ static partial class ContextualSwapActionsPatch
       string[] hsvNames = ["Hue", "Saturation", "Value"];
       foreach (var match in ColorRGBAGroup)
       {
-        string name = rgbaNames.First(v => match.Name.Contains(v));
+        var name = rgbaNames.First(v => match.Name.Contains(v));
         yield return new MenuItem(match, group: "RGBA/" + name);
       }
       foreach (var match in ColorHSVGroup)
       {
-        string name = hsvNames.First(v => match.Name.Contains(v));
+        var name = hsvNames.First(v => match.Name.Contains(v));
         yield return new MenuItem(match, group: "HSV/" + name);
       }
       foreach (var match in ColorBlendGroup)

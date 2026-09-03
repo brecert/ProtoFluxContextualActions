@@ -198,9 +198,9 @@ static partial class ContextualSelectionActionsPatch
             yield return new(psuedoGenericTypes.ExtractBits.First(n => n.Types.First() == outputType).Node, group: "Math/Binary");
           }
 
-          if (psuedoGenericTypes.Pack.Any(t => t.Types.First().BaseVectorType(out bool isVec) == nodeType && isVec))
+          if (psuedoGenericTypes.Pack.Any(t => t.Types.First().BaseVectorType(out var isVec) == nodeType && isVec))
           {
-            foreach (var node in psuedoGenericTypes.Pack.Where(t => t.Types.First().BaseVectorType(out bool isVec) == nodeType && isVec))
+            foreach (var node in psuedoGenericTypes.Pack.Where(t => t.Types.First().BaseVectorType(out var isVec) == nodeType && isVec))
             {
               yield return new(node.Node, group: "Vectors");
             }
@@ -208,7 +208,7 @@ static partial class ContextualSelectionActionsPatch
 
           if (psuedoGenericTypes.Distance.Any(t => t.Types.First() == nodeType))
           {
-            bool isSingle = nodeType == typeof(float) || nodeType == typeof(double);
+            var isSingle = nodeType == typeof(float) || nodeType == typeof(double);
             yield return new(psuedoGenericTypes.Distance.First(t => t.Types.First() == nodeType).Node, group: isSingle ? "Math" : "Vectors");
           }
         }
@@ -234,9 +234,9 @@ static partial class ContextualSelectionActionsPatch
             yield return new(psuedoGenericTypes.ComposeBits.First(n => n.Types.First() == nodeType).Node, group: "Math/Binary");
           }
 
-          if (psuedoGenericTypes.Unpack.Any(t => t.Types.First().BaseVectorType(out bool isVec) == nodeType && isVec))
+          if (psuedoGenericTypes.Unpack.Any(t => t.Types.First().BaseVectorType(out var isVec) == nodeType && isVec))
           {
-            foreach (var node in psuedoGenericTypes.Unpack.Where(t => t.Types.First().BaseVectorType(out bool isVec) == nodeType && isVec))
+            foreach (var node in psuedoGenericTypes.Unpack.Where(t => t.Types.First().BaseVectorType(out var isVec) == nodeType && isVec))
             {
               yield return new(node.Node, group: "Vectors");
             }

@@ -1,5 +1,3 @@
-using System;
-
 namespace ProtoFluxContextualActions.Attributes;
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]

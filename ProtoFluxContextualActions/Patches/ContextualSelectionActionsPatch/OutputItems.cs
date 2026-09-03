@@ -140,7 +140,7 @@ static partial class ContextualSelectionActionsPatch
 
       yield return new MenuItem(typeof(DynamicImpulseTrigger), group: "Events");
 
-      bool shouldRelay = ProtoFluxContextualActions.ShouldUseRelays;
+      var shouldRelay = ProtoFluxContextualActions.ShouldUseRelays;
       Type baseType = shouldRelay ? typeof(ObjectRelay<Slot>) : typeof(ChildrenCount);
 
       yield return new MenuItem(typeof(AllocatingUser), name: "Allocating User", group: "Slots");
@@ -605,7 +605,7 @@ static partial class ContextualSelectionActionsPatch
 
               await new Updates(ProtoFluxContextualActions.StructureReleaseUpdates);
 
-              int i = 0;
+              var i = 0;
               while (tempGrab.IsGrabbed && i < 200)
               {
                 await new Updates(5);
