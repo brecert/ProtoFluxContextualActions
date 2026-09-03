@@ -26,9 +26,6 @@ Adds 'Contextual Swapping Actions' to the ProtoFlux Tool. When trying trying to 
 
 This is intended to be paired with the "Make Casts Explicit" setting, which prevents implicit casts from happening entirely and makes them explicit casts instead, allowing for additional casting actions to appear as well.
 
-Some actions are grouped together like that in order to keep a soft limit of 10 maximum items in the context menu at once.
-This may be made configurable at some point.
-
 ### Dynamic Variable Input Creation
 Adds a context menu item to create DynamicVariableInput nodes when holding a dynamic variable component with the ProtoFlux tool.
 
