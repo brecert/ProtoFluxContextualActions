@@ -16,6 +16,8 @@ Adds 'Contextual Swapping Actions' to the ProtoFlux Tool. Double pressing second
 This is intended to be paired with Contextual Actions.
 For example a `ValueLessThan` may be wanted when dragging a `float` output wire, however that node will not appear in the context menu by default. Instead a `ValueEquals` should be selected first, then swapped for `ValueLessThan` using contextual swap actions.
 
+https://github.com/user-attachments/assets/15ad6739-dbd2-44a1-a7f2-7315a6a429f5
+
 ### Contextual Reference Actions
 Adds 'Contextual Reference Actions' to the ProtoFlux Tool. While the ProtoFlux Tool is held, pressing secondary while holding references will find nodes that supports the reference as a global field and present them as suggestions.
 
@@ -23,8 +25,6 @@ Adds 'Contextual Reference Actions' to the ProtoFlux Tool. While the ProtoFlux T
 Adds 'Contextual Swapping Actions' to the ProtoFlux Tool. When trying trying to connect an an input to an output that isn't the same type and doesn't implicitly cast, additional casting actions may appear.
 
 This is intended to be paired with the "Make Casts Explicit" setting, which prevents implicit casts from happening entirely and makes them explicit casts instead, allowing for additional casting actions to appear as well.
-
-https://github.com/user-attachments/assets/15ad6739-dbd2-44a1-a7f2-7315a6a429f5
 
 Some actions are grouped together like that in order to keep a soft limit of 10 maximum items in the context menu at once.
 This may be made configurable at some point.
