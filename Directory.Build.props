@@ -19,18 +19,18 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <ResoniteProjectType>unknown</ResoniteProjectType>
-    <ResoniteInstallOnBuild>false</ResoniteInstallOnBuild>
+    <ResoniteProjectType Condition="'$(ResoniteProjectType)'==''">unknown</ResoniteProjectType>
+    <ResoniteInstallOnBuild Condition="'$(ResoniteProjectType)'==''">false</ResoniteInstallOnBuild>
   </PropertyGroup>
 
   <!-- https://github.com/ResoniteModdingGroup/MonkeyLoader.GamePacks.Resonite/blob/c48ce3993c04e0d5c70715cbe84a174ea1e60a31/Directory.Build.props#L45C1-L46C1 -->
   <PropertyGroup Condition="'$(ResonitePath)'==''">
-    <ResonitePath>$(MSBuildThisFileDirectory)Resonite</ResonitePath>
-    <ResonitePath Condition="Exists('C:/Program Files (x86)/Steam/steamapps/common/Resonite/')">C:/Program Files (x86)/Steam/steamapps/common/Resonite</ResonitePath>
-    <ResonitePath Condition="Exists('$(HOME)/.steam/steam/steamapps/common/Resonite/')">$(HOME)/.steam/steam/steamapps/common/Resonite</ResonitePath>
-    <ResonitePath Condition="Exists('D:/Files/Games/Resonite/app/')">D:/Files/Games/Resonite/app</ResonitePath>
-    <ResonitePath Condition="Exists('G:/SteamLibrary/steamapps/common/Resonite/')">G:/SteamLibrary/steamapps/common/Resonite</ResonitePath>
-    <ResonitePath Condition="Exists('D:/Program Files (x86)/Steam/steamapps/common/Resonite')">D:/Program Files (x86)/Steam/steamapps/common/Resonite</ResonitePath>
+    <ResonitePath>$(MSBuildThisFileDirectory)Resonite/</ResonitePath>
+    <ResonitePath Condition="Exists('C:/Program Files (x86)/Steam/steamapps/common/Resonite/')">C:/Program Files (x86)/Steam/steamapps/common/Resonite/</ResonitePath>
+    <ResonitePath Condition="Exists('$(HOME)/.steam/steam/steamapps/common/Resonite/')">$(HOME)/.steam/steam/steamapps/common/Resonite/</ResonitePath>
+    <ResonitePath Condition="Exists('D:/Files/Games/Resonite/app/')">D:/Files/Games/Resonite/app/</ResonitePath>
+    <ResonitePath Condition="Exists('G:/SteamLibrary/steamapps/common/Resonite/')">G:/SteamLibrary/steamapps/common/Resonite/</ResonitePath>
+    <ResonitePath Condition="Exists('D:/Program Files (x86)/Steam/steamapps/common/Resonite')">D:/Program Files (x86)/Steam/steamapps/common/Resonite/</ResonitePath>
   </PropertyGroup>
 
 </Project>

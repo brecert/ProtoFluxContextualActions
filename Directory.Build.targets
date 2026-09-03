@@ -13,13 +13,18 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(ResoniteInstallOnBuild)'=='true' And '$(ResoniteProjectType)'=='plugin'">
-    <Message Text="Attempting to copy $(TargetFileName) to $(ResonitePath)Libraries" Importance="high" />
-    <Copy SourceFiles="$(TargetDir)$(TargetFileName)" DestinationFolder="$(ResonitePath)Libraries" ContinueOnError="true" />
+    <Message Text="Attempting to copy $(TargetFileName) to $(ResonitePath)/Libraries" Importance="high" />
+    <Copy SourceFiles="$(TargetDir)$(TargetFileName)" DestinationFolder="$(ResonitePath)/Libraries" ContinueOnError="true" />
   </Target>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(ResoniteInstallOnBuild)'=='true' And '$(ResoniteProjectType)'=='rml_mod'">
-    <Message Text="Attempting to copy $(TargetFileName) to $(ResonitePath)rml_mods" Importance="high" />
-    <Copy SourceFiles="$(TargetDir)$(TargetFileName)" DestinationFolder="$(ResonitePath)rml_mods" ContinueOnError="true" />
+    <Message Text="Attempting to copy $(TargetFileName) to $(ResonitePath)/rml_mods" Importance="high" />
+    <Copy SourceFiles="$(TargetDir)$(TargetFileName)" DestinationFolder="$(ResonitePath)/rml_mods" ContinueOnError="true" />
   </Target>
+
+  <Target Name="PostBuildHotReload" AfterTargets="PostBuildEvent" Condition="'$(ResoniteInstallOnBuild)'=='true' and '$(Configuration)'=='Debug'">
+    <Message Text="Attempting to copy $(TargetFileName) to $(ResonitePath)/rml_mods/HotReloadMods" Importance="high" />
+    <Copy SourceFiles="$(TargetDir)$(TargetFileName)" DestinationFolder="$(ResonitePath)/rml_mods/HotReloadMods" ContinueOnError="true" />
+	</Target>
 
 </Project>

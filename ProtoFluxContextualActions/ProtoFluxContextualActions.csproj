@@ -43,12 +43,12 @@
 
   <ItemGroup>
     <Reference Include="ResoniteModLoader">
-      <HintPath>$(ResonitePath)ResoniteModLoader.dll</HintPath>
+      <HintPath>$(ResonitePath)/ResoniteModLoader.dll</HintPath>
       <HintPath>$(ResonitePath)/Libraries/ResoniteModLoader.dll</HintPath>
   		<Private>False</Private>
     </Reference>
     <Reference Include="HarmonyLib">
-      <HintPath>$(ResonitePath)0Harmony.dll</HintPath>
+      <HintPath>$(ResonitePath)/0Harmony.dll</HintPath>
       <HintPath>$(ResonitePath)/rml_libs/0Harmony.dll</HintPath>
   		<Private>False</Private>
     </Reference>
