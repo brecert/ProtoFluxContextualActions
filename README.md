@@ -26,6 +26,3 @@ Adds a context menu item to create DynamicVariableInput nodes when holding a dyn
 
 ### Sample Spatial Variable Creation
 Adds a context menu item to create SampleSpatialVariable nodes when holding a spatial variable source component with the ProtoFlux tool.
-
-## Acknowledgements
-The project structure is based on https://github.com/esnya/ResoniteEsnyaTweaks.

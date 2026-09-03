@@ -1,0 +1,25 @@
+<Project>
+
+  <PropertyGroup>
+    <ResoniteAssemblyPath>$(ResonitePath)</ResoniteAssemblyPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="@(ResoniteReference)">
+      <Name>%(ResoniteReference.Identity)</Name>
+      <HintPath Condition="Exists('$(ResoniteAssemblyPath)/%(Identity).dll')">$(ResoniteAssemblyPath)/%(Identity).dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(ResoniteInstallOnBuild)'=='true' And '$(ResoniteProjectType)'=='plugin'">
+    <Message Text="Attempting to copy $(TargetFileName) to $(ResonitePath)Libraries" Importance="high" />
+    <Copy SourceFiles="$(TargetDir)$(TargetFileName)" DestinationFolder="$(ResonitePath)Libraries" ContinueOnError="true" />
+  </Target>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(ResoniteInstallOnBuild)'=='true' And '$(ResoniteProjectType)'=='rml_mod'">
+    <Message Text="Attempting to copy $(TargetFileName) to $(ResonitePath)rml_mods" Importance="high" />
+    <Copy SourceFiles="$(TargetDir)$(TargetFileName)" DestinationFolder="$(ResonitePath)rml_mods" ContinueOnError="true" />
+  </Target>
+
+</Project>

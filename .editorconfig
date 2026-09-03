@@ -1,8 +1,8 @@
 root = true
 
-[*.cs]
-indent_size = 2
+[*.{cs,csproj,props,targets,slnx}]
 indent_style = space
+indent_size = 2
 tab_width = 2
 
 # CS8625: Cannot convert null literal to non-nullable reference type.
