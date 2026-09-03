@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using FrooxEngine.ProtoFlux;
-using HarmonyLib;
-using Elements.Core;
-using FrooxEngine;
 using System.Threading.Tasks;
+
+using Elements.Core;
+
+using FrooxEngine;
+using FrooxEngine.ProtoFlux;
+
+using HarmonyLib;
 
 namespace ProtoFluxContextualActions.Utils;
 

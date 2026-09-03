@@ -1,6 +1,8 @@
 using FrooxEngine;
 using FrooxEngine.ProtoFlux;
+
 using ProtoFluxContextualActions.Utils.ProtoFlux;
+
 using ImpulseElement = ProtoFluxContextualActions.Utils.ProtoFlux.ImpulseElement;
 
 namespace ProtoFluxContextualActions.Extensions;

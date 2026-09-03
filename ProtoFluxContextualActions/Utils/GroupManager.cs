@@ -1,12 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using FrooxEngine.ProtoFlux;
-using HarmonyLib;
+
 using Elements.Core;
-using static ProtoFluxContextualActions.Patches.ContextualSelectionActionsPatch;
+
 using FrooxEngine;
+using FrooxEngine.ProtoFlux;
+
+using HarmonyLib;
+
 using ProtoFluxContextualActions.Utils.Visuals;
+
+using static ProtoFluxContextualActions.Patches.ContextualSelectionActionsPatch;
 
 namespace ProtoFluxContextualActions.Utils;
 

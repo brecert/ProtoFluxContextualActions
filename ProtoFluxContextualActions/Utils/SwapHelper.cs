@@ -1,14 +1,17 @@
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+
 using Elements.Core;
-using ProtoFlux.Runtimes.Execution.Nodes.Operators;
+
 using ProtoFlux.Core;
 using ProtoFlux.Runtimes.Execution.Nodes;
-using ProtoFluxContextualActions.Extensions;
-using System;
-using System.Diagnostics.CodeAnalysis;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Slots;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Variables;
+using ProtoFlux.Runtimes.Execution.Nodes.Operators;
+
+using ProtoFluxContextualActions.Extensions;
 
 namespace ProtoFluxContextualActions.Utils.ProtoFlux;
 

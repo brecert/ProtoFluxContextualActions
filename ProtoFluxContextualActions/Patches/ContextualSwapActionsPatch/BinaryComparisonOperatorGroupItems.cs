@@ -1,13 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using Elements.Core;
+
 using FrooxEngine;
+
+using HarmonyLib;
+
+using ProtoFlux.Core;
 using ProtoFlux.Runtimes.Execution.Nodes;
 using ProtoFlux.Runtimes.Execution.Nodes.Operators;
+
 using ProtoFluxContextualActions.Utils;
-using HarmonyLib;
-using ProtoFlux.Core;
 
 namespace ProtoFluxContextualActions.Patches;
 

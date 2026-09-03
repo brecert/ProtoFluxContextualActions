@@ -1,14 +1,19 @@
-using Elements.Core;
-using HarmonyLib;
-using ResoniteModLoader;
 using System;
 using System.Linq;
 using System.Reflection;
+
+using Elements.Core;
+
+using HarmonyLib;
+
 using ProtoFluxContextualActions.Attributes;
+
+using ResoniteModLoader;
 
 namespace ProtoFluxContextualActions;
 
 using System.Collections.Generic;
+
 using global::ProtoFluxContextualActions.Utils;
 
 #if DEBUG
