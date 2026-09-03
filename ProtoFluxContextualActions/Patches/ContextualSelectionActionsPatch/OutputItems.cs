@@ -326,7 +326,7 @@ static partial class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(IsLocalUser), group: "Info");
       yield return new MenuItem(typeof(UserVR_Active), group: "Info");
       yield return new MenuItem(typeof(IsContextMenuOpen), group: "Info");
-      yield return new MenuItem(typeof(GeneralHeadset), group: "Info");
+      yield return new MenuItem(typeof(ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Headsets.GeneralHeadset), group: "Info");
       yield return new MenuItem(typeof(UserRootSlot));
       yield return new MenuItem(typeof(UserUserRoot));
 
