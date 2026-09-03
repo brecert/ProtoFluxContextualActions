@@ -48,7 +48,8 @@ public class ProtoFluxContextualActions : ResoniteMod
   private static readonly ModConfigurationKey<bool> showBackButton = new("Show Back Button", "Whether to show the back button in the submenus.", () => false);
   [AutoRegisterConfigKey]
   private static readonly ModConfigurationKey<bool> showUnsupportedActions = new("Show Unsupported Actions", "Whether to show actions that may have potentially undefined, or unsupported behavior. This will hide refhack related actions for example.", () => false);
-
+  [AutoRegisterConfigKey]
+  private static readonly ModConfigurationKey<bool> forceExplicitCasts = new("Make Casts Explicit", "Whether connections between wires that are not the same type should have an explicit cast, rather than having an implicit cast.", () => false);
 
   [AutoRegisterConfigKey]
   private static readonly ModConfigurationKey<MenuVisual> currentMenuVisual = new("Current Menu Visual", "The visual to use when rendering a menu.\t<b><color=hero.red>NOTE: No other visuals exist currently!</color></b> This setting can be ignored for now.", () => MenuVisual.ContextMenu);
@@ -168,4 +169,6 @@ public class ProtoFluxContextualActions : ResoniteMod
   internal static bool ShouldDisplayUnsupportedActions => showUnsupportedActions.Value;
 
   internal static MenuVisual MenuVisual => currentMenuVisual.Value;
+
+  internal static bool ExplicitCasts => forceExplicitCasts.Value;
 }

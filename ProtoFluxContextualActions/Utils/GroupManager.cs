@@ -74,7 +74,7 @@ internal class GroupManager
     });
 
     // Would be read from mod config instead of a constant
-    MenuVisual selectedVisual = overrideVisual ?? ProtoFluxContextualActions.MenuVisual;
+    var selectedVisual = overrideVisual ?? ProtoFluxContextualActions.MenuVisual;
 
     currentVisual = selectedVisual switch
     {
@@ -160,7 +160,7 @@ internal class GroupManager
 
     foreach (var subgroup in subgroups)
     {
-      string path = string.IsNullOrEmpty(prefix)
+      var path = string.IsNullOrEmpty(prefix)
         ? subgroup
         : $"{prefix}/{subgroup}";
 
@@ -174,15 +174,15 @@ internal class GroupManager
 
   GroupItem BuildFolderEntry(string path, string displayName)
   {
-    string currentPath = path;
-    string currentName = displayName;
+    var currentPath = path;
+    var currentName = displayName;
 
     // This should never run out
-    for (int i = 0; i < 8; i++)
+    for (var i = 0; i < 8; i++)
     {
       var items = GetLevelItems(currentPath, out var subgroups);
 
-      int childCount = items.Count + subgroups.Count;
+      var childCount = items.Count + subgroups.Count;
 
       if (childCount != 1)
       {
@@ -197,7 +197,7 @@ internal class GroupManager
 
       if (items.Count == 1)
       {
-        GroupItem item = items[0];
+        var item = items[0];
 
         item.name = $"{currentName} > {item.name}";
         item.iconUri = CollapsedGroupIcon;
@@ -205,7 +205,7 @@ internal class GroupManager
         return item;
       }
 
-      string nextGroup = subgroups[0];
+      var nextGroup = subgroups[0];
 
       currentName += " > " + nextGroup;
       currentPath += "/" + nextGroup;
@@ -241,7 +241,7 @@ internal class GroupManager
 
       foreach (var subgroup in subgroups)
       {
-        string path = subgroup;
+        var path = subgroup;
 
         if (string.IsNullOrEmpty(path))
           continue;
@@ -251,7 +251,7 @@ internal class GroupManager
 
       currentRootItems.AddRange(items);
 
-      List<List<GroupItem>> pagedRootItems = SplitGroups2(currentRootItems);
+      var pagedRootItems = SplitGroups2(currentRootItems);
       RenderFolder(pagedRootItems, 0, true, initialMenu, "");
     }
     else if (GroupedItems.Count == 0) return false;

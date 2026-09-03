@@ -17,9 +17,11 @@ using ProtoFluxContextualActions.Utils.ProtoFlux;
 using FrooxEngine.UIX;
 using Elements.Quantity;
 
+namespace ProtoFluxContextualActions.Patches;
+
 [HarmonyPatchCategory("ProtoFluxTool Contextual Cast Actions"), TweakCategory("Adds 'Contextual Cast Actions' to the ProtoFlux Tool. Casting certain types to others may suggest extra actions, rather than only allowing explicit casts.")]
 [HarmonyPatch(typeof(ProtoFluxTool), "TryConnect", argumentTypes: [typeof(ProtoFluxNode), typeof(ISyncRef), typeof(INodeOutput)])]
-internal static class ContextualSelectionActionsPatch
+internal static class ContextualCastActionsPatch
 {
   internal readonly struct MenuItem(Type node, string? name = null, Action<ProtoFluxNode>? onSpawn = null)
   {
@@ -37,7 +39,7 @@ internal static class ContextualSelectionActionsPatch
     var baseInputType = input.TargetType;
     var inputType = baseInputType.IsGenericType ? baseInputType.GenericTypeArguments.Last() : baseInputType;
 
-    if (outputType == inputType)
+    if ((!ProtoFluxContextualActions.ExplicitCasts) || outputType == inputType)
     {
       if (node.TryConnectInput(input, output, allowExplicitCast: false, undoable: true))
       {
