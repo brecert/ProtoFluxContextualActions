@@ -33,9 +33,16 @@ internal static class ContextualSelectionActionsPatch
   {
     var tool = __instance;
 
-    if (node.TryConnectInput(input, output, allowExplicitCast: false, undoable: true))
+    var outputType = output.MappedOutput.OutputType;
+    var baseInputType = input.TargetType;
+    var inputType = baseInputType.IsGenericType ? baseInputType.GenericTypeArguments.Last() : baseInputType;
+
+    if (outputType == inputType)
     {
-      return false;
+      if (node.TryConnectInput(input, output, allowExplicitCast: false, undoable: true))
+      {
+        return false;
+      }
     }
 
     __instance.StartTask(async delegate
@@ -54,7 +61,7 @@ internal static class ContextualSelectionActionsPatch
           name: castItem.DisplayName,
           icon: (Uri?)null,
           color: new colorX?(colorX.White),
-          onClicked: () => SpawnNode(tool, node, castItem, (castNode) =>
+          onClicked: () => SpawnNode(tool, node, input, castItem, (castNode) =>
           {
             if (castItem.onSpawn is { } onSpawn)
             {
@@ -76,7 +83,7 @@ internal static class ContextualSelectionActionsPatch
     return false;
   }
 
-  private static void SpawnNode(ProtoFluxTool tool, ProtoFluxNode toNode, MenuItem item, Action<ProtoFluxNode> setup)
+  private static void SpawnNode(ProtoFluxTool tool, ProtoFluxNode toNode, ISyncRef toInput, MenuItem item, Action<ProtoFluxNode> setup)
   {
     var nodeBinding = ProtoFluxHelper.GetBindingForNode(item.node);
     var node = tool.SpawnNode(nodeBinding, n =>
@@ -88,9 +95,29 @@ internal static class ContextualSelectionActionsPatch
     });
     // todo: make not hardcoded?
     // todo: handle casts?
-    node.Slot.GlobalPosition = toNode.Slot.LocalPointToGlobal(
-      float3.Left * ProtoFluxNodeVisual.DEFAULT_WIDTH * ProtoFluxNodeVisual.DEFAULT_SCALE * 1.75f
-    );
+
+    node.EnsureVisual();
+    tool.StartTask(async () =>
+    {
+      // this is not great...
+      // race conditions ahead, beware!
+      await new Updates(3);
+
+      var visual = toNode.GetVisual();
+      var elementRef = toNode.GetInputElementRef(toInput)!.Value;
+
+      // todo: move this out to a util, we should *never* be handling "dynamic" and "fixed" different from eachother in direct code, it is error prone.
+      var inputProxy = elementRef.IsDynamic
+        ? visual.GetDynamicInputProxy(toNode.NodeInstance.GetInputListName(elementRef.listIndex), elementRef.index)
+        : visual.GetFixedInputProxy(toNode.NodeInstance.GetInputName(elementRef.index));
+
+      // making a lot of assumptions about our cast node..
+      var outputProxy = node.Slot.GetComponentInChildren<ProtoFluxOutputProxy>();
+
+      var offset = outputProxy.ConnectPoint.Target.GlobalPosition - inputProxy.ConnectPoint.Target.GlobalPosition;
+      node.Slot.GlobalPosition -= offset;
+      node.Slot.GlobalPosition = node.Slot.LocalPointToGlobal(float3.Left * 16f * 0.00093750004f);
+    });
   }
 
   internal static IEnumerable<MenuItem> TryGetExtraCasts(ProtoFluxTool tool, ProtoFluxNode node, ISyncRef input, INodeOutput output)
