@@ -27,7 +27,6 @@ namespace ProtoFluxContextualActions.Patches;
 [HarmonyPatch(typeof(ProtoFluxTool), nameof(ProtoFluxTool.OnSecondaryPress))]
 internal static partial class ContextualSelectionActionsPatch
 {
-
   internal struct MenuItem(
     Type node, Type? binding = null,
     string? name = null,
@@ -38,13 +37,9 @@ internal static partial class ContextualSelectionActionsPatch
   ) : IGroupItem
   {
     internal readonly Type node = node;
-
     internal readonly Type? binding = binding;
-
     internal readonly string? name = name;
-
     internal readonly bool overload = overload;
-
 
     internal readonly string group = group;
 

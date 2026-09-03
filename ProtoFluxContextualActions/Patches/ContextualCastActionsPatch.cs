@@ -14,6 +14,8 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Reflection;
 using ProtoFluxContextualActions.Utils.ProtoFlux;
+using FrooxEngine.UIX;
+using Elements.Quantity;
 
 [HarmonyPatchCategory("ProtoFluxTool Contextual Cast Actions"), TweakCategory("Adds 'Contextual Cast Actions' to the ProtoFlux Tool. Casting certain types to others may suggest extra actions, rather than only allowing explicit casts.")]
 [HarmonyPatch(typeof(ProtoFluxTool), "TryConnect", argumentTypes: [typeof(ProtoFluxNode), typeof(ISyncRef), typeof(INodeOutput)])]
@@ -52,7 +54,7 @@ internal static class ContextualSelectionActionsPatch
           name: castItem.DisplayName,
           icon: (Uri?)null,
           color: new colorX?(colorX.White),
-          onClicked: () => SpawnNode(tool, castItem, (castNode) =>
+          onClicked: () => SpawnNode(tool, node, castItem, (castNode) =>
           {
             if (castItem.onSpawn is { } onSpawn)
             {
@@ -74,16 +76,21 @@ internal static class ContextualSelectionActionsPatch
     return false;
   }
 
-  private static void SpawnNode(ProtoFluxTool tool, MenuItem item, Action<ProtoFluxNode> setup)
+  private static void SpawnNode(ProtoFluxTool tool, ProtoFluxNode toNode, MenuItem item, Action<ProtoFluxNode> setup)
   {
     var nodeBinding = ProtoFluxHelper.GetBindingForNode(item.node);
-    tool.SpawnNode(nodeBinding, n =>
+    var node = tool.SpawnNode(nodeBinding, n =>
     {
       n.EnsureElementsInDynamicLists();
       setup(n);
       tool.LocalUser.CloseContextMenu(tool);
       CleanupDraggedWire(tool);
     });
+    // todo: make not hardcoded?
+    // todo: handle casts?
+    node.Slot.GlobalPosition = toNode.Slot.LocalPointToGlobal(
+      float3.Left * ProtoFluxNodeVisual.DEFAULT_WIDTH * ProtoFluxNodeVisual.DEFAULT_SCALE * 1.75f
+    );
   }
 
   internal static IEnumerable<MenuItem> TryGetExtraCasts(ProtoFluxTool tool, ProtoFluxNode node, ISyncRef input, INodeOutput output)
@@ -133,12 +140,15 @@ internal static class ContextualSelectionActionsPatch
 
           if (castNode != null && ProtoFluxHelper.GetBindingForNode(castNode) is { } castNodeBinding)
           {
-            tool.SpawnNode(castNodeBinding, setup: n =>
+            var n = tool.SpawnNode(castNodeBinding, setup: n =>
             {
               n.GetInput(0).Target = output;
               toStringNode.GetInput(0).Target = n.GetOutput(0);
               node.TryConnectInput(input, toStringNode.GetOutput(0), allowExplicitCast: false, undoable: true);
             });
+            n.Slot.GlobalPosition = node.Slot.LocalPointToGlobal(
+              float3.Left * ProtoFluxNodeVisual.DEFAULT_WIDTH * ProtoFluxNodeVisual.DEFAULT_SCALE * 2.5f
+            );
           }
         });
       }

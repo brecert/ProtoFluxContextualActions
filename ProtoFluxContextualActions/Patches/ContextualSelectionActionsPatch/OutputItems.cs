@@ -328,7 +328,6 @@ static partial class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(IsContextMenuOpen), group: "Info");
       yield return new MenuItem(typeof(ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Headsets.GeneralHeadset), group: "Info");
       yield return new MenuItem(typeof(UserRootSlot));
-      yield return new MenuItem(typeof(UserUserRoot));
 
       yield return new MenuItem(typeof(FindCharacterControllerFromUser), group: "Info/Sources");
 
