@@ -8,6 +8,8 @@ static partial class ContextualSwapActionsPatch
     typeof(CallRelay),
     typeof(ContinuationRelay),
     typeof(AsyncCallRelay),
+    typeof(Sequence),
+    typeof(AsyncSequence),
   ];
 
   internal static IEnumerable<MenuItem> ImpulseRelayGroupItems(ContextualContext context)

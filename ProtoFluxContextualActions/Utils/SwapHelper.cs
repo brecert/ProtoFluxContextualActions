@@ -81,7 +81,7 @@ public static class SwapHelper
       // map impulse by name
       if (toNewNode.GetImpulseByName(remap?.GetValueOrDefault(fromOldImpulse.DisplayName) ?? fromOldImpulse.DisplayName) is ImpulseElement toNewImpulse)
       {
-        if (IsValidConnection(fromOldImpulse, toNewImpulse.Target))
+        if (IsValidConnection(toNewImpulse, fromOldImpulse.Target))
         {
           toNewImpulse.Target = fromOldImpulse.Target;
         }
@@ -93,21 +93,11 @@ public static class SwapHelper
       foreach (var fromOldImpulse in fromOldNode.AllImpulseElements())
       {
         var toNewImpulse = toNewNode.GetImpulseByIndex(fromOldImpulse.ElementIndex);
-        if (IsValidConnection(fromOldImpulse, toNewImpulse.Target))
+        if (IsValidConnection(toNewImpulse, fromOldImpulse.Target))
         {
           toNewImpulse.Target = fromOldImpulse.Target;
         }
       }
-    }
-
-    static bool IsValidConnection(ImpulseElement fromImpulse, IOperation? toOperation)
-    {
-      return (fromImpulse.TargetType, toOperation) switch
-      {
-        (ImpulseType.AsyncCall or ImpulseType.AsyncResumption or ImpulseType.Continuation, _) => true,
-        (_, IAsyncOperation) => false,
-        _ => true,
-      };
     }
   }
 
@@ -126,24 +116,23 @@ public static class SwapHelper
   /// <summary>
   /// Transfers the impulse sources from one node to another.
   /// </summary>
-  /// <param name="from">The node to transfer operations from</param>
-  /// <param name="to">The node to transfer the operations to</param>
+  /// <param name="fromOldNode">The node to transfer operations from</param>
+  /// <param name="toNewNode">The node to transfer the operations to</param>
   /// <param name="query"></param>
   /// <param name="tryByIndex">if transfers should attempt to match by index instead of by name, this parameter is not stable</param>
-  internal static void TransferOperations(INode from, INode to, NodeQueryAcceleration query, bool tryByIndex = false)
+  internal static void TransferOperations(INode fromOldNode, INode toNewNode, NodeQueryAcceleration query, bool tryByIndex = false)
   {
-    var impulsingFromElements = query.GetImpulsingElements(from);
+    var impulsingFromElements = query.GetImpulsingElements(fromOldNode);
 
-    foreach (var element in impulsingFromElements)
+    foreach (var fromImpulse in impulsingFromElements)
     {
-      var name = from.GetOperationName(element.Target.FindLinearOperationIndex());
-      if (to.GetOperationByName(name) is IOperation toOperation)
+      var oldOperationName = fromOldNode.GetOperationName(fromImpulse.Target.FindLinearOperationIndex());
+      if (toNewNode.GetOperationByName(oldOperationName) is IOperation toNewOperation)
       {
-        if (element.TargetElement() is { } fromOperation)
+        if (fromImpulse.Target != null)
         {
-          TryMapOperation(element, fromOperation, toOperation);
+          TryMapOperation(fromImpulse, toNewOperation);
         }
-        // element.Target = toOperation;
       }
     }
 
@@ -151,44 +140,49 @@ public static class SwapHelper
     {
       foreach (var source in impulsingFromElements)
       {
-        var toOperation = to.GetOperation(source.Target.FindLinearOperationIndex());
-        if (source.TargetElement() is { } fromOperation)
+        var toOperation = toNewNode.GetOperation(source.Target.FindLinearOperationIndex());
+        if (source.Target != null)
         {
-          TryMapOperation(source, fromOperation, toOperation);
+          TryMapOperation(source, toOperation);
         }
       }
     }
 
-    var typeTuple = (from.GetType().GetGenericTypeDefinitionOrSameType(), to.GetType().GetGenericTypeDefinitionOrSameType());
-    var outputs = to.AllImpulseElements().ToDictionary(o => o.DisplayName, o => o);
+    var typeTuple = (fromOldNode.GetType().GetGenericTypeDefinitionOrSameType(), toNewNode.GetType().GetGenericTypeDefinitionOrSameType());
+    var outputs = toNewNode.AllImpulseElements().ToDictionary(o => o.DisplayName, o => o);
     var hasOperationMap = TryGetOperationMap(typeTuple, out var operationMap);
     var operationMapMapTable = operationMap?.ToDictionary();
 
-    foreach (var evaluatingElement in query.GetImpulsingElements(from))
+    foreach (var impulse in query.GetImpulsingElements(fromOldNode))
     {
-      if (evaluatingElement.TargetElement() is OperationElement operationElement)
+      if (impulse.TargetElement() is OperationElement operationElement)
       {
         if (hasOperationMap && (operationMapMapTable?.TryGetValue(operationElement.DisplayName, out var remappedName) ?? false))
         {
-          var toOperation = to.GetOperationByName(remappedName);
-          TryMapOperation(evaluatingElement, operationElement, toOperation);
+          var toOperation = toNewNode.GetOperationByName(remappedName);
+          TryMapOperation(impulse, toOperation);
         }
       }
     }
   }
 
-  private static void TryMapOperation(ImpulseElement impulse, OperationElement fromOperation, IOperation? toOperation)
+  private static void TryMapOperation(ImpulseElement impulse, IOperation? toOperation)
   {
-    var isValidConnection = (impulse.IsAsync, toOperation is IAsyncOperation) switch
-    {
-      (_, false) => true,
-      (true, _) => true,
-      _ => false,
-    };
-    if (isValidConnection)
+    if (IsValidConnection(impulse, toOperation))
     {
       impulse.Target = toOperation;
     }
+  }
+
+  static bool IsValidConnection(ImpulseElement? fromImpulse, IOperation? toOperation)
+  {
+    if (fromImpulse is null || toOperation is null) return false;
+    return (fromImpulse?.TargetType, toOperation) switch
+    {
+      (ImpulseType.AsyncCall or ImpulseType.AsyncResumption or ImpulseType.Continuation, _) => true,
+      (_, IAsyncOperation) => false,
+      _ => true,
+    };
   }
 
   internal static Dictionary<(Type, Type), (string FromName, string ToName)[]> OutputMap = new() {
