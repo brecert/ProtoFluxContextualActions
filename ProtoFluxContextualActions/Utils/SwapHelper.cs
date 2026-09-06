@@ -70,25 +70,26 @@ public static class SwapHelper
   internal static bool TryGetImpulseMap((Type, Type) typeTuple, [MaybeNullWhen(false)] out (string FromName, string ToName)[] elementMap) =>
     TryGetTypeTupleMapping(ImpulseMap, typeTuple, out elementMap);
 
-  internal static void TransferImpulses(INode from, INode to, bool tryByIndex = false)
+  internal static void TransferImpulses(INode fromOldNode, INode toNewNode, bool tryByIndex = false)
   {
-    var typeTuple = (from.GetType().GetGenericTypeDefinitionOrSameType(), to.GetType().GetGenericTypeDefinitionOrSameType());
+    var typeTuple = (fromOldNode.GetType().GetGenericTypeDefinitionOrSameType(), toNewNode.GetType().GetGenericTypeDefinitionOrSameType());
     TryGetImpulseMap(typeTuple, out var elementMap);
     var remap = elementMap?.ToDictionary();
 
-    foreach (var element in from.AllImpulseElements())
+    foreach (var fromOldImpulse in fromOldNode.AllImpulseElements())
     {
-      if (to.GetImpulseByName(remap?.GetValueOrDefault(element.DisplayName) ?? element.DisplayName) is ImpulseElement toImpulse)
+      // map impulse by name
+      if (toNewNode.GetImpulseByName(remap?.GetValueOrDefault(fromOldImpulse.DisplayName) ?? fromOldImpulse.DisplayName) is ImpulseElement toNewImpulse)
       {
-        var isValidConnection = (toImpulse.TargetType, element.Target is ISyncOperation) switch
+        var isValidConnection = (toNewImpulse.TargetType, fromOldImpulse.Target) switch
         {
           (ImpulseType.AsyncCall or ImpulseType.AsyncResumption or ImpulseType.Continuation, _) => true,
-          (_, false) => true,
-          _ => false,
+          (_, IAsyncOperation) => false,
+          _ => true,
         };
         if (isValidConnection)
         {
-          toImpulse.Target = element.Target;
+          toNewImpulse.Target = fromOldImpulse.Target;
         }
       }
     }
