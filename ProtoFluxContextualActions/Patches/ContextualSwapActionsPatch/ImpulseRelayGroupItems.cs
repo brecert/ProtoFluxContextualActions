@@ -16,7 +16,7 @@ static partial class ContextualSwapActionsPatch
     {
       foreach (var match in ImpulseRelayGroup)
       {
-        yield return new MenuItem(match);
+        yield return new MenuItem(match, connectionTransferType: ConnectionTransferType.ByIndexLossy);
       }
     }
   }

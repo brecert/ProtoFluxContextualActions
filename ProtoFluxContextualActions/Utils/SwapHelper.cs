@@ -81,30 +81,34 @@ public static class SwapHelper
       // map impulse by name
       if (toNewNode.GetImpulseByName(remap?.GetValueOrDefault(fromOldImpulse.DisplayName) ?? fromOldImpulse.DisplayName) is ImpulseElement toNewImpulse)
       {
-        var isValidConnection = (toNewImpulse.TargetType, fromOldImpulse.Target) switch
-        {
-          (ImpulseType.AsyncCall or ImpulseType.AsyncResumption or ImpulseType.Continuation, _) => true,
-          (_, IAsyncOperation) => false,
-          _ => true,
-        };
-        if (isValidConnection)
+        if (IsValidConnection(fromOldImpulse, toNewImpulse.Target))
         {
           toNewImpulse.Target = fromOldImpulse.Target;
         }
       }
     }
 
-    // if (tryByIndex)
-    // {
-    //   foreach (var source in from.AllImpulses())
-    //   {
-    //     var toImpulse = to.GetImpulseByIndex(source.ImpulseIndex);
-    //     if (toImpulse.Target != null)
-    //     {
-    //       toImpulse.Target = source.Target;
-    //     }
-    //   }
-    // }
+    if (tryByIndex)
+    {
+      foreach (var fromOldImpulse in fromOldNode.AllImpulseElements())
+      {
+        var toNewImpulse = toNewNode.GetImpulseByIndex(fromOldImpulse.ElementIndex);
+        if (IsValidConnection(fromOldImpulse, toNewImpulse.Target))
+        {
+          toNewImpulse.Target = fromOldImpulse.Target;
+        }
+      }
+    }
+
+    static bool IsValidConnection(ImpulseElement fromImpulse, IOperation? toOperation)
+    {
+      return (fromImpulse.TargetType, toOperation) switch
+      {
+        (ImpulseType.AsyncCall or ImpulseType.AsyncResumption or ImpulseType.Continuation, _) => true,
+        (_, IAsyncOperation) => false,
+        _ => true,
+      };
+    }
   }
 
   internal static Dictionary<(Type, Type), (string FromName, string ToName)[]> OperationMap = new()
