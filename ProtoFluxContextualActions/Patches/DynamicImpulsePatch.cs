@@ -11,7 +11,7 @@ using ProtoFluxContextualActions.Utils;
 
 namespace ProtoFluxContextualActions.Patches;
 
-[HarmonyPatchCategory("ProtoFluxTool DynamicImpulse Creation"), TweakCategory("Adds a context menu item to create DynamicImpulse when holding a button dynamic impulse component with the ProtoFlux tool.")]
+[PatchGroup("DynamicImpulse Creation", "Adds a context menu item to create DynamicImpulse when holding a button dynamic impulse component with the ProtoFlux Tool.")]
 [HarmonyPatch(typeof(ProtoFluxTool), nameof(ProtoFluxTool.GenerateMenuItems))]
 internal static class DynamicImpulsePatch
 {
