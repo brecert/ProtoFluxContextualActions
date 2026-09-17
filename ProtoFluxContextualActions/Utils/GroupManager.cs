@@ -57,7 +57,7 @@ internal class GroupManager
       return new GroupItem()
       {
         name = item.Name,
-        color = targetColor,
+        color = itemColor,
         onClick = () => item.OnClick(tool, item),
         baseItem = item,
       };
@@ -196,9 +196,10 @@ internal class GroupManager
       {
         var item = items[0];
 
-        item.name = $"{currentName} > {item.name}";
-        item.iconUri = CollapsedGroupIcon;
-        item.color = RadiantUI_Constants.Neutrals.LIGHT;
+        // this felt a little ugly visually, maybe revisit?
+        // item.name = $"{currentName} ><br>{item.name}";
+        // item.iconUri = CollapsedGroupIcon;
+        // item.color = RadiantUI_Constants.Neutrals.LIGHT;
         return item;
       }
 

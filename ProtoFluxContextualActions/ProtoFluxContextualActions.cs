@@ -68,10 +68,6 @@ public class ProtoFluxContextualActions : ResoniteMod
   internal static bool ShouldTryKeepContextPosition => tryKeepContextPosition.Value;
 
   [AutoRegisterConfigKey]
-  private static readonly ModConfigurationKey<bool> fluxStructureRelays = new("Structure Relays", "If \"Flux Structures\" should contain relays.", () => true);
-  internal static bool ShouldUseRelays => fluxStructureRelays.Value;
-
-  [AutoRegisterConfigKey]
   private static readonly ModConfigurationKey<int> fluxStructureReleaseUpdates = new("Structure Release Updates", "How many updates to allow for structures to be 'released' from the 'global grabber'.", () => 240);
   internal static int StructureReleaseUpdates => fluxStructureReleaseUpdates.Value;
 

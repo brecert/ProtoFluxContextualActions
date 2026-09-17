@@ -117,34 +117,31 @@ static partial class ContextualSelectionActionsPatch
     if (outputType == typeof(Slot))
     {
       yield return new(typeof(GlobalTransform));
-      yield return new(typeof(GetForward));
       yield return new(typeof(Children));
-      yield return new(typeof(GetChild));
-      yield return new(typeof(ChildrenCount));
-      yield return new(typeof(SetSlotActiveSelf));
       yield return new(typeof(GetSlotName));
+      // can be swapped for persistent, persistent is not needed
+      yield return new(typeof(GetSlotActiveSelf));
+      yield return new(typeof(FindChildByTag));
 
-      yield return new(typeof(SetSlotPersistentSelf), group: "Slots");
-
-      yield return new(typeof(DuplicateSlot));
-      yield return new(typeof(DestroySlot));
-
+      yield return new(typeof(GetChild), group: "Slots");
+      yield return new(typeof(ChildrenCount), group: "Slots");
       yield return new(typeof(GetParentSlot), group: "Slots");
-      yield return new(typeof(SetParent));
 
-      yield return new(typeof(FindChildByTag), group: "Slots"); // use tag here because it has less inputs which fits better when going to swap.
-      yield return new(typeof(DestroySlotChildren), group: "Slots");
-      yield return new(typeof(GetActiveUser));
-
+      yield return new(typeof(GetForward), group: "Slots");
       yield return new(typeof(TransformPoint), group: "Slots");
 
-      yield return new(typeof(DynamicImpulseTrigger), group: "Events");
-
-      var shouldRelay = ProtoFluxContextualActions.ShouldUseRelays;
-      var baseType = shouldRelay ? typeof(ObjectRelay<Slot>) : typeof(ChildrenCount);
-
+      yield return new(typeof(GetActiveUser), group: "Slots");
+      // use tag here because it has less inputs which fits better when going to swap.
       yield return new(typeof(AllocatingUser), name: "Allocating User", group: "Slots");
 
+      // yield return new(typeof(SetSlotActiveSelf), group: "Slots/Actions");
+      // yield return new(typeof(SetSlotPersistentSelf), group: "Slots/Actions");
+      // yield return new(typeof(SetParent), group: "Slots/Actions");
+      yield return new(typeof(DuplicateSlot), group: "Slots/Actions");
+      yield return new(typeof(DestroySlot), group: "Slots/Actions");
+      yield return new(typeof(DestroySlotChildren), group: "Slots/Actions");
+
+      yield return new(typeof(DynamicImpulseTrigger), group: "Actions/Events");
     }
 
     if (outputType == typeof(float2) || outputType == typeof(float3) || outputType == typeof(float4) ||
@@ -176,10 +173,10 @@ static partial class ContextualSelectionActionsPatch
     if (outputType == typeof(bool))
     {
       yield return new(typeof(If));
-      yield return new(typeof(FireOnTrue), group: "Events");
-      yield return new(typeof(FireOnLocalTrue), group: "Events");
-      yield return new(typeof(FireWhileTrue), group: "Events");
-      yield return new(typeof(LocalFireWhileTrue), group: "Events");
+      yield return new(typeof(FireOnTrue), group: "Actions/Events");
+      yield return new(typeof(FireOnLocalTrue), group: "Actions/Events");
+      yield return new(typeof(FireWhileTrue), group: "Actions/Events");
+      yield return new(typeof(LocalFireWhileTrue), group: "Actions/Events");
     }
 
     var changeVariableNode = GetNodeForType(outputType, [
@@ -187,12 +184,12 @@ static partial class ContextualSelectionActionsPatch
       new NodeTypeRecord(typeof(FireOnObjectValueChange<>), null, null),
       new NodeTypeRecord(typeof(FireOnRefChange<>), null, null),
     ]);
-    yield return new(changeVariableNode, group: "Events");
+    yield return new(changeVariableNode, group: "Actions/Events");
     var localChangeVariableNode = GetNodeForType(outputType, [
       new NodeTypeRecord(typeof(FireOnLocalValueChange<>), null, null),
       new NodeTypeRecord(typeof(FireOnLocalObjectChange<>), null, null),
     ]);
-    yield return new(localChangeVariableNode, group: "Events");
+    yield return new(localChangeVariableNode, group: "Actions/Events");
 
     if (!outputType.IsValueType)
     {
@@ -869,7 +866,7 @@ static partial class ContextualSelectionActionsPatch
 
             return connectNode;
           },
-          group: "Variables"
+          group: "Actions"
         );
       }
       if (outputType.TryGetGenericTypeDefinition(out var nodeVarType) && nodeVarType == typeof(IVariable<,>))
@@ -914,8 +911,8 @@ static partial class ContextualSelectionActionsPatch
         new NodeTypeRecord(typeof(ValueWriteLatch<>), null, null),
         new NodeTypeRecord(typeof(ObjectWriteLatch<>), null, null),
       ]);
-      yield return new(variableInput, group: "Variables");
-      yield return new(variableLatchInput, group: "Variables");
+      yield return new(variableInput, group: "Actions");
+      yield return new(variableLatchInput, group: "Actions");
     }
   }
 

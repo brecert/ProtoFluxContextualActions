@@ -28,7 +28,7 @@ static partial class ContextualSelectionActionsPatch
     yield return new(typeof(While), group: "Loops");
 
     yield return new(typeof(ValueWrite<int>));
-    yield return new(typeof(ValueWrite<int>), group: "Variables"); // while using dummy works, having int be the default is better (and its more consistent)
+    yield return new(typeof(ValueWrite<int>), group: "Actions"); // while using dummy works, having int be the default is better (and its more consistent)
 
     yield return new(typeof(ImpulseMultiplexer), name: "Impulse Multiplex", group: "Selection");
     yield return new(typeof(ImpulseDemultiplexer), name: "Impulse Demultiplex", group: "Selection");
@@ -44,7 +44,7 @@ static partial class ContextualSelectionActionsPatch
     yield return new(typeof(DelaySecondsFloat), group: "Async");
     yield return new(typeof(AsyncDynamicImpulseTrigger), group: "Async");
 
-    yield return new(typeof(DataModelBooleanToggle), group: "Variables");
+    yield return new(typeof(DataModelBooleanToggle), group: "Actions");
 
     yield return new(typeof(DebugSphere), group: "Actions/Debug");
     yield return new(typeof(DebugVector), group: "Actions/Debug");
@@ -66,8 +66,8 @@ static partial class ContextualSelectionActionsPatch
 
     if (IsIterationNode(nodeType))
     {
-      yield return new(typeof(ValueIncrement<int>), group: "Variables");
-      yield return new(typeof(ValueDecrement<int>), group: "Variables");
+      yield return new(typeof(ValueIncrement<int>), group: "Actions");
+      yield return new(typeof(ValueDecrement<int>), group: "Actions");
     }
 
     else if (nodeType == typeof(DuplicateSlot))
