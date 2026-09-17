@@ -7,6 +7,7 @@ public readonly struct InputElement(INode owner, int index, int? listIndex = nul
   public readonly INode OwnerNode = owner;
 
   public readonly int ElementIndex = index;
+
   public readonly int? ElementListIndex = listIndex;
 
   public readonly IOutput? Source

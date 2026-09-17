@@ -5,7 +5,9 @@ namespace ProtoFluxContextualActions.Utils.ProtoFlux;
 public readonly struct ReferenceElement(INode node, int index, int? elementListIndex = null) : IElementIndex
 {
   public readonly INode OwnerNode = node;
+
   public readonly int ElementIndex = index;
+
   public readonly int? ElementListIndex = elementListIndex;
 
   public readonly INode? Target
