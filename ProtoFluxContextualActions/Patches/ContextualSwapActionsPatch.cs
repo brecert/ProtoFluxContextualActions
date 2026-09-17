@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 using Elements.Core;
@@ -403,37 +404,37 @@ internal static partial class ContextualSwapActionsPatch
   [HarmonyReversePatch]
   [HarmonyPatch(typeof(ProtoFluxTool), "CleanupDraggedWire")]
   [MethodImpl(MethodImplOptions.NoInlining)]
-  internal static void CleanupDraggedWire(ProtoFluxTool instance) => throw new NotImplementedException();
+  internal static void CleanupDraggedWire(ProtoFluxTool instance) => throw new UnreachableException();
 
   [HarmonyReversePatch]
   [HarmonyPatch(typeof(ProtoFluxTool), "OnSecondaryPress")]
   [MethodImpl(MethodImplOptions.NoInlining)]
-  internal static void OnSecondaryPress(ProtoFluxTool instance) => throw new NotImplementedException();
+  internal static void OnSecondaryPress(ProtoFluxTool instance) => throw new UnreachableException();
 
 
   [HarmonyReversePatch]
   [HarmonyPatch(typeof(ProtoFluxHelper), "GetNodeForType")]
   [MethodImpl(MethodImplOptions.NoInlining)]
-  internal static Type GetNodeForType(Type type, List<NodeTypeRecord> list) => throw new NotImplementedException();
+  internal static Type GetNodeForType(Type type, List<NodeTypeRecord> list) => throw new UnreachableException();
 
   [HarmonyReversePatch]
   [HarmonyPatch(typeof(Tool), "GetHit")]
   [MethodImpl(MethodImplOptions.NoInlining)]
-  internal static RaycastHit? GetHit(Tool instance) => throw new NotImplementedException();
+  internal static RaycastHit? GetHit(Tool instance) => throw new UnreachableException();
 
   [HarmonyReversePatch]
   [HarmonyPatch(typeof(ProtoFluxNodeGroup), "MapCastsAndOverloads")]
   [MethodImpl(MethodImplOptions.NoInlining)]
-  internal static void MapCastsAndOverloads(ProtoFluxNodeGroup instance, ProtoFluxNode sourceNode, ProtoFluxNode targetNode, ConnectionResult result, bool undoable) => throw new NotImplementedException();
+  internal static void MapCastsAndOverloads(ProtoFluxNodeGroup instance, ProtoFluxNode sourceNode, ProtoFluxNode targetNode, ConnectionResult result, bool undoable) => throw new UnreachableException();
 
   [HarmonyReversePatch]
   [HarmonyPatch(typeof(ProtoFluxNode), "AssociateInstance")]
   [MethodImpl(MethodImplOptions.NoInlining)]
-  internal static void AssociateInstance(ProtoFluxNode instance, ProtoFluxNodeGroup group, INode node) => throw new NotImplementedException();
+  internal static void AssociateInstance(ProtoFluxNode instance, ProtoFluxNodeGroup group, INode node) => throw new UnreachableException();
 
   [HarmonyReversePatch]
   [HarmonyPatch(typeof(ProtoFluxNode), "ClearGroupAndInstance")]
   [MethodImpl(MethodImplOptions.NoInlining)]
-  internal static void ClearGroupAndInstance(this ProtoFluxNode instance) => throw new NotImplementedException();
+  internal static void ClearGroupAndInstance(this ProtoFluxNode instance) => throw new UnreachableException();
   #endregion
 }

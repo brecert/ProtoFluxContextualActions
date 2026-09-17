@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 using Elements.Core;
@@ -62,5 +63,5 @@ internal static class SpatialVariableSamplePatch
   [HarmonyReversePatch]
   [HarmonyPatch(typeof(ProtoFluxHelper), "GetNodeForType")]
   [MethodImpl(MethodImplOptions.NoInlining)]
-  internal static Type GetNodeForType(Type type, List<NodeTypeRecord> list) => throw new NotImplementedException();
+  internal static Type GetNodeForType(Type type, List<NodeTypeRecord> list) => throw new UnreachableException();
 }

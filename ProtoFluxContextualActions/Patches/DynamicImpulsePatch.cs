@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 using FrooxEngine;
@@ -123,5 +124,5 @@ internal static class DynamicImpulsePatch
   [HarmonyReversePatch]
   [HarmonyPatch(typeof(ProtoFluxHelper), "GetNodeForType")]
   [MethodImpl(MethodImplOptions.NoInlining)]
-  internal static Type GetNodeForType(Type type, List<NodeTypeRecord> list) => throw new NotImplementedException();
+  internal static Type GetNodeForType(Type type, List<NodeTypeRecord> list) => throw new UnreachableException();
 }

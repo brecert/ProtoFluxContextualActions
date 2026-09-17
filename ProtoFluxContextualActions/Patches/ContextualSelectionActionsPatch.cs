@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
@@ -240,6 +241,7 @@ internal static partial class ContextualSelectionActionsPatch
       elementProxy.Node.Target.TryConnectInput(inputProxy.NodeInput.Target, output, allowExplicitCast: false, undoable: true);
     }
   }
+
   private static void ProcessOutputProxyItem(ProtoFluxTool tool, ProtoFluxElementProxy elementProxy, MenuItem item, ProtoFluxNode addedNode)
   {
     var outputProxy = (ProtoFluxOutputProxy)elementProxy;
@@ -266,6 +268,7 @@ internal static partial class ContextualSelectionActionsPatch
       addedNode.TryConnectInput(input, outputProxy.NodeOutput.Target, allowExplicitCast: false, undoable: true);
     });
   }
+
   private static void ProcessImpulseProxyItem(ProtoFluxTool tool, ProtoFluxElementProxy elementProxy, MenuItem item, ProtoFluxNode addedNode)
   {
     var impulseProxy = (ProtoFluxImpulseProxy)elementProxy;
@@ -281,6 +284,7 @@ internal static partial class ContextualSelectionActionsPatch
     var operation = addedNode.NodeOperationCount > 0 ? addedNode.GetOperation(0) : addedNode.GetOperationList(0).GetElement(0) as INodeOperation;
     addedNode.TryConnectImpulse(impulseProxy.NodeImpulse.Target, operation!, undoable: true);
   }
+
   private static void ProcessOperationProxyItem(ProtoFluxTool tool, ProtoFluxElementProxy elementProxy, MenuItem item, ProtoFluxNode addedNode)
   {
     var operationProxy = (ProtoFluxOperationProxy)elementProxy;
@@ -463,20 +467,20 @@ internal static partial class ContextualSelectionActionsPatch
   [HarmonyReversePatch]
   [HarmonyPatch(typeof(ProtoFluxTool), "CleanupDraggedWire")]
   [MethodImpl(MethodImplOptions.NoInlining)]
-  internal static void CleanupDraggedWire(ProtoFluxTool instance) => throw new NotImplementedException();
+  internal static void CleanupDraggedWire(ProtoFluxTool instance) => throw new UnreachableException();
 
   [HarmonyReversePatch]
   [HarmonyPatch(typeof(ProtoFluxTool), "OnSecondaryPress")]
   [MethodImpl(MethodImplOptions.NoInlining)]
-  internal static void OnSecondaryPress(ProtoFluxTool instance) => throw new NotImplementedException();
+  internal static void OnSecondaryPress(ProtoFluxTool instance) => throw new UnreachableException();
 
   [HarmonyReversePatch]
   [HarmonyPatch(typeof(ProtoFluxHelper), "GetNodeForType")]
   [MethodImpl(MethodImplOptions.NoInlining)]
-  internal static Type GetNodeForType(Type type, List<NodeTypeRecord> list) => throw new NotImplementedException();
+  internal static Type GetNodeForType(Type type, List<NodeTypeRecord> list) => throw new UnreachableException();
 
   [HarmonyReversePatch]
   [HarmonyPatch(typeof(Tool), "GetHit")]
   [MethodImpl(MethodImplOptions.NoInlining)]
-  internal static RaycastHit? GetHit(Tool instance) => throw new NotImplementedException();
+  internal static RaycastHit? GetHit(Tool instance) => throw new UnreachableException();
 }
