@@ -141,7 +141,7 @@ static partial class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(DynamicImpulseTrigger), group: "Events");
 
       var shouldRelay = ProtoFluxContextualActions.ShouldUseRelays;
-      Type baseType = shouldRelay ? typeof(ObjectRelay<Slot>) : typeof(ChildrenCount);
+      var baseType = shouldRelay ? typeof(ObjectRelay<Slot>) : typeof(ChildrenCount);
 
       yield return new MenuItem(typeof(AllocatingUser), name: "Allocating User", group: "Slots");
 
@@ -340,7 +340,7 @@ static partial class ContextualSelectionActionsPatch
       yield return new MenuItem(typeof(DefaultUserScale));
 
       yield return new MenuItem(typeof(StandardController), group: "Input");
-      Type controllerType = GetUserControllerType(Engine.Current.WorldManager.FocusedWorld.LocalUser);
+      var controllerType = GetUserControllerType(Engine.Current.WorldManager.FocusedWorld.LocalUser);
       if (controllerType != typeof(StandardController)) yield return new MenuItem(controllerType, group: "Input");
       // todo: find a way to get the user from the output flux node?
       // if the user isnt null, add the controller type of the user to the list
@@ -348,7 +348,7 @@ static partial class ContextualSelectionActionsPatch
 
     if (psuedoGenericTypes.PackTangentPoint2.Any(t => t.Node == nodeType))
     {
-      Type tangentType = psuedoGenericTypes.PackTangentPoint2.First(t => t.Node == nodeType).Types.First();
+      var tangentType = psuedoGenericTypes.PackTangentPoint2.First(t => t.Node == nodeType).Types.First();
       yield return new MenuItem(psuedoGenericTypes.BezierCurve.First(t => t.Types.First() == tangentType).Node);
     }
 
@@ -492,24 +492,24 @@ static partial class ContextualSelectionActionsPatch
             tool.StartTask(async () =>
             {
               // Node spawning
-              Type refIDObjectCastNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.Casts.ValueToObjectCast<RefID>);
-              Type toStringNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ParsingFormatting.ToString_object);
-              Type stringRemoveNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.Strings.StringRemove);
-              Type parseULongNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ParsingFormatting.Parse_Ulong);
-              Type lengthInputNode = ProtoFluxHelper.GetInputNode(typeof(int));
-              Type numberStyleNode = ProtoFluxHelper.GetInputNode(typeof(NumberStyles));
+              var refIDObjectCastNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.Casts.ValueToObjectCast<RefID>);
+              var toStringNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ParsingFormatting.ToString_object);
+              var stringRemoveNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.Strings.StringRemove);
+              var parseULongNode = typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ParsingFormatting.Parse_Ulong);
+              var lengthInputNode = ProtoFluxHelper.GetInputNode(typeof(int));
+              var numberStyleNode = ProtoFluxHelper.GetInputNode(typeof(NumberStyles));
 
               ProtoFluxNode? SpawnNode(Type nodeType)
               {
                 return tool.SpawnNode(nodeType, node => node.EnsureVisual());
               }
 
-              ProtoFluxNode? refObjCast = SpawnNode(refIDObjectCastNode);
-              ProtoFluxNode? toStr = SpawnNode(toStringNode);
-              ProtoFluxNode? strRemove = SpawnNode(stringRemoveNode);
-              ProtoFluxNode? parseULong = SpawnNode(parseULongNode);
-              ProtoFluxNode? lenInput = SpawnNode(lengthInputNode);
-              ProtoFluxNode? styleInput = SpawnNode(numberStyleNode);
+              var refObjCast = SpawnNode(refIDObjectCastNode);
+              var toStr = SpawnNode(toStringNode);
+              var strRemove = SpawnNode(stringRemoveNode);
+              var parseULong = SpawnNode(parseULongNode);
+              var lenInput = SpawnNode(lengthInputNode);
+              var styleInput = SpawnNode(numberStyleNode);
 
               ProtoFluxNode?[] nodes = [node, refObjCast, toStr, strRemove, parseULong, lenInput, styleInput];
 
@@ -538,20 +538,20 @@ static partial class ContextualSelectionActionsPatch
               }
 
               // Inputs and outputs
-              INodeOutput inputRelay = node.GetOutput(0);
+              var inputRelay = node.GetOutput(0);
 
-              ISyncRef refIDInstance = refObjCast!.GetInput(0);
-              INodeOutput refIDValue = refObjCast.GetOutput(0);
-              ISyncRef objectInstance = toStr!.GetInput(0);
-              INodeOutput objectValue = toStr.GetOutput(0);
-              ISyncRef stringRemoveInstance = strRemove!.GetInput(0);
-              ISyncRef stringRemoveLength = strRemove.GetInput(2);
-              INodeOutput stringRemoveValue = strRemove.GetOutput(0);
-              ISyncRef parseULongInstance = parseULong!.GetInput(0);
-              ISyncRef parseULongStyle = parseULong.GetInput(1);
+              var refIDInstance = refObjCast!.GetInput(0);
+              var refIDValue = refObjCast.GetOutput(0);
+              var objectInstance = toStr!.GetInput(0);
+              var objectValue = toStr.GetOutput(0);
+              var stringRemoveInstance = strRemove!.GetInput(0);
+              var stringRemoveLength = strRemove.GetInput(2);
+              var stringRemoveValue = strRemove.GetOutput(0);
+              var parseULongInstance = parseULong!.GetInput(0);
+              var parseULongStyle = parseULong.GetInput(1);
 
-              INodeOutput lengthValue = lenInput!.GetOutput(0);
-              INodeOutput numberStylesValue = styleInput!.GetOutput(0);
+              var lengthValue = lenInput!.GetOutput(0);
+              var numberStylesValue = styleInput!.GetOutput(0);
 
               refIDInstance.Target = inputRelay;
               objectInstance.Target = refIDValue;
@@ -581,12 +581,12 @@ static partial class ContextualSelectionActionsPatch
               // Positions
               void setPositions()
               {
-                float3 baseUp = nodeSlot.Up;
-                float3 baseRight = nodeSlot.Right;
+                var baseUp = nodeSlot.Up;
+                var baseRight = nodeSlot.Right;
 
                 void LocalTransformNode(ProtoFluxNode input, float X, float Y)
                 {
-                  Slot target = input.Slot;
+                  var target = input.Slot;
                   target.CopyTransform(nodeSlot);
                   target.Parent = nodeSlot.Parent;
                   target.GlobalPosition += (baseUp * Y) + (baseRight * X);
@@ -852,7 +852,7 @@ static partial class ContextualSelectionActionsPatch
     }
 
     var outputNode = outputProxy.Node.Target.NodeInstance;
-    Type? nodeVariable = GetIVariableValueType(outputNode.GetType());
+    var nodeVariable = GetIVariableValueType(outputNode.GetType());
 
     if (nodeVariable != null)
     {
@@ -863,7 +863,7 @@ static partial class ContextualSelectionActionsPatch
           name: name,
           onNodeSpawn: (ProtoFluxNode newNode, ProtoFluxElementProxy proxy, ProtoFluxTool _) =>
           {
-            ISyncRef targetRef = newNode.GetReference(0);
+            var targetRef = newNode.GetReference(0);
 
             newNode.TryConnectReference(targetRef, outputProxy.Node.Target, false);
 
@@ -922,8 +922,8 @@ static partial class ContextualSelectionActionsPatch
 
   internal static Type GetUserControllerType(User user)
   {
-    IStandardController controller = user.InputInterface.GetControllerNode(Chirality.Right);
-    Type? controllerType = controller.GetType();
+    var controller = user.InputInterface.GetControllerNode(Chirality.Right);
+    var controllerType = controller.GetType();
     if (controllerType != null)
     {
       if (controllerType == typeof(FrooxEngine.TouchController))

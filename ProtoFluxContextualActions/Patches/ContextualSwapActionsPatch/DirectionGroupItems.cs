@@ -45,6 +45,6 @@ static partial class ContextualSwapActionsPatch
         yield return new(setMatch);
       }
     }
-    if (TryGetSwap(GetSetDirectionEquivilents, context.NodeType, out Type match)) yield return new(match);
+    if (TryGetSwap(GetSetDirectionEquivilents, context.NodeType, out var match)) yield return new(match);
   }
 }

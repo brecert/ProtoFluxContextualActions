@@ -32,7 +32,7 @@ static partial class ContextualSwapActionsPatch
 
   internal static IEnumerable<MenuItem> GlobalLocalEquivilentSwapGroups(Type nodeType)
   {
-    if (TryGetSwap(SetGlobalLocalEquivilents, nodeType, out Type match)) yield return new(match);
+    if (TryGetSwap(SetGlobalLocalEquivilents, nodeType, out var match)) yield return new(match);
     if (TryGetSwap(GetGlobalLocalEquivilents, nodeType, out match)) yield return new(match, connectionTransferType: ConnectionTransferType.ByIndexLossy);
     if (TryGetSwap(GetSetTransformEquivilents, nodeType, out match)) yield return new(match);
   }

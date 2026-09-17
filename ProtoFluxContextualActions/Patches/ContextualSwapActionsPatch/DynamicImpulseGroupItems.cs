@@ -124,8 +124,8 @@ static partial class ContextualSwapActionsPatch
       if (tag == null) return;
 
       var isGeneric = context.NodeType.IsGenericType;
-      Type oldBaseType = isGeneric ? context.NodeType.GetGenericTypeDefinition() : context.NodeType;
-      Type newBaseType = isGeneric ? inputType.GetGenericTypeDefinition() : inputType;
+      var oldBaseType = isGeneric ? context.NodeType.GetGenericTypeDefinition() : context.NodeType;
+      var newBaseType = isGeneric ? inputType.GetGenericTypeDefinition() : inputType;
       if (!oldBaseType.GetNiceTypeName().Contains("Receiver")) return;
       if (!newBaseType.GetNiceTypeName().Contains("Trigger")) return;
       context.callingTool.SpawnNode(ProtoFluxHelper.GetInputNode(typeof(string)), inputNode =>
@@ -133,7 +133,7 @@ static partial class ContextualSwapActionsPatch
         inputNode.EnsureVisual();
         var casted = (FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ValueObjectInput<string>)inputNode;
         newNode.GetInput(0).Target = casted.GetOutput(0);
-        Slot newNodeSlot = newNode.Slot;
+        var newNodeSlot = newNode.Slot;
         casted.Value.Value = tag;
         casted.Slot.Parent = newNodeSlot.Parent;
         casted.Slot.CopyTransform(newNodeSlot);

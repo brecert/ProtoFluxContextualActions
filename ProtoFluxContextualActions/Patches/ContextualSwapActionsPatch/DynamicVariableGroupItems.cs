@@ -33,7 +33,7 @@ static partial class ContextualSwapActionsPatch
 
   internal static IEnumerable<MenuItem> DynamicVariableGroupItems(ContextualContext context)
   {
-    Type baseNodeType = context.NodeType.IsGenericType ? context.NodeType.GetGenericTypeDefinition() : context.NodeType;
+    var baseNodeType = context.NodeType.IsGenericType ? context.NodeType.GetGenericTypeDefinition() : context.NodeType;
     if (DynamicVariableGroup.Any(t => t == baseNodeType))
     {
       Type? target = null;

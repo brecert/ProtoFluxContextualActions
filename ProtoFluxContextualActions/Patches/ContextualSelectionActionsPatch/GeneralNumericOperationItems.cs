@@ -126,7 +126,7 @@ static partial class ContextualSelectionActionsPatch
           }
           if (psuedoGenericTypes.PackTangentPoint2.Any(t => t.Types.First() == outputType))
           {
-            Type packTangentNode = psuedoGenericTypes.PackTangentPoint2.First(t => t.Types.First() == outputType).Node;
+            var packTangentNode = psuedoGenericTypes.PackTangentPoint2.First(t => t.Types.First() == outputType).Node;
 
             yield return new MenuItem(packTangentNode, group: "Math/Lerping");
           }

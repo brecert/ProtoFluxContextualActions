@@ -63,11 +63,11 @@ internal static class DynamicVariableOutputPatch
         {
           ((ValueObjectInput<string>)n).Value.Value = variableName;
           inputOutput = n.GetOutput(0);
-          float3 upDir = n.Slot.Up;
-          float3 rightDir = n.Slot.Right;
-          float3 scaling = n.Slot.LocalScale;
+          var upDir = n.Slot.Up;
+          var rightDir = n.Slot.Right;
+          var scaling = n.Slot.LocalScale;
 
-          float3 delta = (upDir * -0.015f) + (rightDir * -0.25f);
+          var delta = (upDir * -0.015f) + (rightDir * -0.25f);
           n.Slot.LocalPosition += delta * scaling;
         });
         __instance.SpawnNode(variableRead, n =>
@@ -92,11 +92,11 @@ internal static class DynamicVariableOutputPatch
         {
           ((ValueObjectInput<string>)n).Value.Value = variableName;
           inputOutput = n.GetOutput(0);
-          float3 upDir = n.Slot.Up;
-          float3 rightDir = n.Slot.Right;
-          float3 scaling = n.Slot.LocalScale;
+          var upDir = n.Slot.Up;
+          var rightDir = n.Slot.Right;
+          var scaling = n.Slot.LocalScale;
 
-          float3 delta = (upDir * -0.015f) + (rightDir * -0.25f);
+          var delta = (upDir * -0.015f) + (rightDir * -0.25f);
           n.Slot.LocalPosition += delta * scaling;
         });
         __instance.SpawnNode(variableRead, n =>

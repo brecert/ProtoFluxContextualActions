@@ -34,7 +34,7 @@ static partial class ContextualSwapActionsPatch
     var world = context.hitNode.World;
     var psuedoGenericTypes = world.GetPsuedoGenericTypesForWorld();
 
-    Type nodeValueType = GetTypesFromNode(world, context.NodeType).First();
+    var nodeValueType = GetTypesFromNode(world, context.NodeType).First();
 
     var CosineLerpNodes = psuedoGenericTypes.CosineLerp;
     var MultiCosineLerpNodes = psuedoGenericTypes.MultiCosineLerp;

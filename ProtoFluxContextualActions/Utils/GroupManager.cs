@@ -53,7 +53,7 @@ internal class GroupManager
 
     List<GroupItem> contextItems = [.. items.Select((item) =>
     {
-      colorX itemColor = targetColor ?? item.Color;
+      var itemColor = targetColor ?? item.Color;
       return new GroupItem()
       {
         name = item.Name,
@@ -66,7 +66,7 @@ internal class GroupManager
     contextItems.ForEach((item) =>
     {
       var itemGroup = item.baseItem.Group;
-      if (GroupedItems.TryGetValue(itemGroup, out List<GroupItem>? list)) list.Add(item);
+      if (GroupedItems.TryGetValue(itemGroup, out var list)) list.Add(item);
       else GroupedItems.Add(itemGroup, [item]);
     });
 

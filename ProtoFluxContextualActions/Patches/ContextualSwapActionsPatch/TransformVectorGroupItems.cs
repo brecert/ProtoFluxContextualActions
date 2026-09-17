@@ -72,7 +72,7 @@ static partial class ContextualSwapActionsPatch
         yield return new MenuItem(vecNode, connectionTransferType: ConnectionTransferType.ByIndexLossy);
       }
     }
-    if (TryGetSwap(VectorGlobalLocalGroup, context.NodeType, out Type match)) yield return new(match);
+    if (TryGetSwap(VectorGlobalLocalGroup, context.NodeType, out var match)) yield return new(match);
     if (TryGetSwap(GlobalVectorTransformSwapGroup, context.NodeType, out match)) yield return new(match);
     // this one may not be needed, but it could speed some things up a little.
     if (TryGetSwap(LocalVectorTransformSwapGroup, context.NodeType, out match)) yield return new(match);

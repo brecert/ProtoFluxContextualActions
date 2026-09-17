@@ -24,7 +24,7 @@ static partial class ContextualSwapActionsPatch
 
   internal static IEnumerable<MenuItem> UserRootSwapGroups(Type nodeType)
   {
-    if (TryGetSwap(GetUserRootSwapGroup, nodeType, out Type match)) yield return new(match);
+    if (TryGetSwap(GetUserRootSwapGroup, nodeType, out var match)) yield return new(match);
     if (TryGetSwap(UserRootPositionSwapGroup, nodeType, out match)) yield return new(match);
     if (TryGetSwap(UserRootRotationSwapGroup, nodeType, out match)) yield return new(match);
     if (TryGetSwap(SetUserRootSwapGroup, nodeType, out match)) yield return new(match);

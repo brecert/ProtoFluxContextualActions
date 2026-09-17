@@ -93,7 +93,7 @@ static partial class ContextualSelectionActionsPatch
       // Select a User in the current session
       List<User> users = [];
       inputProxy.Slot.World.GetUsers(users);
-      foreach (User user in users)
+      foreach (var user in users)
       {
         yield return new MenuItem(
           typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.RefObjectInput<User>),

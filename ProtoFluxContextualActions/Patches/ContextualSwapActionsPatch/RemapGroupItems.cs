@@ -13,6 +13,6 @@ static partial class ContextualSwapActionsPatch
 
   internal static IEnumerable<MenuItem> RemapGroupItems(ContextualContext context)
   {
-    if (TryGetSwap(RemapGroup, context.NodeType, out Type match)) yield return new MenuItem(match);
+    if (TryGetSwap(RemapGroup, context.NodeType, out var match)) yield return new MenuItem(match);
   }
 }
