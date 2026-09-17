@@ -8,99 +8,102 @@ namespace ProtoFluxContextualActions.Extensions;
 
 public static class MapExtensions
 {
-  public static void MapElements(this INode from, ProtoFluxNode to, Dictionary<INode, ProtoFluxNode> nodeMapping, bool undoable)
+  /// <summary>
+  /// Maps a ProtoFlux runtime node's values to a FrooxEngine ProtoFluxNode component's values
+  /// </summary>
+  public static void MapElements(this INode fromNode, ProtoFluxNode toNode, Dictionary<INode, ProtoFluxNode> nodeMapping, bool undoable)
   {
-    var query = new NodeQueryAcceleration(from.Runtime.Group);
+    var query = new NodeQueryAcceleration(fromNode.Runtime.Group);
 
-    from.MapInputs(to, nodeMapping, undoable);
-    from.MapImpulses(to, nodeMapping, undoable);
-    from.MapInternalReferences(to, nodeMapping, undoable);
-    from.MapGlobals(to, undoable);
+    fromNode.MapInputs(toNode, nodeMapping, undoable);
+    fromNode.MapImpulses(toNode, nodeMapping, undoable);
+    fromNode.MapInternalReferences(toNode, nodeMapping, undoable);
+    fromNode.MapGlobals(toNode, undoable);
 
-    from.MapOutputs(to, nodeMapping, query, undoable);
-    from.MapOperations(to, nodeMapping, query, undoable);
-    from.MapExternalReferences(to, nodeMapping, query, undoable);
+    fromNode.MapOutputs(toNode, nodeMapping, query, undoable);
+    fromNode.MapOperations(toNode, nodeMapping, query, undoable);
+    fromNode.MapExternalReferences(toNode, nodeMapping, query, undoable);
   }
 
-  public static void MapExternalReferences(this INode from, ProtoFluxNode to, Dictionary<INode, ProtoFluxNode> nodeMapping, NodeQueryAcceleration query, bool undoable)
+  public static void MapExternalReferences(this INode fromNode, ProtoFluxNode toNode, Dictionary<INode, ProtoFluxNode> nodeMapping, NodeQueryAcceleration query, bool undoable)
   {
-    foreach (var source in query.GetReferencingElements(from))
+    foreach (var source in query.GetReferencingElements(fromNode))
     {
       var referencingNode = nodeMapping[source.OwnerNode];
       var syncRef = referencingNode.GetReference(source.ElementIndex);
       if (undoable) syncRef.CreateUndoPoint(forceNew: true);
-      syncRef.Target = to;
+      syncRef.Target = toNode;
     }
   }
 
-  public static void MapGlobals(this INode from, ProtoFluxNode to, bool undoable)
+  public static void MapGlobals(this INode fromNode, ProtoFluxNode toNode, bool undoable)
   {
-    foreach (var source in from.AllGlobalRefElements())
+    foreach (var source in fromNode.AllGlobalRefElements())
     {
-      var globalRef = to.GetGlobalRef(source.ElementIndex);
+      var globalRef = toNode.GetGlobalRef(source.ElementIndex);
       if (undoable) globalRef.CreateUndoPoint(forceNew: true);
       if (source.Target is Global global)
       {
-        globalRef.Target = (IWorldElement)to.Group.GetGlobal(global.Index);
+        globalRef.Target = (IWorldElement)toNode.Group.GetGlobal(global.Index);
       }
     }
   }
 
-  public static void MapImpulses(this INode from, ProtoFluxNode to, Dictionary<INode, ProtoFluxNode> nodeMapping, bool undoable)
+  public static void MapImpulses(this INode fromNode, ProtoFluxNode toNode, Dictionary<INode, ProtoFluxNode> nodeMapping, bool undoable)
   {
-    foreach (var impulse in from.AllImpulseElements())
+    foreach (var impulse in fromNode.AllImpulseElements())
     {
       if (impulse.Target == null) continue;
       var nodeToImpulse = nodeMapping[impulse.Target.OwnerNode];
-      var syncRef = to.GetImpulse(impulse);
+      var syncRef = toNode.GetImpulse(impulse);
       if (undoable) syncRef?.CreateUndoPoint(forceNew: true);
       syncRef?.TrySet(nodeToImpulse.GetOperation(impulse.TargetElement().Value));
     }
   }
 
-  public static void MapInputs(this INode from, ProtoFluxNode to, Dictionary<INode, ProtoFluxNode> nodeMapping, bool undoable)
+  public static void MapInputs(this INode fromNode, ProtoFluxNode toNode, Dictionary<INode, ProtoFluxNode> nodeMapping, bool undoable)
   {
-    foreach (var source in from.AllInputElements())
+    foreach (var source in fromNode.AllInputElements())
     {
       if (source.Source == null) continue;
       var inputFrom = nodeMapping[source.Source.OwnerNode];
-      var syncRef = to.GetInput(source);
+      var syncRef = toNode.GetInput(source);
       if (undoable) syncRef?.CreateUndoPoint(forceNew: true);
       syncRef?.TrySet(inputFrom.GetOutput(source.SourceElement().Value));
     }
   }
 
-  public static void MapInternalReferences(this INode from, ProtoFluxNode to, Dictionary<INode, ProtoFluxNode> nodeMapping, bool undoable)
+  public static void MapInternalReferences(this INode fromNode, ProtoFluxNode toNode, Dictionary<INode, ProtoFluxNode> nodeMapping, bool undoable)
   {
-    foreach (var source in from.AllReferenceElements())
+    foreach (var source in fromNode.AllReferenceElements())
     {
       if (source.Target == null) continue;
       var target = nodeMapping[source.Target];
-      var syncRef = to.GetReference(source.ElementIndex);
+      var syncRef = toNode.GetReference(source.ElementIndex);
       if (undoable) syncRef.CreateUndoPoint(forceNew: true);
       syncRef.Target = target;
     }
   }
 
-  public static void MapOperations(this INode from, ProtoFluxNode to, Dictionary<INode, ProtoFluxNode> nodeMapping, NodeQueryAcceleration query, bool undoable)
+  public static void MapOperations(this INode fromNode, ProtoFluxNode toNode, Dictionary<INode, ProtoFluxNode> nodeMapping, NodeQueryAcceleration query, bool undoable)
   {
-    foreach (var source in query.GetImpulsingElements(from))
+    foreach (var source in query.GetImpulsingElements(fromNode))
     {
       var sourceNode = nodeMapping[source.OwnerNode];
       var syncRef = sourceNode.GetImpulse(source);
       if (undoable) syncRef?.CreateUndoPoint(forceNew: true);
-      syncRef?.TrySet(to.GetOperation(source.TargetElement().Value));
+      syncRef?.TrySet(toNode.GetOperation(source.TargetElement().Value));
     }
   }
 
-  public static void MapOutputs(this INode from, ProtoFluxNode to, Dictionary<INode, ProtoFluxNode> nodeMapping, NodeQueryAcceleration query, bool undoable)
+  public static void MapOutputs(this INode fromNode, ProtoFluxNode toNode, Dictionary<INode, ProtoFluxNode> nodeMapping, NodeQueryAcceleration query, bool undoable)
   {
-    foreach (var source in query.GetEvaluatingElements(from))
+    foreach (var source in query.GetEvaluatingElements(fromNode))
     {
       var sourceNode = nodeMapping[source.OwnerNode];
       var syncRef = sourceNode.GetInput(source);
       if (undoable) syncRef?.CreateUndoPoint(forceNew: true);
-      syncRef?.TrySet(to.GetOutput(source.SourceElement().Value));
+      syncRef?.TrySet(toNode.GetOutput(source.SourceElement().Value));
     }
   }
 }

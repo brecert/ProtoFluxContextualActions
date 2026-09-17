@@ -14,7 +14,6 @@ public static class EnumerableExtensions
     return dictionary;
   }
 
-
   public static BiDictionary<TKey, TElement> ToBiDictionary<TSource, TKey, TElement>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector) where TKey : notnull
   {
     var dictionary = new BiDictionary<TKey, TElement>();

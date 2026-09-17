@@ -307,6 +307,10 @@ public static class SwapHelper
     }
   }
 
+  /// <summary>
+  /// Attempts to transfer all elements from one node to another.<br />
+  /// This includes inputs, outputs, impulses, operations, external references, internal references, and globals.
+  /// </summary>
   public static IEnumerable<ConnectionResult> TransferElements<N>(INode oldNode, INode newNode, NodeQueryAcceleration query, NodeRuntime<N> runtime, bool tryByIndex = false, bool overload = true) where N : class, INode
   {
     newNode.CopyDynamicInputLayout(oldNode);
