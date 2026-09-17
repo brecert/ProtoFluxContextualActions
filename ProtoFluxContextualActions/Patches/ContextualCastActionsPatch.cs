@@ -59,7 +59,7 @@ internal static class ContextualCastActionsPatch
       {
         menu.AddMenuItem(
           name: castItem.DisplayName,
-          icon: (Uri?)null,
+          icon: null,
           color: new colorX?(colorX.White),
           onClicked: () => SpawnNode(tool, node, input, castItem, (castNode) =>
           {

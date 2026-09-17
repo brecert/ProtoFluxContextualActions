@@ -26,7 +26,6 @@ using SharpPipe;
 namespace ProtoFluxContextualActions.Patches;
 
 [PatchGroup("Contextual Actions", "When enabled, pressing secondary while holding the ProtoFlux Tool will open a context menu of actions based on what wire you're dragging instead of always spawning an input/display node. Pressing secondary again will spawn out an input/display node like normal.")]
-[HarmonyPatch(typeof(ProtoFluxTool), nameof(ProtoFluxTool.OnSecondaryPress))]
 internal static partial class ContextualSelectionActionsPatch
 {
   internal struct MenuItem(
@@ -71,7 +70,7 @@ internal static partial class ContextualSelectionActionsPatch
 
   [HarmonyPrefix]
   [HarmonyPatch(typeof(ProtoFluxTool), nameof(ProtoFluxTool.OnPrimaryRelease))]
-  internal static void PrimaryReleasePatch(ProtoFluxTool __instance, SyncRef<ProtoFluxElementProxy> ____currentProxy)
+  internal static void PrimaryReleasePatch(ProtoFluxTool __instance)
   {
     if (!ProtoFluxContextualActions.ShouldDoDefaultActionOnPrimaryRelease) return;
     if (!__instance.LocalUser.IsContextMenuOpen()) return;
@@ -80,7 +79,9 @@ internal static partial class ContextualSelectionActionsPatch
     __instance.OnSecondaryPress();
   }
 
-  internal static bool Prefix(ProtoFluxTool __instance, SyncRef<ProtoFluxElementProxy> ____currentProxy)
+  [HarmonyPrefix]
+  [HarmonyPatch(typeof(ProtoFluxTool), nameof(ProtoFluxTool.OnSecondaryPress))]
+  internal static bool SecondaryPressPatch(ProtoFluxTool __instance, SyncRef<ProtoFluxElementProxy> ____currentProxy)
   {
     var grabbedReference = __instance.GetGrabbedReference();
     // Grabbed References usually mean we should not run the main function.
@@ -100,14 +101,15 @@ internal static partial class ContextualSelectionActionsPatch
       return true;
     }
 
-    var selectionItems = MenuItems(elementProxy)
-      .Where(i => (i.binding ?? i.node).IsValidGenericType(validForInstantiation: true)); // this isn't great, we should instead catch errors before they propigate to here.
+    // this isn't great, we should instead catch errors before they propigate to here.
+    var selectionItems = MenuItems(elementProxy).Where(i => (i.binding ?? i.node).IsValidGenericType(validForInstantiation: true));
 
     var hasSwaps = false;
     ProtoFluxNode? swapRoot = null;
     var hit = GetHit(__instance);
     if (hit is { Collider.Slot: var hitSlot })
     {
+      // ignore wires (they have collision)
       if (hitSlot.Name != "<WIRE_POINT>")
       {
         var hitNode = hitSlot.GetComponentInParents<ProtoFluxNode>();
@@ -116,15 +118,13 @@ internal static partial class ContextualSelectionActionsPatch
       }
     }
     var swapItems = hasSwaps
-      ?
-        ContextualSwapActionsPatch.GetMenuItems(__instance, swapRoot!, elementProxy, true)
+      ? ContextualSwapActionsPatch.GetMenuItems(__instance, swapRoot!, elementProxy, true)
         .Select<ContextualSwapActionsPatch.MenuItem, IGroupItem>(item => { item.group = string.IsNullOrEmpty(item.group) ? "Swaps" : "Swaps/" + item.group; return item; })
-      :
-        [];
-    List<IGroupItem> items = selectionItems.Select<MenuItem, IGroupItem>(item => item)
+      : [];
+
+    var items = selectionItems.Select<MenuItem, IGroupItem>(item => item)
       .Concat(swapItems)
       .ToList();
-    // todo: pages / menu
 
     if (items.Count != 0)
     {
@@ -137,6 +137,7 @@ internal static partial class ContextualSelectionActionsPatch
         __instance.LocalUser.CloseContextMenu(__instance);
         return true;
       }
+
       Action<ProtoFluxTool, ProtoFluxElementProxy, MenuItem, ProtoFluxNode>? currentAction = null;
       colorX? targetColor = null;
 
@@ -176,12 +177,12 @@ internal static partial class ContextualSelectionActionsPatch
         return item;
       });
 
-      items = selectionItems.Select<MenuItem, IGroupItem>(item => item).Concat(swapItems).ToList();
+      items = [.. selectionItems.Select<MenuItem, IGroupItem>(item => item), .. swapItems];
 
       // the idea behind this would have worked, but i must have written it wrong as this breaks all ordering of everything
       //items.Sort((a, b) => a.orderOffset - b.orderOffset);
 
-      GroupManager grouper = new(__instance, items, targetColor);
+      var grouper = new GroupManager(__instance, items, targetColor);
       var success = grouper.RenderRoot(true);
 
       return !success;
