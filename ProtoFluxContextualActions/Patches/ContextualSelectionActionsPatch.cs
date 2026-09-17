@@ -168,11 +168,16 @@ internal static partial class ContextualSelectionActionsPatch
           }
         case ProtoFluxImpulseProxy impulseProxy:
           {
+            targetColor = (item) => NodeMetadataHelper.GetMetadata(item.node).FixedOperations.FirstOrDefault() is { IsAsync: var isAsync }
+              ? DatatypeColorHelper.GetOperationColor(isAsync)
+              : colorX.White;
+
             currentAction = ProcessImpulseProxyItem;
             break;
           }
         case ProtoFluxOperationProxy operationProxy:
           {
+            targetColor = (item) => NodeMetadataHelper.GetMetadata(item.node).FixedImpulses.FirstOrDefault()?.Type.GetImpulseColor() ?? colorX.White;
             currentAction = ProcessOperationProxyItem;
             break;
           }
