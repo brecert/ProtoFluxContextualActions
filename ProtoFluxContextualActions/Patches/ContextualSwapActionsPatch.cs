@@ -128,7 +128,7 @@ internal static partial class ContextualSwapActionsPatch
 
   private static bool CreateMenu(ProtoFluxTool __instance, ProtoFluxNode hitNode, ProtoFluxElementProxy? proxy)
   {
-    List<IGroupItem> items = GetMenuItems(__instance, hitNode, proxy).Where(m => m.node != hitNode.NodeType).Select<MenuItem, IGroupItem>(item => item).ToList();
+    var items = GetMenuItems(__instance, hitNode, proxy).Where(m => m.node != hitNode.NodeType).Select<MenuItem, IGroupItem>(item => item).ToList();
 
     var query = new NodeQueryAcceleration(hitNode.NodeInstance.Runtime.Group);
 

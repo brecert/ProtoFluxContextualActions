@@ -205,7 +205,7 @@ internal static partial class ContextualSelectionActionsPatch
 
   private static void ProcessInputProxyItem(ProtoFluxTool tool, ProtoFluxElementProxy elementProxy, MenuItem item, ProtoFluxNode addedNode)
   {
-    ProtoFluxInputProxy inputProxy = (ProtoFluxInputProxy)elementProxy;
+    var inputProxy = (ProtoFluxInputProxy)elementProxy;
     if (item.overload)
     {
       tool.StartTask(async () =>
@@ -242,7 +242,7 @@ internal static partial class ContextualSelectionActionsPatch
   }
   private static void ProcessOutputProxyItem(ProtoFluxTool tool, ProtoFluxElementProxy elementProxy, MenuItem item, ProtoFluxNode addedNode)
   {
-    ProtoFluxOutputProxy outputProxy = (ProtoFluxOutputProxy)elementProxy;
+    var outputProxy = (ProtoFluxOutputProxy)elementProxy;
     if (item.overload) throw new Exception("Overloading with ProtoFluxOutputProxy is not supported");
 
     tool.StartTask(async () =>
@@ -268,7 +268,7 @@ internal static partial class ContextualSelectionActionsPatch
   }
   private static void ProcessImpulseProxyItem(ProtoFluxTool tool, ProtoFluxElementProxy elementProxy, MenuItem item, ProtoFluxNode addedNode)
   {
-    ProtoFluxImpulseProxy impulseProxy = (ProtoFluxImpulseProxy)elementProxy;
+    var impulseProxy = (ProtoFluxImpulseProxy)elementProxy;
     if (item.overload) throw new Exception("Overloading with ProtoFluxImpulseProxy is not supported");
 
     if (item.onNodeSpawn != null)
@@ -283,7 +283,7 @@ internal static partial class ContextualSelectionActionsPatch
   }
   private static void ProcessOperationProxyItem(ProtoFluxTool tool, ProtoFluxElementProxy elementProxy, MenuItem item, ProtoFluxNode addedNode)
   {
-    ProtoFluxOperationProxy operationProxy = (ProtoFluxOperationProxy)elementProxy;
+    var operationProxy = (ProtoFluxOperationProxy)elementProxy;
     if (item.overload) throw new Exception("Overloading with ProtoFluxOperationProxy is not supported");
     if (item.onNodeSpawn != null)
     {

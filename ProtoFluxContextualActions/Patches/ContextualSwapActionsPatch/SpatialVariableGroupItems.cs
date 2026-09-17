@@ -28,13 +28,13 @@ static partial class ContextualSwapActionsPatch
       // The 'ProxySwap' setup really isnt needed here, but allows for swapping from SampleValueSpatialVariable<float> to SampleMinMaxSpatialVariable<int> in less effort
       if (context.proxy is ProtoFluxInputProxy)
       {
-        ProtoFluxInputProxy inputType = (ProtoFluxInputProxy)context.proxy;
+        var inputType = (ProtoFluxInputProxy)context.proxy;
         Type targetType = inputType.InputType;
         target = targetType;
       }
       if (context.proxy is ProtoFluxOutputProxy)
       {
-        ProtoFluxOutputProxy outputType = (ProtoFluxOutputProxy)context.proxy;
+        var outputType = (ProtoFluxOutputProxy)context.proxy;
         Type targetType = outputType.OutputType;
         target = targetType;
       }
