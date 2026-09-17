@@ -6,8 +6,6 @@ namespace ProtoFluxContextualActions.Utils.ProtoFlux;
 
 static class NodeMetadataUtils
 {
-
-  // todo: move to a utility class
   // lighter than GetMetadata
   public static IEnumerable<OutputMetadata> GetOutputMetadata(Type type)
   {
@@ -36,7 +34,6 @@ static class NodeMetadataUtils
     }
   }
 
-  // todo: move to a utility class
   // lighter than GetMetadata
   public static IEnumerable<InputMetadata> GetInputMetadata(Type type)
   {

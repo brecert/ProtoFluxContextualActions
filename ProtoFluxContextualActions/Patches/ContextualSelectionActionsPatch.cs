@@ -298,12 +298,6 @@ internal static partial class ContextualSelectionActionsPatch
     addedNode.TryConnectImpulse(addedNode.GetImpulse(0), operationProxy.NodeOperation.Target, undoable: true);
   }
 
-  // note: if we can build up a graph then we can egraph reduce to make matches like this easier to spot automatically rather than needing to check each one manually
-  // todo: detect add + 1 and offer to convert to inc?
-  // todo: detect add + 1 or inc and write and offer to convert to increment?
-
-  // todo: increase amount of available nodes for all types?
-  // todo: organize certain nodes into useful groups?
   internal static IEnumerable<MenuItem> MenuItems(ProtoFluxElementProxy? target)
   {
     foreach (var item in GeneralNumericOperationMenuItems(target)) yield return item;

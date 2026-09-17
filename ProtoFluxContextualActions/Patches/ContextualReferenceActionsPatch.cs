@@ -55,7 +55,7 @@ internal static class ContextualReferenceActionsPatch
     var grabbedReference = __instance.GetGrabbedReference();
     if (grabbedReference == null) return true;
 
-    var items = cache.GetOrCreate(grabbedReference.GetType(), () => MenuItems(__instance, grabbedReference).Take(10).ToArray());
+    var items = cache.GetOrCreate(grabbedReference.GetType(), () => [.. MenuItems(__instance, grabbedReference).Take(10)]);
 
     if (items.Length != 0)
     {

@@ -238,6 +238,8 @@ public static class SwapHelper
   }
 
   // TODO: having all of these separate is error prone because a loss in visual symmetry
+  // as in InputMap and OutputMap being defined separately.
+  // if we could define these through attributes that get built into these maps that could be better?
   internal static Dictionary<(Type, Type), (string FromName, string ToName)[]> InputMap = new() {
     {(typeof(For), typeof(RangeLoopInt)), [("Count", "End")]},
     {(typeof(ValueNegate<>), typeof(ValuePlusMinus<>)), [("N", "Offset")]},

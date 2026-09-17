@@ -22,9 +22,6 @@ static partial class ContextualSelectionActionsPatch
   internal static IEnumerable<MenuItem> GeneralNumericOperationMenuItems(ProtoFluxElementProxy? target)
   {
     {
-      // TODO: It's nice to have these work with any node, I think their precedence should be lower than manually specified ones and potentially hidden by default for many types that support but do not need, esp. comparison.
-      //       When I'm more sure that Swapping won't world crash I think I can limit comparison to a single node and then swap to the right one as a sort of submenu?
-      //       Feels a little weird though, ux is difficult. A custom uix menu could help.
       if (target != null)
       {
         Type? nodeType = null;
