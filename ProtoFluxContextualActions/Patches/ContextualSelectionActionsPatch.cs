@@ -25,7 +25,7 @@ using SharpPipe;
 
 namespace ProtoFluxContextualActions.Patches;
 
-[PatchGroup("Contextual Actions", "Pressing secondary while holding the ProtoFlux Tool will open a context menu of actions based on what wire you're dragging instead of always spawning an input/display node. Pressing secondary again will spawn out an input/display node like normal.")]
+[PatchGroup("Contextual Actions", "When enabled, pressing secondary while holding the ProtoFlux Tool will open a context menu of actions based on what wire you're dragging instead of always spawning an input/display node. Pressing secondary again will spawn out an input/display node like normal.")]
 [HarmonyPatch(typeof(ProtoFluxTool), nameof(ProtoFluxTool.OnSecondaryPress))]
 internal static partial class ContextualSelectionActionsPatch
 {

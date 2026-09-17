@@ -17,7 +17,7 @@ using ProtoFluxContextualActions.Utils.ProtoFlux;
 
 namespace ProtoFluxContextualActions.Patches;
 
-[PatchGroup("Contextual Cast Actions", "Casting certain types to others may suggest extra actions, rather than only allowing explicit casts.")]
+[PatchGroup("Contextual Cast Actions", "When enabled, casting certain types to others may suggest extra actions, rather than only allowing explicit casts.")]
 [HarmonyPatch(typeof(ProtoFluxTool), "TryConnect", argumentTypes: [typeof(ProtoFluxNode), typeof(ISyncRef), typeof(INodeOutput)])]
 internal static class ContextualCastActionsPatch
 {

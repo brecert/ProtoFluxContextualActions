@@ -14,7 +14,7 @@ using ProtoFluxContextualActions.Utils;
 
 namespace ProtoFluxContextualActions.Patches;
 
-[PatchGroup("DynamicVariableInput Creation", "Adds a context menu item to create DynamicVariableInputs when holding a dynamic variable component with the ProtoFlux Tool.")]
+[PatchGroup("DynamicVariableInput Creation", "When enabled, adds a context menu item to create DynamicVariableInputs when holding a dynamic variable component with the ProtoFlux Tool.")]
 [HarmonyPatch(typeof(ProtoFluxTool), nameof(ProtoFluxTool.GenerateMenuItems))]
 internal static class DynamicVariableOutputPatch
 {

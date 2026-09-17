@@ -14,7 +14,7 @@ using ProtoFluxContextualActions.Utils;
 
 namespace ProtoFluxContextualActions.Patches;
 
-[PatchGroup("SpatialVariable Creation", "Adds a context menu item to create SampleSpatialVariable nodes when holding a spatial variable source component with the ProtoFlux Tool.")]
+[PatchGroup("SpatialVariable Creation", "When enabled, adds a context menu item to create SampleSpatialVariable nodes when holding a spatial variable source component with the ProtoFlux Tool.")]
 [HarmonyPatch(typeof(ProtoFluxTool), nameof(ProtoFluxTool.GenerateMenuItems))]
 internal static class SpatialVariableSamplePatch
 {
