@@ -42,108 +42,108 @@ static partial class ContextualSelectionActionsPatch
           {
             if (TryGetPsuedoGenericForType(world, "Pow_", outputType) is Type powType)
             {
-              yield return new MenuItem(powType);
+              yield return new(powType);
             }
 
             if (coder.Property<bool>("SupportsMul").Value)
             {
-              yield return new MenuItem(typeof(ValueMul<>).MakeGenericType(outputType));
+              yield return new(typeof(ValueMul<>).MakeGenericType(outputType));
             }
 
             if (coder.Property<bool>("SupportsDiv").Value)
             {
-              yield return new MenuItem(typeof(ValueDiv<>).MakeGenericType(outputType));
+              yield return new(typeof(ValueDiv<>).MakeGenericType(outputType));
             }
           }
           else
           {
             if (coder.Property<bool>("SupportsAddSub").Value)
             {
-              yield return new MenuItem(typeof(ValueAdd<>).MakeGenericType(outputType));
-              yield return new MenuItem(typeof(ValueSub<>).MakeGenericType(outputType));
+              yield return new(typeof(ValueAdd<>).MakeGenericType(outputType));
+              yield return new(typeof(ValueSub<>).MakeGenericType(outputType));
             }
 
             if (coder.Property<bool>("SupportsMul").Value)
             {
-              yield return new MenuItem(typeof(ValueMul<>).MakeGenericType(outputType));
+              yield return new(typeof(ValueMul<>).MakeGenericType(outputType));
             }
 
             if (coder.Property<bool>("SupportsDiv").Value)
             {
-              yield return new MenuItem(typeof(ValueDiv<>).MakeGenericType(outputType));
+              yield return new(typeof(ValueDiv<>).MakeGenericType(outputType));
             }
 
             if (coder.Property<bool>("SupportsNegate").Value)
             {
-              yield return new MenuItem(typeof(ValueNegate<>).MakeGenericType(outputType), group: "Math");
+              yield return new(typeof(ValueNegate<>).MakeGenericType(outputType), group: "Math");
             }
 
             if (coder.Property<bool>("SupportsMod").Value)
             {
-              yield return new MenuItem(typeof(ValueMod<>).MakeGenericType(outputType), group: "Math");
+              yield return new(typeof(ValueMod<>).MakeGenericType(outputType), group: "Math");
             }
 
             if (coder.Property<bool>("SupportsAbs").Value && !isMatrix)
             {
-              yield return new MenuItem(typeof(ValueAbs<>).MakeGenericType(outputType), group: "Math");
+              yield return new(typeof(ValueAbs<>).MakeGenericType(outputType), group: "Math");
             }
 
             if (coder.Property<bool>("SupportsComparison").Value)
             {
-              yield return new MenuItem(typeof(ValueMax<>).MakeGenericType(outputType), group: "Comparisons");
-              // yield return new MenuItem(typeof(ValueLessThan<>).MakeGenericType(outputType));
-              // yield return new MenuItem(typeof(ValueLessOrEqual<>).MakeGenericType(outputType));
-              // yield return new MenuItem(typeof(ValueGreaterThan<>).MakeGenericType(outputType));
-              // yield return new MenuItem(typeof(ValueGreaterOrEqual<>).MakeGenericType(outputType));
-              // yield return new MenuItem(typeof(ValueEquals<>).MakeGenericType(outputType));
-              // yield return new MenuItem(typeof(ValueNotEquals<>).MakeGenericType(outputType));
+              yield return new(typeof(ValueMax<>).MakeGenericType(outputType), group: "Comparisons");
+              // yield return new(typeof(ValueLessThan<>).MakeGenericType(outputType));
+              // yield return new(typeof(ValueLessOrEqual<>).MakeGenericType(outputType));
+              // yield return new(typeof(ValueGreaterThan<>).MakeGenericType(outputType));
+              // yield return new(typeof(ValueGreaterOrEqual<>).MakeGenericType(outputType));
+              // yield return new(typeof(ValueEquals<>).MakeGenericType(outputType));
+              // yield return new(typeof(ValueNotEquals<>).MakeGenericType(outputType));
             }
 
             if (coder.Property<bool>("SupportsAddSub").Value)
             {
-              yield return new MenuItem(typeof(ValueInc<>).MakeGenericType(outputType), group: "Math");
-              yield return new MenuItem(typeof(ValueOneMinus<>).MakeGenericType(outputType), group: "Math");
-              yield return new MenuItem(typeof(ValueDelta<>).MakeGenericType(outputType), group: "Math/Time");
+              yield return new(typeof(ValueInc<>).MakeGenericType(outputType), group: "Math");
+              yield return new(typeof(ValueOneMinus<>).MakeGenericType(outputType), group: "Math");
+              yield return new(typeof(ValueDelta<>).MakeGenericType(outputType), group: "Math/Time");
             }
             if (coder.Property<bool>("SupportsMul").Value)
             {
-              yield return new MenuItem(typeof(ValueSquare<>).MakeGenericType(outputType), group: "Math");
-              yield return new MenuItem(typeof(MulDeltaTime<>).MakeGenericType(outputType), group: "Math/Time");
+              yield return new(typeof(ValueSquare<>).MakeGenericType(outputType), group: "Math");
+              yield return new(typeof(MulDeltaTime<>).MakeGenericType(outputType), group: "Math/Time");
             }
             if (coder.Property<bool>("SupportsDiv").Value)
             {
-              yield return new MenuItem(typeof(ValueReciprocal<>).MakeGenericType(outputType), group: "Math");
+              yield return new(typeof(ValueReciprocal<>).MakeGenericType(outputType), group: "Math");
             }
           }
 
           if (coder.Property<bool>("SupportsLerp").Value)
           {
-            yield return new MenuItem(typeof(ValueLerp<>).MakeGenericType(outputType), group: "Math/Lerping");
+            yield return new(typeof(ValueLerp<>).MakeGenericType(outputType), group: "Math/Lerping");
           }
           if (coder.Property<bool>("SupportsSmoothLerp").Value)
           {
-            yield return new MenuItem(typeof(ValueSmoothLerp<>).MakeGenericType(outputType), group: "Math/Lerping");
+            yield return new(typeof(ValueSmoothLerp<>).MakeGenericType(outputType), group: "Math/Lerping");
           }
           if (psuedoGenericTypes.PackTangentPoint2.Any(t => t.Types.First() == outputType))
           {
             var packTangentNode = psuedoGenericTypes.PackTangentPoint2.First(t => t.Types.First() == outputType).Node;
 
-            yield return new MenuItem(packTangentNode, group: "Math/Lerping");
+            yield return new(packTangentNode, group: "Math/Lerping");
           }
 
           if (coder.Property<bool>("SupportsMinMax").Value)
           {
-            yield return new MenuItem(typeof(ValueClamp<>).MakeGenericType(outputType), group: "Comparisons");
+            yield return new(typeof(ValueClamp<>).MakeGenericType(outputType), group: "Comparisons");
           }
 
           if (TryGetInverseNode(outputType, out var inverseNodeType))
           {
-            yield return new MenuItem(inverseNodeType, group: "Math");
+            yield return new(inverseNodeType, group: "Math");
           }
 
           if (TryGetTransposeNode(outputType, out var transposeNodeType))
           {
-            yield return new MenuItem(transposeNodeType, name: "Transpose");
+            yield return new(transposeNodeType, name: "Transpose");
           }
 
           // While not often used, masking is useful.

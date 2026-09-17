@@ -382,7 +382,7 @@ internal static partial class ContextualSwapActionsPatch
     {
       foreach (var match in types)
       {
-        yield return new MenuItem(match);
+        yield return new(match);
       }
     }
   }
@@ -393,7 +393,7 @@ internal static partial class ContextualSwapActionsPatch
     {
       foreach (var match in types)
       {
-        yield return new MenuItem(match.MakeGenericType(type.GenericTypeArguments));
+        yield return new(match.MakeGenericType(type.GenericTypeArguments));
       }
     }
   }

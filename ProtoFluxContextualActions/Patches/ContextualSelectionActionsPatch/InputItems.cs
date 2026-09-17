@@ -70,7 +70,7 @@ static partial class ContextualSelectionActionsPatch
     {
       foreach (var packNodeType in packNodeTypes)
       {
-        yield return new MenuItem(packNodeType);
+        yield return new(packNodeType);
       }
     }
 
@@ -78,15 +78,15 @@ static partial class ContextualSelectionActionsPatch
     {
       foreach (var worldTimeType in Groups.WorldTimeFloatGroup)
       {
-        yield return new MenuItem(worldTimeType, group: "Time");
+        yield return new(worldTimeType, group: "Time");
       }
-      yield return new MenuItem(typeof(DeltaTime), group: "Time");
+      yield return new(typeof(DeltaTime), group: "Time");
     }
 
     if (inputType == typeof(string))
     {
-      yield return new MenuItem(typeof(FormatString));
-      yield return new MenuItem(typeof(ToString_object));
+      yield return new(typeof(FormatString));
+      yield return new(typeof(ToString_object));
     }
     else if (inputType == typeof(User))
     {
@@ -95,7 +95,7 @@ static partial class ContextualSelectionActionsPatch
       inputProxy.Slot.World.GetUsers(users);
       foreach (var user in users)
       {
-        yield return new MenuItem(
+        yield return new(
           typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.RefObjectInput<User>),
           name: user.UserName,
           onNodeSpawn: (node, proxy, tool) =>
@@ -109,16 +109,16 @@ static partial class ContextualSelectionActionsPatch
         );
       }
 
-      yield return new MenuItem(typeof(LocalUser));
-      yield return new MenuItem(typeof(HostUser));
-      yield return new MenuItem(typeof(UserFromUsername), group: "User From");
-      yield return new MenuItem(typeof(UserFromID), group: "User From");
-      yield return new MenuItem(typeof(GetActiveUser));
-      yield return new MenuItem(typeof(GetActiveUserSelf));
+      yield return new(typeof(LocalUser));
+      yield return new(typeof(HostUser));
+      yield return new(typeof(UserFromUsername), group: "User From");
+      yield return new(typeof(UserFromID), group: "User From");
+      yield return new(typeof(GetActiveUser));
+      yield return new(typeof(GetActiveUserSelf));
 
-      yield return new MenuItem(typeof(NearestUserHead));
+      yield return new(typeof(NearestUserHead));
 
-      yield return new MenuItem(
+      yield return new(
         typeof(AllocatingUser),
         name: "Allocating User",
         group: "User From",
@@ -128,134 +128,134 @@ static partial class ContextualSelectionActionsPatch
 
     else if (inputType == typeof(UserRoot))
     {
-      yield return new MenuItem(typeof(GetActiveUserRoot));
-      yield return new MenuItem(typeof(LocalUserRoot));
-      yield return new MenuItem(typeof(UserUserRoot));
+      yield return new(typeof(GetActiveUserRoot));
+      yield return new(typeof(LocalUserRoot));
+      yield return new(typeof(UserUserRoot));
     }
 
     else if (inputType == typeof(bool))
     {
-      yield return new MenuItem(typeof(ValueEquals<int>));
-      yield return new MenuItem(typeof(AND_Bool));
-      yield return new MenuItem(typeof(NOT_Bool));
+      yield return new(typeof(ValueEquals<int>));
+      yield return new(typeof(AND_Bool));
+      yield return new(typeof(NOT_Bool));
 
       // Sometimes this can be really helpful to have around
-      yield return new MenuItem(typeof(DataModelBooleanToggle));
+      yield return new(typeof(DataModelBooleanToggle));
 
-      yield return new MenuItem(typeof(LeftMousePressed), group: "Input");
-      yield return new MenuItem(typeof(LeftMouseHeld), group: "Input");
-      yield return new MenuItem(typeof(RightMousePressed), group: "Input");
-      yield return new MenuItem(typeof(RightMouseHeld), group: "Input");
+      yield return new(typeof(LeftMousePressed), group: "Input");
+      yield return new(typeof(LeftMouseHeld), group: "Input");
+      yield return new(typeof(RightMousePressed), group: "Input");
+      yield return new(typeof(RightMouseHeld), group: "Input");
 
-      yield return new MenuItem(typeof(KeyHeld), group: "Input");
+      yield return new(typeof(KeyHeld), group: "Input");
     }
 
     else if (inputType == typeof(float))
     {
-      yield return new MenuItem(typeof(MouseScrollDelta), group: "Input");
-      yield return new MenuItem(typeof(LocalWindowAspectRatio), group: "Input");
+      yield return new(typeof(MouseScrollDelta), group: "Input");
+      yield return new(typeof(LocalWindowAspectRatio), group: "Input");
     }
     else if (inputType == typeof(float2))
     {
-      yield return new MenuItem(typeof(MouseScrollDelta2D), group: "Input");
-      yield return new MenuItem(typeof(MousePosition), group: "Input");
+      yield return new(typeof(MouseScrollDelta2D), group: "Input");
+      yield return new(typeof(MousePosition), group: "Input");
     }
     else if (inputType == typeof(int2))
     {
-      yield return new MenuItem(typeof(LocalWindowResolution), group: "Input");
-      yield return new MenuItem(typeof(LocalPrimaryResolution), group: "Input");
+      yield return new(typeof(LocalWindowResolution), group: "Input");
+      yield return new(typeof(LocalPrimaryResolution), group: "Input");
     }
 
     else if (inputType == typeof(DateTime))
     {
-      yield return new MenuItem(typeof(UtcNow));
-      yield return new MenuItem(typeof(FromUnixMilliseconds));
+      yield return new(typeof(UtcNow));
+      yield return new(typeof(FromUnixMilliseconds));
     }
 
     else if (inputType == typeof(TimeSpan))
     {
-      yield return new MenuItem(typeof(Parse_TimeSpan));
-      yield return new MenuItem(typeof(TimeSpanFromTicks));
-      yield return new MenuItem(typeof(TimeSpanFromMilliseconds));
-      yield return new MenuItem(typeof(TimeSpanFromSeconds));
-      yield return new MenuItem(typeof(TimeSpanFromMinutes));
-      yield return new MenuItem(typeof(TimeSpanFromHours));
-      yield return new MenuItem(typeof(TimeSpanFromDays));
+      yield return new(typeof(Parse_TimeSpan));
+      yield return new(typeof(TimeSpanFromTicks));
+      yield return new(typeof(TimeSpanFromMilliseconds));
+      yield return new(typeof(TimeSpanFromSeconds));
+      yield return new(typeof(TimeSpanFromMinutes));
+      yield return new(typeof(TimeSpanFromHours));
+      yield return new(typeof(TimeSpanFromDays));
     }
 
     else if (inputType == typeof(Slot))
     {
-      yield return new MenuItem(typeof(RootSlot));
-      yield return new MenuItem(typeof(LocalUserSlot));
-      yield return new MenuItem(typeof(LocalUserSpace));
-      yield return new MenuItem(typeof(UserRootSlot));
+      yield return new(typeof(RootSlot));
+      yield return new(typeof(LocalUserSlot));
+      yield return new(typeof(LocalUserSpace));
+      yield return new(typeof(UserRootSlot));
     }
 
     else if (inputType == typeof(BoundingBox))
     {
-      yield return new MenuItem(typeof(ComputeBoundingBox));
-      yield return new MenuItem(typeof(FromCenterSize));
-      yield return new MenuItem(typeof(Empty));
-      yield return new MenuItem(typeof(EncapsulateBounds));
-      yield return new MenuItem(typeof(EncapsulatePoint));
-      yield return new MenuItem(typeof(TransformBounds));
+      yield return new(typeof(ComputeBoundingBox));
+      yield return new(typeof(FromCenterSize));
+      yield return new(typeof(Empty));
+      yield return new(typeof(EncapsulateBounds));
+      yield return new(typeof(EncapsulatePoint));
+      yield return new(typeof(TransformBounds));
     }
 
     else if (inputType == typeof(CharacterController))
     {
-      yield return new MenuItem(typeof(FindCharacterControllerFromSlot));
-      yield return new MenuItem(typeof(FindCharacterControllerFromUser));
+      yield return new(typeof(FindCharacterControllerFromSlot));
+      yield return new(typeof(FindCharacterControllerFromUser));
     }
 
     else if (inputType == typeof(Type))
     {
-      yield return new MenuItem(typeof(GetType));
+      yield return new(typeof(GetType));
     }
 
     else if (inputType == typeof(Chirality))
     {
-      yield return new MenuItem(typeof(BodyNodeChirality));
-      yield return new MenuItem(typeof(ToolEquippingSide));
+      yield return new(typeof(BodyNodeChirality));
+      yield return new(typeof(ToolEquippingSide));
     }
 
     else if (inputType == typeof(BodyNode))
     {
-      yield return new MenuItem(typeof(GrabberBodyNode));
-      yield return new MenuItem(typeof(GetSide));
+      yield return new(typeof(GrabberBodyNode));
+      yield return new(typeof(GetSide));
     }
 
     else if (inputType == typeof(Grabber))
     {
-      yield return new MenuItem(typeof(GetUserGrabber));
-      yield return new MenuItem(typeof(GrabbableGrabber));
+      yield return new(typeof(GetUserGrabber));
+      yield return new(typeof(GrabbableGrabber));
     }
 
     else if (typeof(IFingerPoseSourceComponent).IsAssignableFrom(inputType))
     {
-      yield return new MenuItem(typeof(UserFingerPoseSource));
+      yield return new(typeof(UserFingerPoseSource));
     }
 
     else if (nodeType == typeof(GetLocomotionArchetype))
     {
-      yield return new MenuItem(typeof(GetActiveLocomotionModule));
+      yield return new(typeof(GetActiveLocomotionModule));
     }
 
     else if (inputType == typeof(Uri))
     {
-      yield return new MenuItem(typeof(StringToAbsoluteURI));
+      yield return new(typeof(StringToAbsoluteURI));
     }
 
     else if (TypeUtils.MatchInterface(inputType, typeof(IQuantity<>), out var quantityType))
     {
       var baseType = quantityType.GenericTypeArguments[0];
-      yield return new MenuItem(typeof(FromBaseValue<>).MakeGenericType(baseType));
-      yield return new MenuItem(typeof(ParseQuantity<>).MakeGenericType(baseType));
+      yield return new(typeof(FromBaseValue<>).MakeGenericType(baseType));
+      yield return new(typeof(ParseQuantity<>).MakeGenericType(baseType));
     }
 
     else if (nodeType == typeof(ValueMul<floatQ>) && inputProxy.ElementName == "B")
     {
-      yield return new MenuItem(typeof(GetForward), overload: true);
-      // yield return new MenuItem(
+      yield return new(typeof(GetForward), overload: true);
+      // yield return new(
       //     name: "ValueInput<float>",
       //     node: typeof(ExternalValueInput<FrooxEngineContext, float3>),
       //     binding: typeof(FrooxEngine.ProtoFlux.Runtimes.Execution.Nodes.ValueInput<float3>),
@@ -264,20 +264,20 @@ static partial class ContextualSelectionActionsPatch
     }
     else if (inputType == typeof(float3))
     {
-      yield return new MenuItem(typeof(GetForward), group: "Directions");
-      yield return new MenuItem(typeof(GetBackward), group: "Directions");
-      yield return new MenuItem(typeof(GetUp), group: "Directions");
-      yield return new MenuItem(typeof(GetDown), group: "Directions");
-      yield return new MenuItem(typeof(GetLeft), group: "Directions");
-      yield return new MenuItem(typeof(GetRight), group: "Directions");
+      yield return new(typeof(GetForward), group: "Directions");
+      yield return new(typeof(GetBackward), group: "Directions");
+      yield return new(typeof(GetUp), group: "Directions");
+      yield return new(typeof(GetDown), group: "Directions");
+      yield return new(typeof(GetLeft), group: "Directions");
+      yield return new(typeof(GetRight), group: "Directions");
     }
 
     else if (inputType == typeof(int) && (IsIterationNode(nodeType) || indirectlyConnectsToIterationNode))
     {
-      //yield return new MenuItem(typeof(ValueInc<int>));
-      //yield return new MenuItem(typeof(ValueDec<int>));
-      yield return new MenuItem(typeof(ChildrenCount));
-      yield return new MenuItem(typeof(CountOccurrences));
+      //yield return new(typeof(ValueInc<int>));
+      //yield return new(typeof(ValueDec<int>));
+      yield return new(typeof(ChildrenCount));
+      yield return new(typeof(CountOccurrences));
     }
 
     if (typeof(IAvatarAnchor).IsAssignableFrom(inputType))
@@ -292,23 +292,23 @@ static partial class ContextualSelectionActionsPatch
 
     if (inputProxy.ElementName == nameof(LocalScreenPointToDirection.NormalizedScreenPoint))
     {
-      yield return new MenuItem(typeof(NormalizedMousePosition));
+      yield return new(typeof(NormalizedMousePosition));
     }
 
     if (TypeUtils.MatchInterface(inputType, typeof(IAsset), out _))
     {
-      yield return new MenuItem(typeof(GetAsset<>).MakeGenericType(inputType));
+      yield return new(typeof(GetAsset<>).MakeGenericType(inputType));
     }
 
     if (inputType.IsEnum)
     {
-      // yield return new MenuItem(typeof(NextValue<>).MakeGenericType(inputType));
-      // yield return new MenuItem(typeof(ShiftEnum<>).MakeGenericType(inputType));
+      // yield return new(typeof(NextValue<>).MakeGenericType(inputType));
+      // yield return new(typeof(ShiftEnum<>).MakeGenericType(inputType));
 
       var enumType = inputType.GetEnumUnderlyingType();
       if (NodeUtils.TryGetNumberToEnumNode(enumType, out var toNumberType))
       {
-        yield return new MenuItem(toNumberType.MakeGenericType(inputType));
+        yield return new(toNumberType.MakeGenericType(inputType));
       }
     }
 
@@ -318,8 +318,8 @@ static partial class ContextualSelectionActionsPatch
         || typeof(ValueDemultiplex<>).IsAssignableFrom(nodeType)
         || typeof(ObjectDemultiplex<>).IsAssignableFrom(nodeType)))
     {
-      yield return new MenuItem(typeof(ImpulseDemultiplexer), name: "Impulse Demultiplexer");
-      yield return new MenuItem(typeof(IndexOfFirstValueMatch<dummy>));
+      yield return new(typeof(ImpulseDemultiplexer), name: "Impulse Demultiplexer");
+      yield return new(typeof(IndexOfFirstValueMatch<dummy>));
     }
 
 
@@ -329,7 +329,7 @@ static partial class ContextualSelectionActionsPatch
       var nodeHasAtan2Connection = inputProxy.Node.Target.NodeInstance.AllInputElements().Any(i => i.Source is IOutput source && source.OwnerNode.GetType() == atan2Type);
       if (nodeHasAtan2Connection)
       {
-        yield return new MenuItem(typeof(RadToDeg), overload: true);
+        yield return new(typeof(RadToDeg), overload: true);
       }
     }
 
@@ -341,7 +341,7 @@ static partial class ContextualSelectionActionsPatch
     //   new NodeTypeRecord(typeof(DataModelObjectRefStore<>), null, null),
     //   new NodeTypeRecord(typeof(StoredObject<>), null, null),
     // ]);
-    // yield return new MenuItem(variableInput);
+    // yield return new(variableInput);
     //
 
     if (inputType == typeof(string))
@@ -350,7 +350,7 @@ static partial class ContextualSelectionActionsPatch
         new NodeTypeRecord(typeof(GlobalToValueOutput<>), null, null),
         new NodeTypeRecord(typeof(GlobalToObjectOutput<>), null, null),
       ]);
-      yield return new MenuItem(globalOutput);
+      yield return new(globalOutput);
     }
 
 
@@ -363,8 +363,8 @@ static partial class ContextualSelectionActionsPatch
       new NodeTypeRecord(typeof(SampleObjectSpatialVariable<>), null, null),
     ]);
 
-    yield return new MenuItem(dynVariableInput);
-    yield return new MenuItem(spatialVariableInput);
+    yield return new(dynVariableInput);
+    yield return new(spatialVariableInput);
 
     IEnumerable<(Type Node, IEnumerable<Type> Types)> randomLerp = [.. psuedoGenericTypes.RandomLerp, .. psuedoGenericTypes.RandomSlerp];
     IEnumerable<(Type Node, IEnumerable<Type> Types)> randomColor = [.. psuedoGenericTypes.RandomHue, .. psuedoGenericTypes.RandomRGBA, .. psuedoGenericTypes.RandomGrayscale];
@@ -377,25 +377,25 @@ static partial class ContextualSelectionActionsPatch
     {
       foreach (var node in allRandom.Where(t => t.Types.First() == inputType))
       {
-        yield return new MenuItem(node.Node, group: "Selection");
+        yield return new(node.Node, group: "Selection");
       }
     }
     if (inputType.IsEnum)
     {
-      yield return new MenuItem(typeof(RandomEnum<>).MakeGenericType(inputType), name: "Random Enum", group: "Selection");
+      yield return new(typeof(RandomEnum<>).MakeGenericType(inputType), name: "Random Enum", group: "Selection");
     }
 
     var pickRandomNode = GetNodeForType(inputType, [
       new NodeTypeRecord(typeof(PickRandomValue<>), null, null),
       new NodeTypeRecord(typeof(PickRandomObject<>), null, null),
     ]);
-    yield return new MenuItem(pickRandomNode, group: "Selection");
+    yield return new(pickRandomNode, group: "Selection");
 
     var multiplexNode = GetNodeForType(inputType, [
       new NodeTypeRecord(typeof(ValueMultiplex<>), null, null),
       new NodeTypeRecord(typeof(ObjectMultiplex<>), null, null),
     ]);
-    yield return new MenuItem(multiplexNode, group: "Selection");
+    yield return new(multiplexNode, group: "Selection");
 
     if (psuedoGenericTypes.Parse.Any(n => n.Types.First() == inputType))
     {
