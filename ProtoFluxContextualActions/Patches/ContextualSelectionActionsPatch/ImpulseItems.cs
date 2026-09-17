@@ -28,7 +28,7 @@ static partial class ContextualSelectionActionsPatch
     yield return new(typeof(While), group: "Loops");
 
     yield return new(typeof(ValueWrite<int>));
-    yield return new(typeof(ValueWrite<int>), group: "Actions"); // while using dummy works, having int be the default is better (and its more consistent)
+    // yield return new(typeof(ValueWrite<int>), group: "Actions"); // while using dummy works, having int be the default is better (and its more consistent)
 
     yield return new(typeof(ImpulseMultiplexer), name: "Impulse Multiplex", group: "Selection");
     yield return new(typeof(ImpulseDemultiplexer), name: "Impulse Demultiplex", group: "Selection");

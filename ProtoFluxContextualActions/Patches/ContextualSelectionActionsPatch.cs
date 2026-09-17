@@ -34,6 +34,7 @@ internal static partial class ContextualSelectionActionsPatch
     string? name = null,
     bool overload = false,
     string group = "",
+    colorX? color = null,
     Func<ProtoFluxNode, ProtoFluxElementProxy, ProtoFluxTool, bool>? onNodeSpawn = null,
     int orderOffset = 0
   ) : IGroupItem
@@ -44,6 +45,7 @@ internal static partial class ContextualSelectionActionsPatch
     internal readonly bool overload = overload;
 
     internal readonly string group = group;
+    internal colorX? color = color;
 
     // allows for items to be placed before/after others, without needing to reorder the code itself.
     internal readonly int orderOffset = orderOffset;
@@ -55,7 +57,7 @@ internal static partial class ContextualSelectionActionsPatch
     internal Action<ProtoFluxTool, IGroupItem>? currentAction = null;
 
     readonly string IGroupItem.Name => DisplayName;
-    readonly colorX IGroupItem.Color => node.GetTypeColor();
+    readonly colorX IGroupItem.Color => color ?? node.GetTypeColor();
     readonly string IGroupItem.Group => group;
     readonly Action<ProtoFluxTool, IGroupItem> IGroupItem.OnClick => currentAction!;
   }
@@ -140,7 +142,7 @@ internal static partial class ContextualSelectionActionsPatch
       }
 
       Action<ProtoFluxTool, ProtoFluxElementProxy, MenuItem, ProtoFluxNode>? currentAction = null;
-      colorX? targetColor = null;
+      Func<MenuItem, colorX> targetColor = null;
 
       lastProxy = elementProxy;
 
@@ -148,13 +150,19 @@ internal static partial class ContextualSelectionActionsPatch
       {
         case ProtoFluxInputProxy inputProxy:
           {
-            targetColor = inputProxy.InputType.Value.GetTypeColor();
+            targetColor = (item) =>
+              NodeMetadataHelper.GetMetadata(item.node).FixedOperations.FirstOrDefault() is { IsAsync: var isAsync }
+              ? DatatypeColorHelper.GetOperationColor(isAsync)
+              : NodeMetadataHelper.GetMetadata(item.node).FixedInputs.FirstOrDefault()?.InputType?.GetTypeColor() ?? colorX.White;
             currentAction = ProcessInputProxyItem;
             break;
           }
         case ProtoFluxOutputProxy outputProxy:
           {
-            targetColor = outputProxy.OutputType.Value.GetTypeColor();
+            targetColor = (item) =>
+              NodeMetadataHelper.GetMetadata(item.node).FixedImpulses.FirstOrDefault()?.Type.GetImpulseColor()
+              ?? NodeMetadataHelper.GetMetadata(item.node).FixedOutputs.FirstOrDefault()?.OutputType.GetTypeColor()
+              ?? colorX.White;
             currentAction = ProcessOutputProxyItem;
             break;
           }
@@ -174,6 +182,7 @@ internal static partial class ContextualSelectionActionsPatch
 
       selectionItems = selectionItems.Select(item =>
       {
+        if (targetColor != null) item.color = targetColor(item);
         item.currentAction = (tool, item) => OnMenuItemClicked(tool, (MenuItem)item, (node) => currentAction(__instance, elementProxy, (MenuItem)item, node));
         return item;
       });
@@ -183,7 +192,7 @@ internal static partial class ContextualSelectionActionsPatch
       // the idea behind this would have worked, but i must have written it wrong as this breaks all ordering of everything
       //items.Sort((a, b) => a.orderOffset - b.orderOffset);
 
-      var grouper = new GroupManager(__instance, items, targetColor);
+      var grouper = new GroupManager(__instance, items);
       var success = grouper.RenderRoot(true);
 
       return !success;

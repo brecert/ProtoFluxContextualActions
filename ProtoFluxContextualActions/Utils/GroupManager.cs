@@ -48,16 +48,15 @@ internal class GroupManager
 
   readonly IMenuVisual currentVisual;
 
-  internal GroupManager(ProtoFluxTool tool, List<IGroupItem> items, colorX? targetColor, MenuVisual? overrideVisual = null)
+  internal GroupManager(ProtoFluxTool tool, List<IGroupItem> items, MenuVisual? overrideVisual = null)
   {
 
     List<GroupItem> contextItems = [.. items.Select((item) =>
     {
-      var itemColor = targetColor ?? item.Color;
       return new GroupItem()
       {
         name = item.Name,
-        color = itemColor,
+        color = item.Color,
         onClick = () => item.OnClick(tool, item),
         baseItem = item,
       };

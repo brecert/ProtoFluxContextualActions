@@ -138,7 +138,7 @@ internal static partial class ContextualSwapActionsPatch
       // restore previous spawn node
       __instance.SpawnNodeType.Value = additionalData.GetOrCreateValue(__instance).lastSpawnNodeType;
 
-      GroupManager grouper = new(__instance, items, colorX.White);
+      GroupManager grouper = new(__instance, items);
       var success = grouper.RenderRoot(true);
 
       return !success;
