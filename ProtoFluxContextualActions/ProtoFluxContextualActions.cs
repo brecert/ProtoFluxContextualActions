@@ -57,7 +57,7 @@ public class ProtoFluxContextualActions : ResoniteMod
   internal static bool ShouldDoDefaultActionOnPrimaryRelease => defaultActionOnPrimaryRelease.Value;
 
   [AutoRegisterConfigKey]
-  private static readonly ModConfigurationKey<dummy> _advancedCategory = new("AdvancedCategory", "<b>Advanced Settings</b>");
+  private static readonly ModConfigurationKey<dummy> _advancedCategory = new("_AdvancedCategory", "<b>Advanced Settings</b>");
 
   [AutoRegisterConfigKey]
   private static readonly ModConfigurationKey<bool> tryFixFlick = new("Try Fix Context Flick", "If the context menu should attempt to fix flicking.", () => true);
@@ -94,6 +94,7 @@ public class ProtoFluxContextualActions : ResoniteMod
 
   public override void DefineConfiguration(ModConfigurationDefinitionBuilder builder)
   {
+    builder.Key(new ModConfigurationKey<dummy>("_PatchesCategory", "Patches"));
     foreach (var key in PatchGroupKeys.Values)
     {
       Debug($"Adding configuration key for {key.Name}...");
