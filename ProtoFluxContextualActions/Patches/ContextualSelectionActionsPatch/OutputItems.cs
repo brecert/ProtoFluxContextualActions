@@ -194,7 +194,7 @@ static partial class ContextualSelectionActionsPatch
     if (!outputType.IsValueType)
     {
       yield return new(typeof(IsNull<>).MakeGenericType(outputType), group: "Comparisons");
-      yield return new(typeof(NotNull<>).MakeGenericType(outputType), group: "Comparisons");
+      // yield return new(typeof(NotNull<>).MakeGenericType(outputType), group: "Comparisons"); // not needed, swap to if needed.
       yield return new(typeof(NullCoalesce<>).MakeGenericType(outputType), group: "Comparisons");
     }
 
@@ -478,9 +478,10 @@ static partial class ContextualSelectionActionsPatch
     if (outputType == typeof(IWorldElement))
     {
       yield return new(typeof(IsRemoved));
+      yield return new(typeof(ElementExists));
+      yield return new(typeof(ReferenceID));
       if (ProtoFluxContextualActions.ShouldDisplayUnsupportedActions)
       {
-        yield return new(typeof(ReferenceID));
         yield return new(
           typeof(ReferenceID),
           name: "RefID -> ULong",

@@ -61,7 +61,7 @@ internal static partial class ContextualSwapActionsPatch
 
     readonly string IGroupItem.Name => DisplayName;
 
-    readonly colorX IGroupItem.Color => node.GetTypeColor();
+    readonly colorX IGroupItem.Color => colorX.White;
 
     readonly string IGroupItem.Group => group;
 
