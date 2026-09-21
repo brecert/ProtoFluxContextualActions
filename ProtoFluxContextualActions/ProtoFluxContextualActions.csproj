@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-   	<Version>2.4.1</Version>
+   	<Version>2.4.2</Version>
 		<Authors>bree;IHaveAName2653</Authors>
 		<Description>Adds additional contextual actions for protoflux.</Description>
 		<PackageTags>Resonite,Mod,ResoniteModLoader,Tweaks,ProtoFlux</PackageTags>

@@ -79,8 +79,27 @@ internal static partial class ContextualSelectionActionsPatch
     lastProxy = null;
     if (!ProtoFluxContextualActions.ShouldDoDefaultActionOnPrimaryRelease) return;
     if (!__instance.LocalUser.IsContextMenuOpen()) return;
-    // only allow the contextmenu to trigger if the menu came from the tool
-    __instance.OnSecondaryPress();
+
+    // why is this try block here?
+    // it has something to do with an existing Resonite bug.
+    // NodeMetadata is failing to find an explicit default value set for most of the nodes that have `IInputList` or `IOutputList` elements, and not creating one or having a fallback otherwise.
+    // For all of the other element types it has a default value it falls back on by using `Activator.CreateInstance`
+    // Then when it goes to set the value of the input using the default value found in `NodeMetadata` it fails because the boxed value can't be set to the object of null
+    // and so `CleanupDraggedWire` isn't called because that throws an exception before it can be called and the wire is left dragged
+    // Thankfully in vanilla when releasing the wire `OnPrimaryRelease` is called and the wire gets cleaned up.
+    // Everything is fine.
+    // 
+    // Except we're patching `OnPrimaryRelease` and calling `OnSecondaryPress` from it, leading to the issue of the wire getting forever stuck to the tool.
+    // I hate adding this here but it's needed to avoid that issue.
+    try
+    {
+      // only allow the contextmenu to trigger if the menu came from the tool
+      __instance.OnSecondaryPress();
+    }
+    catch (NullReferenceException)
+    {
+      __instance.CleanupDraggedWire();
+    }
   }
 
   [HarmonyPrefix]
@@ -201,7 +220,7 @@ internal static partial class ContextualSelectionActionsPatch
       var grouper = new GroupManager(__instance, items);
       var success = grouper.RenderRoot(true);
 
-      return !success;
+      return false;
     }
 
     return true;
@@ -476,7 +495,7 @@ internal static partial class ContextualSelectionActionsPatch
   [HarmonyReversePatch]
   [HarmonyPatch(typeof(ProtoFluxTool), "CleanupDraggedWire")]
   [MethodImpl(MethodImplOptions.NoInlining)]
-  internal static void CleanupDraggedWire(ProtoFluxTool instance) => throw new UnreachableException();
+  internal static void CleanupDraggedWire(this ProtoFluxTool instance) => throw new UnreachableException();
 
   [HarmonyReversePatch]
   [HarmonyPatch(typeof(ProtoFluxTool), "OnSecondaryPress")]
