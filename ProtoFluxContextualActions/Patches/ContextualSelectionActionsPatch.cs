@@ -220,7 +220,7 @@ internal static partial class ContextualSelectionActionsPatch
       var grouper = new GroupManager(__instance, items);
       var success = grouper.RenderRoot(true);
 
-      return false;
+      return !success;
     }
 
     return true;
