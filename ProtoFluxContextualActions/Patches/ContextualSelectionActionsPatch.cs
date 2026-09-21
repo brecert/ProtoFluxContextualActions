@@ -75,10 +75,11 @@ internal static partial class ContextualSelectionActionsPatch
   [HarmonyPatch(typeof(ProtoFluxTool), nameof(ProtoFluxTool.OnPrimaryRelease))]
   internal static void PrimaryReleasePatch(ProtoFluxTool __instance)
   {
+    if (__instance.LocalUser.GetUserContextMenu().CurrentSummoner != __instance) return;
+    lastProxy = null;
     if (!ProtoFluxContextualActions.ShouldDoDefaultActionOnPrimaryRelease) return;
     if (!__instance.LocalUser.IsContextMenuOpen()) return;
     // only allow the contextmenu to trigger if the menu came from the tool
-    if (__instance.LocalUser.GetUserContextMenu().CurrentSummoner != __instance) return;
     __instance.OnSecondaryPress();
   }
 
