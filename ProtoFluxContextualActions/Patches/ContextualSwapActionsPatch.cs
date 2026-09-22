@@ -354,6 +354,7 @@ internal static partial class ContextualSwapActionsPatch
       .. ImpulseRelayGroupItems(context),
       ..ForEachGroupItems(context),
       ..DivReciprocalItems(context),
+      ..AbsMagnitudeItems(context),
     ];
 
     var indexedItems = menuItems.Index();
