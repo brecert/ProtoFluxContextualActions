@@ -245,6 +245,13 @@ static partial class ContextualSelectionActionsPatch
       yield return new(typeof(StringToAbsoluteURI));
     }
 
+    else if (inputType == typeof(Guid))
+    {
+      yield return new(typeof(ParseGUID));
+      yield return new(typeof(RandomGUID));
+      yield return new(typeof(EmptyGUID));
+    }
+
     else if (TypeUtils.MatchInterface(inputType, typeof(IQuantity<>), out var quantityType))
     {
       var baseType = quantityType.GenericTypeArguments[0];
@@ -358,13 +365,18 @@ static partial class ContextualSelectionActionsPatch
       new NodeTypeRecord(typeof(DynamicVariableValueInput<>), null, null),
       new NodeTypeRecord(typeof(DynamicVariableObjectInput<>), null, null),
     ]);
+
     var spatialVariableInput = GetNodeForType(inputType, [
       new NodeTypeRecord(typeof(SampleValueSpatialVariable<>), null, null),
       new NodeTypeRecord(typeof(SampleObjectSpatialVariable<>), null, null),
     ]);
 
-    yield return new(dynVariableInput);
-    yield return new(spatialVariableInput);
+    if (inputType.IsDataModelType())
+    {
+      yield return new(dynVariableInput);
+      yield return new(spatialVariableInput);
+    }
+
 
     IEnumerable<(Type Node, IEnumerable<Type> Types)> randomLerp = [.. psuedoGenericTypes.RandomLerp, .. psuedoGenericTypes.RandomSlerp];
     IEnumerable<(Type Node, IEnumerable<Type> Types)> randomColor = [.. psuedoGenericTypes.RandomHue, .. psuedoGenericTypes.RandomRGBA, .. psuedoGenericTypes.RandomGrayscale];
