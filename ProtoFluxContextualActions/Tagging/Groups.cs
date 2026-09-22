@@ -1,5 +1,6 @@
 using System.Collections.Frozen;
 
+using ProtoFlux.Runtimes.Execution.Nodes.Binary;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Input.Mouse;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Playback;
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Time;
@@ -120,5 +121,17 @@ static class Groups
   public static readonly FrozenSet<Type> PlaybackActionsGroup = [
     ..CommonPlaybackActionsGroup,
     typeof(Toggle),
+  ];
+
+  public static readonly FrozenSet<Type> BinaryUnpackingPrecursorGroup = [
+    typeof(HalfAsUShort),
+    typeof(FloatAsUInt),
+    typeof(DoubleAsULong)
+  ];
+
+  public static readonly FrozenSet<Type> BinaryPackingPrecursorGroup = [
+    typeof(UShortAsHalf),
+    typeof(UIntAsFloat),
+    typeof(ULongAsDouble)
   ];
 }
