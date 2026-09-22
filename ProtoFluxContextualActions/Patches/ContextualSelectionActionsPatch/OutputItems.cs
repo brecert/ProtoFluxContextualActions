@@ -96,6 +96,7 @@ static partial class ContextualSelectionActionsPatch
       new NodeTypeRecord(typeof(ObjectEquals<>), null, null),
     ]);
     yield return new(equalsNode, group: "Comparisons");
+    yield return new(equalsNode);
 
     var conditionalNode = GetNodeForType(outputType, [
       new NodeTypeRecord(typeof(ValueConditional<>), null, null),

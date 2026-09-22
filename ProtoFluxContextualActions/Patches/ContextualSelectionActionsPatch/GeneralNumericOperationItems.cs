@@ -113,7 +113,7 @@ static partial class ContextualSelectionActionsPatch
             }
           }
 
-          if (coder.Property<bool>("SupportsLerp").Value)
+          if (coder.Property<bool>("SupportsLerp").Value && outputType != typeof(bool))
           {
             yield return new(typeof(ValueLerp<>).MakeGenericType(outputType), group: "Math/Lerping");
           }
