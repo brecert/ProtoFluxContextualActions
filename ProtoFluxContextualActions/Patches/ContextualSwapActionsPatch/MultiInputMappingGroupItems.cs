@@ -29,7 +29,7 @@ static partial class ContextualSwapActionsPatch
         var binopType = context.NodeType.GenericTypeArguments[0];
         yield return new MenuItem(
           node: mapped.MakeGenericType(binopType),
-          name: mapped.GetNiceTypeName(),
+          name: FormatMultiName(mapped.MakeGenericType(binopType)),
           connectionTransferType: ConnectionTransferType.ByIndexLossy
         );
       }

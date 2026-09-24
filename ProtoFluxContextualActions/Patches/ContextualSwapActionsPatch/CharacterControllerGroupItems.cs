@@ -1,49 +1,27 @@
 using ProtoFlux.Runtimes.Execution.Nodes.FrooxEngine.Physics;
 
+using ProtoFluxContextualActions.Types;
+
 namespace ProtoFluxContextualActions.Patches;
 
 static partial class ContextualSwapActionsPatch
 {
-  static readonly HashSet<Type> CharacterControllerGroup = [
+  [NodeGroup]
+  static readonly SystemTypeSet CharacterControllerGroup = [
     typeof(ApplyCharacterImpulse),
     typeof(ApplyCharacterForce),
     typeof(SetCharacterVelocity)
   ];
 
-  static readonly HashSet<Type> FindCharacterControllerGroup = [
+  [NodeGroup]
+  static readonly SystemTypeSet FindCharacterControllerGroup = [
     typeof(FindCharacterControllerFromSlot),
     typeof(FindCharacterControllerFromUser),
   ];
 
-  static readonly HashSet<Type> CharacterControllerGravityGroup = [
+  [NodeGroup]
+  static readonly SystemTypeSet CharacterControllerGravityGroup = [
     typeof(CharacterGravity),
     typeof(SetCharacterGravity),
   ];
-
-  internal static IEnumerable<MenuItem> CharacterControllerGroupItems(ContextualContext context)
-  {
-    if (CharacterControllerGroup.Contains(context.NodeType))
-    {
-      foreach (var match in CharacterControllerGroup)
-      {
-        yield return new MenuItem(match);
-      }
-    }
-
-    if (FindCharacterControllerGroup.Contains(context.NodeType))
-    {
-      foreach (var match in FindCharacterControllerGroup)
-      {
-        yield return new MenuItem(match);
-      }
-    }
-
-    if (CharacterControllerGravityGroup.Contains(context.NodeType))
-    {
-      foreach (var match in CharacterControllerGravityGroup)
-      {
-        yield return new MenuItem(match);
-      }
-    }
-  }
 }

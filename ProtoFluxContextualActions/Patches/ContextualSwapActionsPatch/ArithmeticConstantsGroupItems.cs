@@ -1,10 +1,13 @@
 using ProtoFlux.Runtimes.Execution.Nodes.Math.Constants;
 
+using ProtoFluxContextualActions.Types;
+
 namespace ProtoFluxContextualActions.Patches;
 
 static partial class ContextualSwapActionsPatch
 {
-  static readonly HashSet<Type> ArithmeticConstantsGroup = [
+  [NodeGroup]
+  static readonly SystemTypeSet ArithmeticConstantsGroup = [
     typeof(Pi),
     typeof(Tau),
     typeof(e),
@@ -16,26 +19,9 @@ static partial class ContextualSwapActionsPatch
     typeof(InvertedQuarterPi),
   ];
 
-  static readonly HashSet<Type> ConversionsConstantsGroup = [
+  [NodeGroup]
+  static readonly SystemTypeSet ConversionsConstantsGroup = [
     typeof(RadToDeg),
     typeof(DegToRad),
   ];
-
-  internal static IEnumerable<MenuItem> ArithmeticConstantsGroupItems(ContextualContext context)
-  {
-    if (ArithmeticConstantsGroup.Contains(context.NodeType))
-    {
-      foreach (var match in ArithmeticConstantsGroup)
-      {
-        yield return new MenuItem(match, connectionTransferType: ConnectionTransferType.ByIndexLossy);
-      }
-    }
-    if (ConversionsConstantsGroup.Contains(context.NodeType))
-    {
-      foreach (var match in ConversionsConstantsGroup)
-      {
-        yield return new MenuItem(match, connectionTransferType: ConnectionTransferType.ByIndexLossy);
-      }
-    }
-  }
 }

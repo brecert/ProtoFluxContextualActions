@@ -246,14 +246,14 @@ internal static partial class ContextualSwapActionsPatch
     __instance.World.EndUndoBatch();
   }
 
-  static List<(TypeSet TypeSet, NodeGroupAttribute Group)> NodeGroups =>
-    field ??=
+  static List<(ITypeSet TypeSet, INodeGroupAttribute Group)> NodeGroups =>
+      // field ??=
       typeof(ContextualSwapActionsPatch)
       .GetFields(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
-      .Where(f => f.FieldType == typeof(TypeSet))
-      .Select(f => (f, f.GetCustomAttribute<NodeGroupAttribute>()))
-      .OfType<(FieldInfo field, NodeGroupAttribute group)>()
-      .Select(f => ((TypeSet)f.field.GetValue(null)!, f.group))
+      .Where(f => f.FieldType.IsAssignableTo(typeof(ITypeSet)))
+      .Select(f => (f, f.GetCustomAttributes().OfType<INodeGroupAttribute>().FirstOrDefault()))
+      .OfType<(FieldInfo field, INodeGroupAttribute group)>()
+      .Select(f => ((ITypeSet)f.field.GetValue(null)!, f.group))
       .ToList();
 
   internal static IEnumerable<MenuItem> GetMenuItems(ProtoFluxTool __instance, ProtoFluxNode nodeComponent, ProtoFluxElementProxy? proxy, bool isSelectSwap = false)
@@ -262,8 +262,23 @@ internal static partial class ContextualSwapActionsPatch
     var nodeType = node.GetType();
     var context = new ContextualContext(nodeType, __instance.World, proxy, isSelectSwap, nodeComponent, __instance);
 
+    // UniLog.Log(
+    //   string.Join("\n",
+    //   typeof(ContextualSwapActionsPatch)
+    //     .GetFields(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+    //     .Where(f => f.FieldType.IsAssignableTo(typeof(ITypeSet)))
+    // ));
+    UniLog.Log(string.Join("\n", NodeGroups));
+
     var autoItems = NodeGroups
-      .SelectMany(f => f.TypeSet.MakeGenericTypesFrom(context).Select(t => new MenuItem(t, connectionTransferType: f.Group.ConnectionTransferType)));
+      .SelectMany(a =>
+          a.TypeSet.GetMatchingTypes(context)
+            .Select(type => new MenuItem(
+                node: type,
+                name: a.Group.Format(type),
+                connectionTransferType: a.Group.ConnectionTransferType
+            ))
+      );
 
     IEnumerable<MenuItem> menuItems = [
       .. autoItems,
@@ -295,7 +310,7 @@ internal static partial class ContextualSwapActionsPatch
       .. BinaryOperationsMultiGroupItems(context),
       .. BinaryOperationsMultiSwapMapItems(context),
       .. NumericLogGroupItems(context),
-      .. AverageGroupItems(context),
+      // .. AverageGroupItems(context),
       .. VariableStoreNodesGroupItems(context),
       .. ValueRelayGroupItems(context),
       .. ObjectRelayGroupItems(context),
@@ -320,8 +335,8 @@ internal static partial class ContextualSwapActionsPatch
       .. WriteGroupItems(context),
       .. DynamicImpulseGroupItems(context),
       .. IsNullGroupItemsGroupItems(context),
-      .. BinaryComparisonOperatorGroupItems(context),
-      .. BooleanVectorToBoolOperationsGroupItems(context),
+      // .. BinaryComparisonOperatorGroupItems(context),
+      // .. BooleanVectorToBoolOperationsGroupItems(context),
       .. ShiftRotationOperationsGroupItems(context),
       .. SlotChildGroupItems(context),
       .. GetSlotActiveGroupItems(context),
@@ -329,13 +344,13 @@ internal static partial class ContextualSwapActionsPatch
       .. TweenGroupItems(context),
       .. DynamicVariableGroupItems(context),
       .. SpatialVariableGroupItems(context),
-      .. ClampGroupItems(context),
+      // .. ClampGroupItems(context),
       .. LerpGroupItems(context),
       .. SampleAnimationGroupItems(context),
       .. CloudVariableGroupItems(context),
       .. TimeoutGroupItems(context),
       .. WorldTimeGroupItems(context),
-      .. CharacterControllerGroupItems(context),
+      // .. CharacterControllerGroupItems(context),
       .. OrderOffsetGroupItems(context),
       .. StringAddGroupItems(context),
       .. LoopGroupItems(context),
@@ -343,7 +358,7 @@ internal static partial class ContextualSwapActionsPatch
       .. RoundGroupItems(context),
       .. StringIncludesGroupItems(context),
       .. TransformVectorGroupItems(context),
-      .. ArithmeticConstantsGroupItems(context),
+      // .. ArithmeticConstantsGroupItems(context),
       .. UserReferenceGroupItems(context),
       .. RemapGroupItems(context),
       .. ZeroOneGroupItems(context),
@@ -368,7 +383,7 @@ internal static partial class ContextualSwapActionsPatch
       .. ImpulseRelayGroupItems(context),
       ..ForEachGroupItems(context),
       ..DivReciprocalItems(context),
-      ..AbsMagnitudeItems(context),
+      // ..AbsMagnitudeItems(context),
     ];
 
     var indexedItems = menuItems.Index();

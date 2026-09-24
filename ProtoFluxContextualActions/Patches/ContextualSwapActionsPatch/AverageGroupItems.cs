@@ -1,50 +1,29 @@
-using Elements.Core;
-
 using ProtoFlux.Core;
+using ProtoFlux.Runtimes.Execution.Nodes.Math;
 
-using ProtoFluxContextualActions.Utils;
+using ProtoFluxContextualActions.Types;
 
 namespace ProtoFluxContextualActions.Patches;
 
 static partial class ContextualSwapActionsPatch
 {
-  internal static IEnumerable<MenuItem> AverageGroupItems(ContextualContext context)
-  {
-    var psuedoGenericTypes = context.World.GetPsuedoGenericTypesForWorld();
-    var avgGroup = psuedoGenericTypes.AvgGroup().ToDictionary();
+  [NodeGroup<MultiNodeFormatter>(ConnectionTransferType.ByIndexLossy)]
+  static TypeSet AvgGroup = [
+    PsuedoTypeDefinition.Avg,
+    PsuedoTypeDefinition.AvgMulti,
+  ];
 
-    if (avgGroup.TryGetValue(context.NodeType, out var genericTypes))
-    {
-      var matchingNodes = avgGroup.Where(a => genericTypes.SequenceEqual(a.Value)).Select(a => a.Key);
-      foreach (var match in matchingNodes)
-      {
-        yield return new MenuItem(
-          node: match,
-          name: match.GetNiceTypeName().Contains("Multi_") ? FormatMultiName(match) : null,
-          connectionTransferType: ConnectionTransferType.ByIndexLossy
-        );
-      }
-      if (context.NodeType.GetNiceTypeName().Contains("Multi_"))
-      {
-        foreach (var match in MinMaxMultiGroup)
-        {
-          yield return new MenuItem(
-            node: match.MakeGenericType([.. genericTypes]),
-            name: FormatMultiName(match),
-            connectionTransferType: ConnectionTransferType.ByIndexLossy
-          );
-        }
-      }
-      else
-      {
-        foreach (var match in MinMaxGroup)
-        {
-          yield return new MenuItem(
-            node: match.MakeGenericType([.. genericTypes]),
-            connectionTransferType: ConnectionTransferType.ByIndexLossy
-          );
-        }
-      }
-    }
-  }
+  [NodeGroup(ConnectionTransferType.ByIndexLossy)]
+  static TypeSet AvgMinMaxGroup = [
+    PsuedoTypeDefinition.Avg,
+    new SystemTypeDefinition(typeof(ValueMin<>)),
+    new SystemTypeDefinition(typeof(ValueMax<>)),
+  ];
+
+  [NodeGroup<MultiNodeFormatter>(ConnectionTransferType.ByIndexLossy)]
+  static TypeSet AvgMultiMinMaxGroup = [
+    PsuedoTypeDefinition.AvgMulti,
+    new SystemTypeDefinition(typeof(ValueMinMulti<>)),
+    new SystemTypeDefinition(typeof(ValueMaxMulti<>)),
+  ];
 }

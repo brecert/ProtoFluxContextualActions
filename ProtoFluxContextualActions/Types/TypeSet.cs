@@ -8,7 +8,12 @@ using ProtoFluxContextualActions.Utils;
 
 namespace ProtoFluxContextualActions.Types;
 
-class TypeSet : HashSet<ITypeDefinition>
+interface ITypeSet
+{
+  public IEnumerable<Type> GetMatchingTypes(Type type, TypeManager worldTypes);
+}
+
+class TypeSet : HashSet<ITypeDefinition>, ITypeSet
 {
   public IEnumerable<Type> TryMakeGeneric(params Type[] typeArguments) =>
     this.Select(t => t.TryMakeGenericType(typeArguments)).OfType<Type>();
@@ -21,7 +26,7 @@ class TypeSet : HashSet<ITypeDefinition>
       .Select(t => t.ResolvedType)
       .OfType<Type>();
 
-  public IEnumerable<Type> MakeGenericTypesFrom(Type type, TypeManager worldTypes)
+  public IEnumerable<Type> GetMatchingTypes(Type type, TypeManager worldTypes)
   {
     if (TryCreateTypeFrom(type, worldTypes).FirstOrDefault() is IType matched)
     {
@@ -31,8 +36,36 @@ class TypeSet : HashSet<ITypeDefinition>
   }
 }
 
+class SystemTypeSet : HashSet<Type>, ITypeSet
+{
+  public IEnumerable<Type> GetMatchingTypes(Type type, TypeManager worldTypes)
+  {
+    foreach (var t in this)
+    {
+      if (TypeUtils.MatchInterface(type, t, out var matchedType))
+      {
+        foreach (var ty in this)
+        {
+          if (matchedType.IsGenericType)
+          {
+            if (ty.TryMakingGenericTypeFrom(matchedType) is Type filledType)
+            {
+              yield return filledType;
+            }
+          }
+          else
+          {
+            yield return ty;
+          }
+        }
+        break;
+      }
+    }
+  }
+}
+
 static class ContextActionTypeSetExtensions
 {
-  public static IEnumerable<Type> MakeGenericTypesFrom(this TypeSet typeSet, Patches.ContextualSwapActionsPatch.ContextualContext context) =>
-    typeSet.MakeGenericTypesFrom(context.NodeType, context.World.Types);
+  public static IEnumerable<Type> GetMatchingTypes(this ITypeSet typeSet, Patches.ContextualSwapActionsPatch.ContextualContext context) =>
+    typeSet.GetMatchingTypes(context.NodeType, context.World.Types);
 }

@@ -17,10 +17,10 @@ class SystemTypeDefinition(Type Definition) : ITypeDefinition
     return null;
   }
 
-  Type? ITypeDefinition.TryMakeGenericType(params Type[] typeArguments) =>
+  public Type? TryMakeGenericType(params Type[] typeArguments) =>
     Definition.TryMakeGenericType(typeArguments);
 
-  IType? ITypeDefinition.TryCreateTypeFrom(Type type, TypeManager worldTypes) =>
+  public IType? TryCreateTypeFrom(Type type, TypeManager worldTypes) =>
     TryCreateTypeFrom(type);
 
   public static implicit operator SystemTypeDefinition(Type type) => new(type);
