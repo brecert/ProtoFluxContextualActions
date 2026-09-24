@@ -8,12 +8,12 @@ namespace ProtoFluxContextualActions.Patches;
 
 static partial class ContextualSwapActionsPatch
 {
-  private static TypeSet Items = [
+  internal static TypeSet AbsMagnitudeItemsGroup = [
     PsuedoTypeDefinition.Magnitude,
     PsuedoTypeDefinition.SqrMagnitude,
     new SystemTypeDefinition(typeof(ValueAbs<>)),
   ];
 
   internal static IEnumerable<MenuItem> AbsMagnitudeItems(ContextualContext context) =>
-    Items.MakeGenericTypesFrom(context).Select(t => new MenuItem(t, connectionTransferType: ConnectionTransferType.ByIndexLossy));
+    AbsMagnitudeItemsGroup.MakeGenericTypesFrom(context).Select(t => new MenuItem(t, connectionTransferType: ConnectionTransferType.ByIndexLossy));
 }

@@ -6,7 +6,7 @@ using ProtoFluxContextualActions.Utils;
 
 namespace ProtoFluxContextualActions.Types;
 
-record SystemTypeDefinition(Type Definition) : ITypeDefinition
+class SystemTypeDefinition(Type Definition) : ITypeDefinition
 {
   public SystemType? TryCreateTypeFrom(Type type)
   {
@@ -22,6 +22,8 @@ record SystemTypeDefinition(Type Definition) : ITypeDefinition
 
   IType? ITypeDefinition.TryCreateTypeFrom(Type type, TypeManager worldTypes) =>
     TryCreateTypeFrom(type);
+
+  public static implicit operator SystemTypeDefinition(Type type) => new(type);
 }
 
 record SystemType(Type OriginalType, Type Definition, Type Matched) : IType

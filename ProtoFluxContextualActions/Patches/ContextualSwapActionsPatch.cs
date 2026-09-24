@@ -298,7 +298,6 @@ internal static partial class ContextualSwapActionsPatch
       .. EnumToNumberGroupItems(context),
       .. NumberToEnumGroupItems(context),
       .. MultiInputMappingGroupItems(context),
-      .. ApproximatelyNodesGroupItems(context),
       .. GrabbableValuePropertyGroupItems(context),
       .. SinCosSwapGroup(context),
       .. KeyStateGroupItems(context),
