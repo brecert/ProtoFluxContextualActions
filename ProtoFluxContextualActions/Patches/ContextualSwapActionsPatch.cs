@@ -284,7 +284,7 @@ internal static partial class ContextualSwapActionsPatch
       .. autoItems,
       .. UserRootSwapGroups(nodeType),
       .. GlobalLocalEquivilentSwapGroups(nodeType),
-      .. DirectionGroupItems(context),
+      // .. DirectionGroupItems(context),
       .. ForLoopGroupItems(context),
       .. EasingOfSameKindFloatItems(context),
       .. EasingOfSameKindDoubleItems(context),
@@ -382,7 +382,7 @@ internal static partial class ContextualSwapActionsPatch
       .. ColorGroupItems(context),
       .. ImpulseRelayGroupItems(context),
       ..ForEachGroupItems(context),
-      ..DivReciprocalItems(context),
+      // ..DivReciprocalItems(context),
       // ..AbsMagnitudeItems(context),
     ];
 

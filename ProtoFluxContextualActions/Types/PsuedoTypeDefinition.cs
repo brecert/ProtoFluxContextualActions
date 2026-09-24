@@ -12,7 +12,8 @@ namespace ProtoFluxContextualActions.Types;
 
 sealed partial class PsuedoTypeDefinition(string Prefix) : ITypeDefinition
 {
-  private BiDictionary<Type, Type[]> Registry;
+  // todo: better annotate nullablity
+  private BiDictionary<Type, Type[]> Registry = null;
 
   public void RegisterTypes(TypeManager worldTypes) =>
     Registry ??= PsuedoGenericUtils.GetProtoFluxNodes().Values
@@ -45,7 +46,7 @@ sealed partial class PsuedoTypeDefinition(string Prefix) : ITypeDefinition
     return null;
   }
 
-  Type? ITypeDefinition.TryMakeGenericType(params Type[] typeArguments) =>
+  Type? ITypeDefinition.TryMakeGenericType(params Type[]? typeArguments) =>
     Registry.FirstOrDefault(t => t.Second.SequenceEqual(typeArguments)).First;
 
   IType? ITypeDefinition.TryCreateTypeFrom(Type type, TypeManager worldTypes) =>

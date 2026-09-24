@@ -14,7 +14,7 @@ static partial class ContextualSwapActionsPatch
 
   [NodeGroup(ConnectionTransferType.ByIndexLossy)]
   static TypeSet ApproximatelyEquals = [
-      PsuedoTypeDefinition.Approximately,
+    PsuedoTypeDefinition.Approximately,
     new SystemTypeDefinition(typeof(ValueEquals<>)),
   ];
 

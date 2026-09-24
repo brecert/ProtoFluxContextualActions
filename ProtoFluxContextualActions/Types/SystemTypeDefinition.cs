@@ -17,8 +17,8 @@ class SystemTypeDefinition(Type Definition) : ITypeDefinition
     return null;
   }
 
-  public Type? TryMakeGenericType(params Type[] typeArguments) =>
-    Definition.TryMakeGenericType(typeArguments);
+  public Type? TryMakeGenericType(params Type[]? typeArguments) =>
+    typeArguments != null ? Definition.TryMakeGenericType(typeArguments) : Definition;
 
   public IType? TryCreateTypeFrom(Type type, TypeManager worldTypes) =>
     TryCreateTypeFrom(type);
@@ -28,6 +28,6 @@ class SystemTypeDefinition(Type Definition) : ITypeDefinition
 
 record SystemType(Type OriginalType, Type Definition, Type Matched) : IType
 {
-  public Type[] GenericArguments => Matched.GenericTypeArguments;
+  public Type[]? GenericArguments => Matched.IsGenericType ? Matched.GenericTypeArguments : null;
   public Type? ResolvedType => Matched;
 }
