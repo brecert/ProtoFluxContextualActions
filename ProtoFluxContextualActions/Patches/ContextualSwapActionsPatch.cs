@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 using Elements.Core;
@@ -14,6 +15,7 @@ using ProtoFlux.Runtimes.Execution;
 
 using ProtoFluxContextualActions.Attributes;
 using ProtoFluxContextualActions.Extensions;
+using ProtoFluxContextualActions.Types;
 using ProtoFluxContextualActions.Utils;
 using ProtoFluxContextualActions.Utils.ProtoFlux;
 
@@ -244,13 +246,27 @@ internal static partial class ContextualSwapActionsPatch
     __instance.World.EndUndoBatch();
   }
 
+  static List<(TypeSet TypeSet, NodeGroupAttribute Group)> NodeGroups =>
+    field ??=
+      typeof(ContextualSwapActionsPatch)
+      .GetFields(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+      .Where(f => f.FieldType == typeof(TypeSet))
+      .Select(f => (f, f.GetCustomAttribute<NodeGroupAttribute>()))
+      .OfType<(FieldInfo field, NodeGroupAttribute group)>()
+      .Select(f => ((TypeSet)f.field.GetValue(null)!, f.group))
+      .ToList();
+
   internal static IEnumerable<MenuItem> GetMenuItems(ProtoFluxTool __instance, ProtoFluxNode nodeComponent, ProtoFluxElementProxy? proxy, bool isSelectSwap = false)
   {
     var node = nodeComponent.NodeInstance;
     var nodeType = node.GetType();
     var context = new ContextualContext(nodeType, __instance.World, proxy, isSelectSwap, nodeComponent, __instance);
 
+    var autoItems = NodeGroups
+      .SelectMany(f => f.TypeSet.MakeGenericTypesFrom(context).Select(t => new MenuItem(t, connectionTransferType: f.Group.ConnectionTransferType)));
+
     IEnumerable<MenuItem> menuItems = [
+      .. autoItems,
       .. UserRootSwapGroups(nodeType),
       .. GlobalLocalEquivilentSwapGroups(nodeType),
       .. DirectionGroupItems(context),
@@ -279,7 +295,6 @@ internal static partial class ContextualSwapActionsPatch
       .. BinaryOperationsMultiGroupItems(context),
       .. BinaryOperationsMultiSwapMapItems(context),
       .. NumericLogGroupItems(context),
-      .. ApproximatelyGroupItems(context),
       .. AverageGroupItems(context),
       .. VariableStoreNodesGroupItems(context),
       .. ValueRelayGroupItems(context),
