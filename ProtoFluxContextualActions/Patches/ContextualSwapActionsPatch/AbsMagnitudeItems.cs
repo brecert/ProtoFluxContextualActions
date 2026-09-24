@@ -1,13 +1,8 @@
 using Elements.Core;
 
-using HarmonyLib;
-
 using ProtoFlux.Runtimes.Execution.Nodes.Math;
-using ProtoFlux.Runtimes.Execution.Nodes.Operators;
 
-using ProtoFluxContextualActions.Extensions;
 using ProtoFluxContextualActions.Types;
-using ProtoFluxContextualActions.Utils;
 
 namespace ProtoFluxContextualActions.Patches;
 
@@ -20,6 +15,5 @@ static partial class ContextualSwapActionsPatch
   ];
 
   internal static IEnumerable<MenuItem> AbsMagnitudeItems(ContextualContext context) =>
-    Items.ValidTypesFrom(context.NodeType, context.World.Types).Select(t => new MenuItem(t));
-
+    Items.MakeGenericTypesFrom(context).Select(t => new MenuItem(t, connectionTransferType: ConnectionTransferType.ByIndexLossy));
 }

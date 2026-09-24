@@ -21,7 +21,7 @@ class TypeSet : HashSet<ITypeDefinition>
       .Select(t => t.ResolvedType)
       .OfType<Type>();
 
-  public IEnumerable<Type> ValidTypesFrom(Type type, TypeManager worldTypes)
+  public IEnumerable<Type> MakeGenericTypesFrom(Type type, TypeManager worldTypes)
   {
     if (TryCreateTypeFrom(type, worldTypes).FirstOrDefault() is IType matched)
     {
@@ -29,5 +29,10 @@ class TypeSet : HashSet<ITypeDefinition>
     }
     return [];
   }
+}
 
+static class ContextActionTypeSetExtensions
+{
+  public static IEnumerable<Type> MakeGenericTypesFrom(this TypeSet typeSet, Patches.ContextualSwapActionsPatch.ContextualContext context) =>
+    typeSet.MakeGenericTypesFrom(context.NodeType, context.World.Types);
 }
