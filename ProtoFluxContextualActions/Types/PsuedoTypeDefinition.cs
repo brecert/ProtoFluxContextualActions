@@ -4,24 +4,32 @@ using FrooxEngine;
 
 using ProtoFlux.Core;
 
+using ProtoFluxContextualActions.Extensions;
+using ProtoFluxContextualActions.Patches;
+using ProtoFluxContextualActions.Utils;
+
 namespace ProtoFluxContextualActions.Types;
 
 record PsuedoTypeDefinition(string Prefix) : ITypeDefinition
 {
-  private readonly BiDictionary<Type, Type[]> Registry = [];
+  private BiDictionary<Type, Type[]> Registry;
 
-  public bool TryRegisterType(Type type, TypeManager worldTypes)
-  {
-    if (TryParseGenerics(type, worldTypes) is { } generics)
-    {
-      Registry.Add(type, generics);
-      return true;
-    }
-    return false;
-  }
+  public void RegisterTypes(TypeManager worldTypes) =>
+    Registry ??= PsuedoGenericUtils.GetProtoFluxNodes().Values
+      .AsParallel()
+      .Select(t => NodeUtils.ProtoFluxBindingMapping.GetValueOrDefault(t))
+      .OfType<Type>()
+      .Where(t => t.GetNiceTypeName().StartsWith(Prefix))
+      .Select(t => (t, TryParseGenerics(t, worldTypes)))
+      .OfType<(Type, Type[])>()
+      .ToBiDictionary();
 
   public PsuedoType? TryCreateTypeFrom(Type type, TypeManager worldTypes)
   {
+    // TODO: handle worldTypes.IsSupported so that types are per-world rather than global.
+    RegisterTypes(worldTypes);
+
+    // fast path, should always be reached unless in a world that defines new protoflux bindings (ie. with plugins)
     if (Registry.TryGetSecond(type, out var generics))
     {
       return new(type, this, generics);
@@ -33,15 +41,15 @@ record PsuedoTypeDefinition(string Prefix) : ITypeDefinition
       Registry.Add(type, matchedTypes);
       return new(type, this, matchedTypes);
     }
+
     return null;
   }
 
   Type? ITypeDefinition.TryMakeGenericType(params Type[] typeArguments) =>
-    Registry.TryGetFirst(typeArguments, out var type) ? type : null;
+    Registry.FirstOrDefault(t => t.Second.SequenceEqual(typeArguments)).First;
 
   IType? ITypeDefinition.TryCreateTypeFrom(Type type, TypeManager worldTypes) =>
     TryCreateTypeFrom(type, worldTypes);
-
 
   private Type[]? TryParseGenerics(Type type, TypeManager worldTypes)
   {
@@ -58,7 +66,7 @@ record PsuedoTypeDefinition(string Prefix) : ITypeDefinition
   }
 
 }
-record PsuedoType(Type OriginalType, PsuedoTypeDefinition Definition, Type[] Generics) : IType
+record PsuedoType(Type OriginalType, PsuedoTypeDefinition Definition, Type[] GenericArguments) : IType
 {
-
+  public Type? ResolvedType => OriginalType;
 }

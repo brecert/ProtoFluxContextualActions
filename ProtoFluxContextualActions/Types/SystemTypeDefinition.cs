@@ -1,3 +1,5 @@
+using Elements.Core;
+
 using FrooxEngine;
 
 using ProtoFluxContextualActions.Utils;
@@ -8,9 +10,9 @@ record SystemTypeDefinition(Type Definition) : ITypeDefinition
 {
   public SystemType? TryCreateTypeFrom(Type type)
   {
-    if (TypeUtils.MatchInterface(type, Definition, out _))
+    if (TypeUtils.MatchInterface(type, Definition, out var match))
     {
-      return new(type, Definition);
+      return new(type, Definition, match);
     }
     return null;
   }
@@ -22,7 +24,8 @@ record SystemTypeDefinition(Type Definition) : ITypeDefinition
     TryCreateTypeFrom(type);
 }
 
-record SystemType(Type OriginalType, Type Definition) : IType
+record SystemType(Type OriginalType, Type Definition, Type Matched) : IType
 {
-  public Type[] Generics => OriginalType.GenericTypeArguments;
+  public Type[] GenericArguments => Matched.GenericTypeArguments;
+  public Type? ResolvedType => Matched;
 }

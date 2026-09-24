@@ -43,7 +43,7 @@ public static class PsuedoGenericUtils
   static IEnumerable<Type> ParseUnderscoreGenerics(World world, string generics) =>
       generics.Split('_').Select(name => world.Types.DecodeType(name.ToLower()) ?? world.Types.DecodeType(name));
 
-  static Dictionary<string, Type> GetProtoFluxNodes() =>
+  public static Dictionary<string, Type> GetProtoFluxNodes() =>
     Traverse.Create(typeof(ProtoFluxHelper)).Field<Dictionary<string, Type>>("protoFluxNodes").Value;
 
   public static IEnumerable<Type> GetTypesFromNode(World world, Type nodeType) =>
