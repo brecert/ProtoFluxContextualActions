@@ -10,7 +10,7 @@ using ProtoFluxContextualActions.Utils;
 
 namespace ProtoFluxContextualActions.Types;
 
-record PsuedoTypeDefinition(string Prefix) : ITypeDefinition
+sealed partial class PsuedoTypeDefinition(string Prefix) : ITypeDefinition
 {
   private BiDictionary<Type, Type[]> Registry;
 

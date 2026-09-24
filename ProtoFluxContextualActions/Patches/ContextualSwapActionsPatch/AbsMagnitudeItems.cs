@@ -9,8 +9,8 @@ namespace ProtoFluxContextualActions.Patches;
 static partial class ContextualSwapActionsPatch
 {
   private static TypeSet Items = [
-    new PsuedoTypeDefinition("Magnitude_"),
-    new PsuedoTypeDefinition("SqrMagnitude_"),
+    PsuedoTypeDefinition.Magnitude,
+    PsuedoTypeDefinition.SqrMagnitude,
     new SystemTypeDefinition(typeof(ValueAbs<>)),
   ];
 
