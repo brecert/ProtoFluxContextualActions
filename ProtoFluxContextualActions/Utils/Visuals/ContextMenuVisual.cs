@@ -21,9 +21,16 @@ internal class ContextMenuVisual : IMenuVisual
     isInitialMenu = false;
   }
 
-  async Task IMenuVisual.OnRenderDone()
+  async Task IMenuVisual.Close()
   {
+    currentMenu?.Close();
+  }
 
+  bool IMenuVisual.IsOpen()
+  {
+    if (currentMenu == null) return false;
+    if (!currentMenu.LocalUser.IsContextMenuOpen()) return false;
+    return currentMenu.LocalUser.GetUserContextMenu().CurrentSummoner == currentTool;
   }
 
   async Task IMenuVisual.RenderBack(Action onClicked)
