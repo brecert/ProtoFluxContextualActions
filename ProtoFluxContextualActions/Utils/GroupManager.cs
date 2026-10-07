@@ -24,8 +24,6 @@ internal interface IGroupItem
   internal Action<ProtoFluxTool, IGroupItem> OnClick { get; }
 }
 
-// To be used by the mod config, as a "What visual do you want to use" setting.
-// Add new entries when making a new visual
 internal enum MenuVisual
 {
   ContextMenu
@@ -69,13 +67,11 @@ internal class GroupManager
       else GroupedItems.Add(itemGroup, [item]);
     });
 
-    // Would be read from mod config instead of a constant
     var selectedVisual = overrideVisual ?? ProtoFluxContextualActions.MenuVisual;
 
     currentVisual = selectedVisual switch
     {
       MenuVisual.ContextMenu => new ContextMenuVisual(),
-      // add custom visual classes here, with a new enum entry
       _ => new ContextMenuVisual(),
     };
     currentVisual.CreateInitialMenu(tool);
@@ -315,6 +311,18 @@ internal class GroupManager
       {
         await currentVisual.RenderNextPage(() => RenderFolder(Items, pageIndex + 1, isRoot, false, prefix));
       }
+
+      await currentVisual.OnRenderDone();
     });
+  }
+
+  internal void Close()
+  {
+    currentVisual.Close();
+  }
+
+  internal bool IsOpen()
+  {
+    return currentVisual?.IsOpen() ?? false;
   }
 }
