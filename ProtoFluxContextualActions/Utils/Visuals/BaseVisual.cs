@@ -10,6 +10,7 @@ internal interface IMenuVisual
   internal Task RenderBack(Action onClicked);
   internal Task RenderNextPage(Action onClicked);
   internal Task RenderPrevPage(Action onClicked);
+  internal Task OnRenderDone();
   internal Task Close();
   internal bool IsOpen();
 }

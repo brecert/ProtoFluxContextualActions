@@ -311,6 +311,8 @@ internal class GroupManager
       {
         await currentVisual.RenderNextPage(() => RenderFolder(Items, pageIndex + 1, isRoot, false, prefix));
       }
+
+      await currentVisual.OnRenderDone();
     });
   }
 

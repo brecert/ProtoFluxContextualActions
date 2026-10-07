@@ -52,4 +52,9 @@ internal class ContextMenuVisual : IMenuVisual
   {
     currentMenu!.AddMenuItem("Previous", RadiantUI_Constants.Hero.ORANGE, onClicked);
   }
+
+  async Task IMenuVisual.OnRenderDone()
+  {
+    
+  }
 }
