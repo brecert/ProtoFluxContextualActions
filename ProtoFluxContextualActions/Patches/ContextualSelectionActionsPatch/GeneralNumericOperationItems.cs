@@ -189,7 +189,7 @@ static partial class ContextualSelectionActionsPatch
             if (outputType == typeof(ulong)) yield return new(typeof(ULongAsDouble), group: "Math/Binary");
             if (outputType == typeof(ulong)) yield return new(typeof(ULongAsDouble), group: "Casts");
 
-            if (psuedoGenericTypes.ExtractBits.FirstOrDefault() is { Types: { } types })
+            if (psuedoGenericTypes.ExtractBits.FirstOrDefault(t => t.Node == nodeType.NodeType) is { Types: { } types })
             {
               yield return new(psuedoGenericTypes.ComposeBits.First(n => n.Types.SequenceEqual(types)).Node);
             }
@@ -243,7 +243,7 @@ static partial class ContextualSelectionActionsPatch
             if (inputType == typeof(uint)) yield return new(typeof(FloatAsUInt), group: "Math/Binary");
             if (inputType == typeof(ulong)) yield return new(typeof(DoubleAsULong), group: "Math/Binary");
 
-            if (psuedoGenericTypes.ComposeBits.FirstOrDefault() is { Types: { } types })
+            if (psuedoGenericTypes.ComposeBits.FirstOrDefault(n => n.Node == nodeType.NodeType) is { Types: { } types })
             {
               yield return new(psuedoGenericTypes.ExtractBits.First(n => n.Types.SequenceEqual(types)).Node);
             }
